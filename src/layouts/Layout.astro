@@ -11,14 +11,23 @@ const {
 const SITIO = "Keto Argentina";
 const url = new URL(Astro.url.pathname, Astro.site ?? "https://ketofacil.vercel.app");
 
+// Ocho ítems no entran en la barra de un notebook sin apretujarse. Se parte en
+// dos: los cinco que resuelven el recorrido principal van arriba, el resto vive
+// en el pie. **El menú del celular muestra los dos grupos**, porque ahí el
+// espacio es vertical y no hay razón para esconder nada.
 const NAV = [
+  { href: "/como-empezar", texto: "Cómo empezar" },
   { href: "/plan-semanal", texto: "Plan semanal" },
-  { href: "/lista-compras", texto: "Lista del súper" },
   { href: "/recetas", texto: "Recetas" },
   { href: "/negociemos", texto: "Negociemos" },
-  { href: "/evidencia", texto: "Evidencia" },
-  { href: "/productos", texto: "Qué comprar" },
   { href: "/calculadora", texto: "Calculadora" },
+];
+
+const NAV_EXTRA = [
+  { href: "/lista-compras", texto: "Lista del súper" },
+  { href: "/productos", texto: "Qué comprar" },
+  { href: "/evidencia", texto: "Evidencia" },
+  { href: "/quienes-somos", texto: "Quiénes somos" },
 ];
 ---
 
@@ -91,7 +100,7 @@ const NAV = [
         </div>
 
         <nav id="menu-movil" class="md:hidden hidden pb-3" aria-label="Principal móvil">
-          {NAV.map((i) => (
+          {[...NAV, ...NAV_EXTRA].map((i) => (
             <a href={i.href} class="block px-3 py-2 rounded-md text-sm hover:bg-hoja-600">
               {i.texto}
             </a>
@@ -107,7 +116,7 @@ const NAV = [
     <footer class="bg-hoja-900 text-crema-100 mt-12">
       <div class="mx-auto max-w-5xl px-4 py-8 text-sm space-y-4">
         <div class="flex flex-wrap gap-x-6 gap-y-2">
-          {NAV.map((i) => (
+          {[...NAV, ...NAV_EXTRA].map((i) => (
             <a href={i.href} class="hover:text-naranja-400 transition-colors">{i.texto}</a>
           ))}
         </div>

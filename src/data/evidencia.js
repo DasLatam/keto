@@ -167,4 +167,82 @@ export const ARTICULOS = [
       },
     ],
   },
+  {
+    slug: "keto-y-diabetes-tipo-2-que-muestran-los-ensayos",
+    titulo: "Keto y diabetes tipo 2: qué muestran los ensayos",
+    bajada:
+      "Es el área donde la evidencia es más fuerte, y también donde más cuidado hay que tener: la dieta puede obligar a cambiar la medicación.",
+    actualizado: "2026-08-17",
+    resumen_directo:
+      "Los ensayos y metaanálisis muestran que las dietas cetogénicas y bajas en carbohidratos mejoran el control glucémico frente a dietas bajas en grasa: baja la hemoglobina glicosilada, bajan los triglicéridos, sube el HDL y muchas personas reducen la medicación. Las tasas de remisión son altas al primer año y caen de forma marcada con los años. **Nada de esto se hace sin coordinar la medicación con quien la recetó.**",
+    secciones: [
+      {
+        titulo: "Qué mejora, según los ensayos",
+        parrafos: [
+          "Los metaanálisis de ensayos clínicos encuentran mejor control glucémico con dieta cetogénica que con dieta baja en grasas, medido sobre todo por hemoglobina glicosilada. También aparecen mejoras en el índice HOMA, que estima la resistencia a la insulina.",
+          "En el perfil lipídico el resultado más consistente es la baja de triglicéridos y el aumento del HDL. El comportamiento del LDL es más variable entre personas, y por eso conviene medir antes de empezar y a los pocos meses.",
+          "Un hallazgo que se repite y que importa en la vida real: buena parte de los participantes reduce la dependencia de medicación hipoglucemiante y antihipertensiva a lo largo del estudio.",
+        ],
+      },
+      {
+        titulo: "Remisión: el número que hay que leer con contexto",
+        parrafos: [
+          "En revisiones de largo plazo, las tasas de remisión son más altas al año —se reportan cifras de hasta el 62 %— y caen de forma marcada con el tiempo, hasta alrededor del 13 % a los cinco años. El ensayo DiRECT, que usó dietas muy bajas en calorías en atención primaria, reportó 46 % de remisión al año y 36 % a los dos años.",
+          "La lectura honesta de esos números es doble. Por un lado, que la remisión de la diabetes tipo 2 por vía alimentaria es posible y está documentada, algo que hace veinte años no se daba por sentado. Por otro, que sostenerla en el tiempo es difícil: la caída entre el año uno y el año cinco habla de recuperación de peso y de recaída glucémica.",
+          "Dicho de otro modo: lo que hace la diferencia a cinco años no es el arranque, es la adherencia.",
+        ],
+      },
+      {
+        titulo: "El riesgo concreto: hipoglucemia",
+        parrafos: [
+          "Este es el punto que separa a la diabetes del resto de los casos. Si tomás insulina o sulfonilureas, bajar los carbohidratos de golpe puede provocar una hipoglucemia, y la dosis que era correcta el lunes puede ser peligrosa el miércoles.",
+          "No es un riesgo teórico ni una advertencia de trámite: es la razón por la que los ensayos serios ajustan la medicación al inicio y monitorean glucemia con frecuencia. Fuera de un estudio, eso lo hace tu médico.",
+          "Lo mismo aplica, en menor medida, a la medicación para la presión: la pérdida de líquido de los primeros días suele bajarla, y la dosis habitual puede quedar de más.",
+        ],
+      },
+      {
+        titulo: "Qué no dice esta evidencia",
+        parrafos: [
+          "No dice que keto sea la única forma de mejorar la diabetes tipo 2. Varias intervenciones de restricción calórica logran resultados comparables, y el ensayo DiRECT —el de mejores tasas de remisión— usó dietas muy bajas en calorías, no cetogénicas.",
+          "Tampoco dice que la mejora sea permanente. Los datos a cinco años muestran una caída importante, y ningún estudio disponible sigue a las personas durante décadas.",
+        ],
+      },
+    ],
+    fuentes: [
+      {
+        cita: "Long-Term Efficacy and Safety of a Low-Carbohydrate Diet in Type 2 Diabetes Remission: A Systematic Review.",
+        url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12476234/",
+        nota: "Revisión sistemática con tasas de remisión a uno y cinco años.",
+      },
+      {
+        cita: "Effects of the Ketogenic Diet on Glycemic Control in Diabetic Patients: Meta-Analysis of Clinical Trials.",
+        url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7641470/",
+        nota: "Metaanálisis sobre hemoglobina glicosilada e índice HOMA.",
+      },
+      {
+        cita: "Ketogenic Diet and Its Potential Role in Preventing Type 2 Diabetes Mellitus and Its Complications: A Narrative Review of Randomized Controlled Trials.",
+        url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11380086/",
+        nota: "Revisión de ensayos aleatorizados en prevención y complicaciones.",
+      },
+      {
+        cita: "Impact of a Ketogenic Diet on Metabolic Parameters in Patients with Obesity or Overweight and with or without Type 2 Diabetes: A Meta-Analysis of Randomized Controlled Trials.",
+        url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7400909/",
+        nota: "Parámetros metabólicos y perfil lipídico.",
+      },
+    ],
+    faq: [
+      {
+        p: "¿La dieta keto puede revertir la diabetes tipo 2?",
+        r: "Hay remisión documentada en ensayos clínicos, con tasas altas al primer año —se reportan cifras de hasta el 62 %— que caen de forma marcada con los años, hasta alrededor del 13 % a los cinco. Es posible, pero sostenerlo en el tiempo es lo difícil.",
+      },
+      {
+        p: "¿Puedo hacer keto si tomo insulina o metformina?",
+        r: "No sin coordinarlo con tu médico. Bajar los carbohidratos de golpe puede provocar hipoglucemia si tomás insulina o sulfonilureas, porque la dosis que era correcta antes puede ser excesiva después. La medicación se ajusta con quien la recetó.",
+      },
+      {
+        p: "¿Keto baja la hemoglobina glicosilada?",
+        r: "Los metaanálisis de ensayos clínicos muestran mejor control glucémico con dieta cetogénica que con dieta baja en grasas, medido por hemoglobina glicosilada, junto con baja de triglicéridos y aumento del HDL.",
+      },
+    ],
+  },
 ];

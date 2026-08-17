@@ -1,0 +1,220 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { RECETAS } from "../data/recetas.js";
+
+// La consulta "cómo empezar la dieta keto" es la de mayor volumen del nicho y la
+// que trae gente en el momento exacto en que va a decidir. Por eso esta página se
+// estructura como HowTo con pasos numerados: es el formato que Google puede
+// mostrar como resultado enriquecido y el que un modelo de IA puede resumir sin
+// perder el orden.
+
+const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
+
+const PASOS = [
+  {
+    n: 1,
+    titulo: "Vaciá la alacena antes de empezar",
+    texto:
+      "El primer día no se define con fuerza de voluntad, se define con lo que hay en tu casa. Sacá de la vista el pan, los fideos, el arroz, las galletitas y las gaseosas comunes. No hace falta tirar nada: alcanza con que no estén al alcance de la mano a las once de la noche.",
+    detalle:
+      "Es el paso que más gente saltea y el que más determina si llegás al viernes.",
+  },
+  {
+    n: 2,
+    titulo: "Calculá cuántos carbohidratos vas a comer",
+    texto:
+      "El rango keto es de 20 a 50 gramos de carbohidratos netos por día. Si arrancás de cero, poné 20 las primeras dos semanas: se entra en cetosis más rápido y los resultados tempranos son lo que sostiene la motivación.",
+    detalle: "La calculadora te da también tu proteína y tu grasa diaria.",
+    enlace: { href: "/calculadora", texto: "Calcular mis macros" },
+  },
+  {
+    n: 3,
+    titulo: "Hacé una sola compra grande",
+    texto:
+      "Comprar día a día es lo que hace que termines resolviendo con lo que haya. Una compra semanal con todo lo de las recetas de la semana saca esa decisión del medio.",
+    detalle: "La lista está agrupada por sector del súper para no ir y volver entre góndolas.",
+    enlace: { href: "/lista-compras", texto: "Ver la lista del súper" },
+  },
+  {
+    n: 4,
+    titulo: "Tomá más agua y salá más la comida",
+    texto:
+      "Esto suena a detalle y es la causa número uno de que la gente la pase mal la primera semana. Al bajar los carbohidratos, el cuerpo elimina más sodio y con él, agua. El dolor de cabeza, el cansancio y los calambres de los primeros días casi siempre son eso.",
+    detalle:
+      "Un caldo con sal a media tarde durante los primeros días resuelve buena parte del cuadro.",
+    enlace: { href: "/evidencia/gripe-keto-por-que-pasa-y-como-evitarla", texto: "Qué dice la investigación" },
+  },
+  {
+    n: 5,
+    titulo: "Resolvé el desayuno primero",
+    texto:
+      "Es la comida más fácil de convertir y la que más veces vas a repetir. Huevos con palta, un omelette, huevos fritos en grasa de panceta: tres minutos, cero decisiones y te saca del problema del pan con dulce de leche.",
+    detalle: "Si el desayuno está resuelto, el día empieza bien encaminado.",
+    enlace: { href: "/recetas", texto: "Ver desayunos" },
+  },
+  {
+    n: 6,
+    titulo: "Tené preparada la respuesta al antojo",
+    texto:
+      "Va a aparecer, casi siempre a la tarde o después de cenar. Si no tenés algo listo, comés lo que haya. El pan keto de taza sale en tres minutos al microondas y la mousse de chocolate en cinco; un frasco con queso en cubos y aceitunas en la heladera resuelve el resto.",
+    detalle:
+      "Esta es la diferencia entre la gente que sostiene la dieta y la que la abandona en la segunda semana.",
+    enlace: { href: "/recetas/pan-keto-de-taza", texto: "Pan keto de taza" },
+  },
+  {
+    n: 7,
+    titulo: "No te peses todos los días la primera semana",
+    texto:
+      "Vas a bajar dos o tres kilos en pocos días y eso es agua, no grasa: al vaciarse las reservas de glucógeno se pierde el líquido que retenían. Después se frena, y ese freno desmotiva a mucha gente que creyó que el ritmo inicial era el ritmo real.",
+    detalle:
+      "Pesate una vez por semana, el mismo día y a la misma hora. La tendencia del mes dice mucho más que el número del martes.",
+  },
+];
+
+const PRIMEROS_DIAS = [
+  { dia: "Día 1", que: "Compra grande y desayuno resuelto. Empezá a salar más y a tomar más agua desde hoy." },
+  { dia: "Día 2-3", que: "Puede aparecer dolor de cabeza o cansancio. Es esperable: caldo salado y más líquido." },
+  { dia: "Día 4-5", que: "Suele bajar el hambre bastante. Es la señal de que el cuerpo empezó a usar grasa." },
+  { dia: "Día 6-7", que: "La balanza ya se movió, casi todo agua. Primera pesada seria: anotala y no la mires hasta la semana que viene." },
+];
+
+const FAQ = [
+  { p: "¿Cuánto tarda el cuerpo en entrar en cetosis?", r: "Entre dos y cuatro días con una ingesta de 20 a 50 gramos de carbohidratos netos diarios. Varía según cuánta actividad física hagas y cuántos carbohidratos comías antes." },
+  { p: "¿Puedo empezar keto sin consultar a un médico?", r: "Si sos una persona sana y no tomás medicación, en general sí. Hay que consultar antes si tomás medicación para diabetes o presión, si estás embarazada o amamantando, o si tenés enfermedad renal, hepática o antecedentes de trastornos alimentarios." },
+  { p: "¿Qué desayuno en keto si no puedo comer pan ni facturas?", r: "Huevos en cualquiera de sus formas es la respuesta más simple: revueltos con palta, en omelette o fritos en grasa de panceta. Si necesitás algo tipo pan, el pan keto de taza sale en tres minutos al microondas." },
+  { p: "¿Es normal sentirse mal los primeros días de keto?", r: "Es frecuente y se conoce como «gripe keto». Casi siempre es pérdida de sodio y de agua, no una desintoxicación. Tomar más líquido y salar más la comida suele resolverlo en pocos días." },
+];
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      name: "Cómo empezar la dieta keto en 7 días",
+      description:
+        "Guía paso a paso para arrancar la dieta cetogénica en Argentina: qué sacar de la alacena, cuántos carbohidratos comer, qué comprar y cómo evitar la gripe keto.",
+      inLanguage: "es-AR",
+      totalTime: "P7D",
+      step: PASOS.map((p) => ({
+        "@type": "HowToStep",
+        position: p.n,
+        name: p.titulo,
+        text: p.texto,
+      })),
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+  ],
+};
+---
+
+<Layout
+  titulo="Cómo empezar la dieta keto en 7 días"
+  descripcion="Guía paso a paso para arrancar keto en Argentina: qué sacar de la alacena, cuántos carbohidratos comer, qué comprar y cómo evitar la gripe keto de los primeros días."
+  jsonld={jsonld}
+>
+  <article class="prosa">
+    <h1 class="text-3xl md:text-4xl font-bold text-hoja-700 leading-tight">
+      Cómo empezar keto en 7 días
+    </h1>
+    <p class="mt-3 text-lg text-hoja-900/70 max-w-2xl leading-relaxed">
+      Siete pasos concretos para la primera semana, en el orden en que conviene
+      hacerlos. Sin suplementos ni productos importados: con lo que hay en el súper
+      de acá.
+    </p>
+
+    <div class="mt-6 rounded-xl border-l-4 border-hoja-600 bg-hoja-50 p-5">
+      <p class="text-sm font-semibold uppercase tracking-wide text-hoja-600 mb-2">
+        Lo más importante, si leés una sola cosa
+      </p>
+      <p class="text-hoja-900/85 leading-relaxed">
+        Sacá de tu casa lo que no vas a comer, hacé una sola compra grande con todo lo
+        de la semana, y desde el primer día tomá más agua y salá más la comida. Esas
+        tres cosas evitan la mayoría de los abandonos de la primera semana.
+      </p>
+    </div>
+
+    <AdSlot formato="horizontal" />
+
+    <ol class="mt-4 space-y-6">
+      {PASOS.map((p) => (
+        <li class="rounded-xl border border-hoja-100 bg-white p-6">
+          <div class="flex gap-4">
+            <span class="shrink-0 w-10 h-10 rounded-full bg-hoja-600 text-crema-50 grid place-items-center font-bold">
+              {p.n}
+            </span>
+            <div class="min-w-0">
+              <h2 class="font-bold text-xl text-hoja-700 leading-snug">{p.titulo}</h2>
+              <p class="mt-2 text-hoja-900/80 leading-relaxed">{p.texto}</p>
+              {p.detalle && (
+                <p class="mt-2 text-sm text-hoja-900/55 leading-relaxed italic">{p.detalle}</p>
+              )}
+              {p.enlace && (
+                <a href={p.enlace.href} class="mt-3 inline-block text-naranja-600 hover:underline font-medium">
+                  {p.enlace.texto} →
+                </a>
+              )}
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <AdSlot formato="rectangulo" />
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-4 mb-4">Qué esperar día a día</h2>
+    <div class="grid gap-3 sm:grid-cols-2">
+      {PRIMEROS_DIAS.map((d) => (
+        <div class="rounded-xl border border-hoja-100 bg-white p-5">
+          <h3 class="font-semibold text-hoja-700">{d.dia}</h3>
+          <p class="mt-1.5 text-sm text-hoja-900/70 leading-relaxed">{d.que}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-8 rounded-xl bg-hoja-50 border border-hoja-100 p-6">
+      <h2 class="text-xl font-bold text-hoja-700">Ya está, ¿por dónde sigo?</h2>
+      <p class="mt-2 text-hoja-900/75 leading-relaxed">
+        El plan de la semana tiene las 28 comidas armadas sin repetir ninguna, y cada
+        una enlaza a su receta con los pasos completos.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a href="/plan-semanal" class="px-5 py-2.5 rounded-lg bg-hoja-600 text-crema-50 font-medium hover:bg-hoja-700 transition-colors">
+          Ver el plan semanal
+        </a>
+        <a href="/productos" class="px-5 py-2.5 rounded-lg border-2 border-naranja-500 text-naranja-600 font-medium hover:bg-naranja-500 hover:text-white transition-colors">
+          Qué sí y qué no en la góndola
+        </a>
+      </div>
+    </div>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-4">Preguntas frecuentes</h2>
+    <div class="space-y-3">
+      {FAQ.map((f) => (
+        <details class="group rounded-lg border border-hoja-100 bg-white p-4">
+          <summary class="font-medium text-hoja-700 cursor-pointer list-none flex justify-between items-center gap-4">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/70 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
+
+    <aside class="mt-8 rounded-xl bg-crema-100 border border-hoja-100 p-5">
+      <p class="text-sm text-hoja-900/70 leading-relaxed">
+        <strong class="text-hoja-700">Esto no es consejo médico.</strong> Si tomás
+        medicación para diabetes o presión, si estás embarazada o amamantando, o si
+        tenés enfermedad renal o hepática, consultá con un profesional antes de
+        empezar. <a href="/quienes-somos" class="underline underline-offset-2 hover:text-naranja-600">Más sobre cómo elaboramos esto</a>.
+      </p>
+    </aside>
+  </article>
+</Layout>
