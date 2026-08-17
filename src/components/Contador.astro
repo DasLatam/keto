@@ -1,0 +1,187 @@
+---
+// Contador de visitas de la vieja escuela, en el pie de página.
+//
+// Arranca en 19751108 por pedido de Ariel. El número no es un conteo inflado: el
+// endpoint devuelve por separado `base` (el offset) y `visitas` (las contadas de
+// verdad), y el título del elemento muestra las dos cosas. Los contadores de
+// GeoCities de los 90 hacían lo mismo pero sin decirlo.
+//
+// El conteo es real y lo lleva un endpoint propio en Ferozo (`contador/contador.php`
+// en este repo), no un servicio de terceros: así el dato es nuestro, no hay cookies
+// de nadie más y la política de privacidad no tiene que declarar un tercero.
+//
+// Si el endpoint no responde —está caído, todavía no se subió, o el visitante
+// tiene un bloqueador— se muestra el número base y listo. Un contador roto no
+// puede romper el pie de página.
+
+/** URL del endpoint. Se puede pisar con la variable de entorno
+ *  `PUBLIC_CONTADOR_URL` en Vercel sin tocar el código. */
+const URL_CONTADOR =
+  import.meta.env.PUBLIC_CONTADOR_URL ??
+  "https://www.baudry.com.ar/keto-contador/contador.php";
+
+/** El offset. Tiene que coincidir con `BASE` en contador.php: se muestra este
+ *  mientras el endpoint no contesta, y si no coincidieran el número saltaría al
+ *  cargar. */
+const BASE = 19751108;
+
+// Se renderiza dígito por dígito para que cada uno tenga su cajita, como los
+// contadores de imágenes de los 90. Ocho dígitos fijos: el ancho del bloque no
+// cambia cuando el número crece, así el pie no se mueve.
+const digitos = String(BASE).padStart(8, "0").split("");
+---
+
+<div class="contador" data-url={URL_CONTADOR} data-base={BASE}>
+  <span class="etiqueta">visitantes</span>
+  <output
+    id="contador-visitas"
+    class="digitos"
+    aria-label={`${BASE} visitas`}
+    title="Arranca en 19751108 — el 8 de noviembre de 1975"
+  >
+    {digitos.map((d) => <span class="digito">{d}</span>)}
+  </output>
+</div>
+
+<style>
+  .contador {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-wrap: wrap;
+  }
+
+  .etiqueta {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--color-crema-200) 55%, transparent);
+  }
+
+  .digitos {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 4px;
+    /* El borde hundido es la mitad del efecto: es el relieve que tenían los
+       contadores de los 90, cuando todo llevaba bisel. */
+    background: #0b0f0a;
+    box-shadow:
+      inset 1px 1px 0 rgb(0 0 0 / 0.8),
+      inset -1px -1px 0 rgb(255 255 255 / 0.12);
+  }
+
+  .digito {
+    display: grid;
+    place-items: center;
+    min-width: 1.05em;
+    padding: 0.15em 0.18em;
+    font-family: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #7dff5c;
+    /* El resplandor del fósforo verde. Sutil: dos capas de sombra alcanzan, y
+       más que esto se vuelve ilegible en pantallas chicas. */
+    text-shadow: 0 0 4px rgb(125 255 92 / 0.75), 0 0 9px rgb(125 255 92 / 0.35);
+    background: linear-gradient(180deg, #16210f 0%, #0d1409 100%);
+    border-radius: 2px;
+  }
+
+  /* Cuando llega el número real, los dígitos que cambiaron parpadean una vez.
+     Es el guiño final a la época, y dura poco a propósito. */
+  .digito.cambio {
+    animation: prender 0.55s ease-out;
+  }
+
+  @keyframes prender {
+    0% {
+      color: #eaffe3;
+      text-shadow: 0 0 8px rgb(180 255 150 / 0.95), 0 0 18px rgb(125 255 92 / 0.7);
+    }
+    100% {
+      color: #7dff5c;
+      text-shadow: 0 0 4px rgb(125 255 92 / 0.75), 0 0 9px rgb(125 255 92 / 0.35);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .digito.cambio {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Una visita por pestaña: sin esto, cada navegación interna sumaría una visita
+  // y el número sería basura. El servidor además deduplica por día, así que
+  // recargar en otra pestaña tampoco cuenta de nuevo.
+  const CLAVE_SESION = "keto-visita";
+
+  const caja = document.querySelector(".contador");
+  const salida = document.getElementById("contador-visitas");
+  if (caja && salida) {
+    const base = Number(caja.dataset.base);
+
+    /** Pinta el número a ocho dígitos, marcando los que cambiaron. */
+    function pintar(total) {
+      const nuevos = String(total).padStart(8, "0").split("");
+      const cajas = [...salida.querySelectorAll(".digito")];
+
+      // Si el número creció de largo (nueve dígitos), se agregan las cajas que
+      // falten en lugar de recortar el número.
+      while (cajas.length < nuevos.length) {
+        const s = document.createElement("span");
+        s.className = "digito";
+        salida.prepend(s);
+        cajas.unshift(s);
+      }
+
+      nuevos.forEach((d, i) => {
+        const c = cajas[i];
+        if (!c || c.textContent === d) return;
+        c.textContent = d;
+        c.classList.remove("cambio");
+        // Reiniciar la animación necesita un reflow forzado en el medio, o el
+        // navegador agrupa el remove y el add y no la vuelve a disparar.
+        void c.offsetWidth;
+        c.classList.add("cambio");
+      });
+
+      salida.setAttribute("aria-label", `${total} visitas`);
+      const contadas = total - base;
+      salida.title =
+        `${total.toLocaleString("es-AR")} visitas: ${base.toLocaleString("es-AR")} de arranque ` +
+        `(el 8 de noviembre de 1975) más ${contadas.toLocaleString("es-AR")} contadas de verdad.`;
+    }
+
+    let yaContada = false;
+    try {
+      yaContada = sessionStorage.getItem(CLAVE_SESION) === "1";
+    } catch {
+      // Almacenamiento bloqueado: se cuenta esta carga y listo. El servidor
+      // deduplica por día, así que tampoco se dispara el número.
+    }
+
+    const url = `${caja.dataset.url}?a=${yaContada ? "get" : "up"}`;
+
+    // `keepalive` para que el pedido sobreviva si la persona se va de la página
+    // enseguida, que es exactamente cuando más se pierden las visitas.
+    fetch(url, { keepalive: true })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d || typeof d.total !== "number") return;
+        pintar(d.total);
+        try {
+          sessionStorage.setItem(CLAVE_SESION, "1");
+        } catch {
+          /* ídem: no se puede guardar, no importa */
+        }
+      })
+      .catch(() => {
+        // Endpoint caído o pedido bloqueado: queda el número base, que ya está
+        // renderizado en el HTML. No se avisa nada: es el pie de página.
+      });
+  }
+</script>

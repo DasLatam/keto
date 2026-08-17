@@ -1,6 +1,8 @@
 ---
 import "../styles/global.css";
 import Buscador from "../components/Buscador.astro";
+import Contador from "../components/Contador.astro";
+import { LEGALES } from "../data/legales.js";
 
 const {
   titulo,
@@ -12,7 +14,7 @@ const {
 const SITIO = "Keto Argentina";
 const url = new URL(Astro.url.pathname, Astro.site ?? "https://ketofacil.vercel.app");
 
-// Ocho ítems no entran en la barra de un notebook sin apretujarse. Se parte en
+// Once ítems no entran en la barra de un notebook sin apretujarse. Se parte en
 // dos: los cinco que resuelven el recorrido principal van arriba, el resto vive
 // en el pie. **El menú del celular muestra los dos grupos**, porque ahí el
 // espacio es vertical y no hay razón para esconder nada.
@@ -20,13 +22,15 @@ const NAV = [
   { href: "/como-empezar", texto: "Cómo empezar" },
   { href: "/plan-semanal", texto: "Plan semanal" },
   { href: "/recetas", texto: "Recetas" },
-  { href: "/negociemos", texto: "Negociemos" },
+  { href: "/ejercicios", texto: "Ejercicios" },
   { href: "/calculadora", texto: "Calculadora" },
 ];
 
 const NAV_EXTRA = [
   { href: "/lista-compras", texto: "Lista del súper" },
+  { href: "/calendario", texto: "Calendario" },
   { href: "/productos", texto: "Qué comprar" },
+  { href: "/negociemos", texto: "Negociemos" },
   { href: "/evidencia", texto: "Evidencia" },
   { href: "/quienes-somos", texto: "Quiénes somos" },
 ];
@@ -129,10 +133,23 @@ const NAV_EXTRA = [
           estás embarazada o tenés una condición renal, hepática o diabetes,
           consultá con un profesional antes de empezar.
         </p>
-        <p class="text-crema-200/50">
-          © {new Date().getFullYear()} Keto Argentina ·{" "}
-          <a href="/quienes-somos" class="hover:text-naranja-400 underline underline-offset-2">Quiénes somos</a>
-        </p>
+
+        {/* Los legales van en su propia línea y separados del resto de la
+            navegación: mezclados entre las secciones de contenido no se
+            encuentran, y son las páginas que se buscan cuando se buscan. */}
+        <div class="pt-4 border-t border-crema-100/10 flex flex-wrap gap-x-5 gap-y-2 text-crema-200/70">
+          {LEGALES.map((l) => (
+            <a href={`/${l.slug}`} class="hover:text-naranja-400 transition-colors">{l.titulo}</a>
+          ))}
+        </div>
+
+        <div class="pt-2 flex flex-wrap items-center justify-between gap-4">
+          <p class="text-crema-200/50">
+            © {new Date().getFullYear()} Keto Argentina ·{" "}
+            <a href="/quienes-somos" class="hover:text-naranja-400 underline underline-offset-2">Quiénes somos</a>
+          </p>
+          <Contador />
+        </div>
       </div>
     </footer>
 

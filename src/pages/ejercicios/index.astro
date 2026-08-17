@@ -1,0 +1,185 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AdSlot from "../../components/AdSlot.astro";
+import { RUTINAS, caloriasPorSesion, sesionesSemanales, caloriasSemana, minutosModerados } from "../../data/ejercicios.js";
+
+// El peso de referencia para las calorías de la tabla. 80 kg no es un promedio
+// oficial: es un número redondo cerca del peso de quien empieza una dieta, y la
+// página aclara la fórmula al lado para que cada uno la recalcule con el suyo.
+const PESO_REF = 80;
+
+const minutos = minutosModerados();
+const totalSemana = caloriasSemana(PESO_REF);
+const sesiones = RUTINAS.reduce((t, r) => t + sesionesSemanales(r), 0);
+
+const FAQ = [
+  {
+    p: "¿Cuánto ejercicio hace falta por semana?",
+    r: `La Organización Mundial de la Salud recomienda para adultos de 150 a 300 minutos semanales de actividad moderada, más dos sesiones de fuerza. Las tres rutinas de esta página suman ${minutos} minutos moderados y dos de fuerza: cubren la recomendación completa sin gimnasio y sin aparatos.`,
+  },
+  {
+    p: "¿Hace falta ir al gimnasio para no perder músculo en una dieta?",
+    r: "No, pero hace falta entrenar fuerza de alguna forma. Lo que protege el músculo durante un déficit calórico son dos cosas: proteína suficiente (unos 2 gramos por kilo de masa magra) y estímulo de fuerza dos veces por semana. Con el peso del cuerpo, una silla y una banda elástica alcanza durante bastante tiempo.",
+  },
+  {
+    p: "¿Se puede entrenar haciendo keto?",
+    r: "Sí. Las primeras dos o tres semanas la fuerza y la resistencia bajan, porque el músculo todavía tiene poco glucógeno y el cuerpo está aprendiendo a usar grasa. Después se recupera casi por completo para caminata y trabajo de fuerza con repeticiones moderadas. Lo que sigue costando más es el esfuerzo explosivo y muy corto, tipo sprint.",
+  },
+  {
+    p: "¿Qué pasa si un día no puedo?",
+    r: "Se saltea y se sigue. La rutina está armada en tres piezas justamente para que perder una no arrastre a las otras: si no camina el miércoles, la elongación del jueves y la fuerza del jueves siguen en pie. Lo que rompe el proceso no es faltar un día, es tratar de recuperar todo el sábado.",
+  },
+];
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ItemList",
+      name: "Rutinas de ejercicio en casa",
+      numberOfItems: RUTINAS.length,
+      itemListElement: RUTINAS.map((r, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: r.nombre,
+        url: new URL(`/ejercicios/${r.slug}`, Astro.site).href,
+      })),
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+  ],
+};
+---
+
+<Layout
+  titulo="Rutinas de ejercicio en casa, sin gimnasio"
+  descripcion="Elongación de diez minutos cada mañana, caminata de 40 minutos tres veces por semana y fuerza para piernas, pecho, espalda y brazos con una silla, la pared y una banda elástica."
+  jsonld={jsonld}
+>
+  <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Moverse, sin gimnasio</h1>
+  <p class="mt-3 text-hoja-900/70 max-w-3xl leading-relaxed">
+    Tres rutinas y nada más: <strong>elongación suave todas las mañanas</strong>,{" "}
+    <strong>caminata de 40 minutos tres veces por semana</strong> y{" "}
+    <strong>fuerza dos veces</strong> con el propio cuerpo, una silla, la pared y a lo
+    sumo una banda elástica. Juntas cubren la recomendación completa de actividad física
+    de la Organización Mundial de la Salud.
+  </p>
+
+  <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+    {[
+      ["Sesiones por semana", sesiones],
+      ["Minutos moderados", `${minutos}`],
+      ["Aparatos que hacen falta", "0"],
+      [`Calorías por semana (${PESO_REF} kg)`, `~${totalSemana}`],
+    ].map(([k, v]) => (
+      <div class="rounded-xl bg-white border border-hoja-100 p-4 text-center">
+        <div class="text-2xl font-bold text-hoja-700">{v}</div>
+        <div class="text-[11px] uppercase tracking-wide text-hoja-900/50 mt-1 leading-tight">{k}</div>
+      </div>
+    ))}
+  </div>
+
+  <p class="mt-3 text-sm text-hoja-900/50 max-w-3xl leading-relaxed">
+    Las calorías son de tabla, con la fórmula estándar{" "}
+    <strong>MET × kilos × horas</strong> del Compendio de Actividades Físicas. Cambiá el
+    peso y cambia el número: cada rutina lo recalcula con el tuyo en su página.
+  </p>
+
+  <div class="mt-8 space-y-5">
+    {RUTINAS.map((r) => (
+      <article class="rounded-xl border border-hoja-100 bg-white p-6 hover:border-hoja-500 hover:shadow-lg transition-all">
+        <div class="flex items-start gap-4">
+          <div class="text-4xl shrink-0" aria-hidden="true">{r.emoji}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-baseline justify-between gap-3 flex-wrap">
+              <h2 class="text-xl font-bold text-hoja-700">
+                <a href={`/ejercicios/${r.slug}`} class="hover:text-naranja-600">{r.nombre}</a>
+              </h2>
+              <span class="text-xs px-3 py-1 rounded-full bg-hoja-100 text-hoja-700 whitespace-nowrap">
+                {r.frecuencia}
+              </span>
+            </div>
+
+            <p class="mt-2 text-hoja-900/70 leading-relaxed">{r.resumen}</p>
+
+            <dl class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+              {[
+                ["Duración", `${r.duracion} min`],
+                ["Cuándo", r.dias],
+                ["Intensidad", r.intensidad],
+                [`Calorías (${PESO_REF} kg)`, `~${caloriasPorSesion(r, PESO_REF)}`],
+              ].map(([k, v]) => (
+                <div class="rounded-lg bg-crema-100 py-2 px-1">
+                  <dt class="text-[10px] uppercase tracking-wide text-hoja-900/50">{k}</dt>
+                  <dd class="text-sm font-semibold text-hoja-700 leading-tight mt-0.5">{v}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <ul class="mt-4 flex flex-wrap gap-1.5">
+              {r.elementos.map((e) => (
+                <li class="text-[11px] px-2 py-0.5 rounded-full bg-crema-200 text-hoja-900/60">{e}</li>
+              ))}
+            </ul>
+
+            <a href={`/ejercicios/${r.slug}`} class="inline-block mt-4 text-sm text-naranja-600 hover:underline font-medium">
+              Ver la rutina completa →
+            </a>
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <AdSlot formato="horizontal" />
+
+  <section class="mt-4 rounded-xl border-2 border-naranja-400/50 bg-naranja-400/5 p-6">
+    <h2 class="text-xl font-bold text-hoja-700">Agendalas y dejá de decidir cada día</h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed max-w-2xl">
+      Lo que hace que una rutina se sostenga no es la fuerza de voluntad, es que ya esté
+      en el calendario a una hora fija. En <a href="/calendario" class="text-naranja-600 underline underline-offset-2">Calendario</a>{" "}
+      podés elegir los días y horarios y descargar un archivo que se importa en Google
+      Calendar, en el Calendario del iPhone o en Outlook, con los avisos ya puestos.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-3">
+      <a href="/calendario" class="px-5 py-2.5 rounded-lg bg-hoja-600 text-crema-50 font-medium hover:bg-hoja-700 transition-colors">
+        Armar mis recordatorios
+      </a>
+      <a href="/rutina-keto.ics" download class="px-5 py-2.5 rounded-lg border-2 border-hoja-600 text-hoja-700 font-medium hover:bg-hoja-600 hover:text-crema-50 transition-colors">
+        Bajar con los horarios por defecto
+      </a>
+    </div>
+  </section>
+
+  <section class="mt-10 prosa max-w-3xl">
+    <h2 class="text-2xl font-bold text-hoja-700 mb-4">Preguntas frecuentes</h2>
+    <div class="space-y-3">
+      {FAQ.map((f) => (
+        <details class="group rounded-lg border border-hoja-100 bg-white p-4">
+          <summary class="font-medium text-hoja-700 cursor-pointer list-none flex justify-between items-center gap-4">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/70 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <aside class="mt-8 rounded-xl bg-crema-100 border border-hoja-100 p-5 max-w-3xl">
+    <p class="text-sm text-hoja-900/70 leading-relaxed">
+      <strong class="text-hoja-700">Antes de empezar.</strong> Estas rutinas son de
+      intensidad suave a moderada y están pensadas para adultos sanos. Si tenés una
+      lesión, un problema cardíaco, hipertensión sin controlar o hace muchos años que no
+      te movés, conviene que un médico te dé el visto bueno primero — sobre todo si
+      además estás empezando una dieta cetogénica, que cambia el manejo del agua y las
+      sales en el cuerpo.
+    </p>
+  </aside>
+</Layout>

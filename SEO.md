@@ -60,7 +60,19 @@ dentro del `<head>` y vale para todas las páginas.
 | `Recipe` con `nutrition`, `HowToStep` e `image` | Cada receta |
 | `Article` + `FAQPage` | Cada comparativa de Negociemos |
 | `MedicalWebPage` + `citation` + `FAQPage` | Cada artículo de Evidencia |
-| `ItemList` | Lista de compras |
+| `ItemList` | Lista de compras, índice de Ejercicios |
+| `ExercisePlan` + `HowTo` + `FAQPage` | Cada rutina de ejercicio |
+| `FAQPage` | Plan semanal, Calculadora, Calendario |
+| `WebPage` con `dateModified` | Las tres páginas legales |
+
+En las rutinas van los dos tipos a propósito: `ExercisePlan` es el que acepta
+frecuencia, duración e intensidad como campos propios, y `HowTo` es el que Google
+entiende para mostrar los pasos. Describen lo mismo, uno para el buscador y otro
+para los modelos que buscan la ficha estructurada.
+
+Las cantidades del `ItemList` de la lista de compras se emiten **para una
+persona**, que es la base de los datos: el escalado por grupo familiar ocurre en
+el navegador y no tiene sentido en los datos estructurados.
 
 `image` en `Recipe` no es opcional en la práctica: sin esa propiedad Google no
 muestra la ficha enriquecida de receta, que es el formato con más clics del
@@ -81,6 +93,10 @@ No es lo mismo que SEO clásico y se optimiza distinto.
   confía más en el resto del contenido.
 - **Nada inventado.** Una cita falsa detectada arruina la credibilidad de todo el
   dominio, y en salud Google lo penaliza fuerte por criterios E-E-A-T.
+- **Los números se dan con la fórmula al lado.** Las calorías de las rutinas salen
+  de `MET × kilos × horas` (Compendio de Actividades Físicas) y la página dice el
+  MET que usó, así que la cuenta es reproducible. Un modelo puede citar el método
+  y no sólo el resultado — y el resultado no queda atado a un peso inventado.
 
 ## Pendiente
 

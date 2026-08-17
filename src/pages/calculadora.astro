@@ -2,6 +2,20 @@
 import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
 
+// ── Escala de la barra de IMC ────────────────────────────────────────
+// Los umbrales de la OMS y los extremos de la barra. La escala arranca en 15 y
+// no en 0 porque un IMC de 0 a 15 no existe en la práctica: usar 0 como origen
+// aplastaba las tres franjas que importan contra el borde derecho.
+const MIN = 15;
+const MAX = 40;
+const BAJO = 18.5;   // por debajo: bajo peso
+const SANO = 25;     // por debajo: peso saludable
+const SOBRE = 30;    // por debajo: sobrepeso; por encima: obesidad
+
+/** Posición de un IMC en la barra, en porcentaje. La usan las franjas (en el
+ *  build) y el marcador (en el navegador), para que no puedan desalinearse. */
+const pos = (imc) => ((Math.min(MAX, Math.max(MIN, imc)) - MIN) / (MAX - MIN)) * 100;
+
 const FAQ = [
   {
     p: "¿Cuánto debería pesar según mi altura?",
@@ -133,17 +147,29 @@ const jsonld = {
           <span id="badgeImc" class="ml-auto text-xs px-3 py-1 rounded-full bg-crema-200 text-hoja-900/60">IMC —</span>
         </div>
 
-        <!-- Barra de IMC: la posición del marcador dice más que el número -->
+        <!-- Barra de IMC: la posición del marcador dice más que el número.
+             Los anchos de las franjas y la posición del marcador salen los dos de
+             `pos()`, que es la única fuente de verdad de la escala. Antes las
+             franjas estaban escritas a mano como porcentajes de una escala 0–100
+             mientras el marcador usaba una 0–40: el rojo empezaba en IMC 20 y
+             cualquiera con un IMC saludable de 22 se veía el marcador en rojo. -->
         <div class="mt-5">
           <div class="relative h-3 rounded-full overflow-hidden flex">
-            <div class="bg-sky-300" style="width:18.5%"></div>
-            <div class="bg-hoja-500" style="width:16.5%"></div>
-            <div class="bg-naranja-400" style="width:15%"></div>
-            <div class="bg-red-400" style="width:50%"></div>
+            <div class="bg-sky-300" style={`width:${pos(BAJO)}%`} title="Bajo peso"></div>
+            <div class="bg-hoja-500" style={`width:${pos(SANO) - pos(BAJO)}%`} title="Peso saludable"></div>
+            <div class="bg-naranja-400" style={`width:${pos(SOBRE) - pos(SANO)}%`} title="Sobrepeso"></div>
+            <div class="bg-red-400" style={`width:${100 - pos(SOBRE)}%`} title="Obesidad"></div>
             <div id="marcador" class="absolute top-[-4px] w-1 h-5 bg-hoja-900 rounded-full transition-all" style="left:0%"></div>
           </div>
-          <div class="mt-1.5 flex justify-between text-[11px] text-hoja-900/40">
-            <span>Bajo</span><span>18,5</span><span>25</span><span>30</span><span>Obesidad</span>
+          {/* Las marcas van posicionadas sobre su valor real, no repartidas con
+              `justify-between`: con el reparto automático el «25» caía sobre la
+              franja naranja, que arranca justo ahí. */}
+          <div class="relative mt-1.5 h-4 text-[11px] text-hoja-900/40">
+            <span class="absolute left-0">Bajo</span>
+            {[[BAJO, "18,5"], [SANO, "25"], [SOBRE, "30"]].map(([v, t]) => (
+              <span class="absolute -translate-x-1/2" style={`left:${pos(v)}%`}>{t}</span>
+            ))}
+            <span class="absolute right-0">Obesidad</span>
           </div>
         </div>
         <p id="textoImc" class="mt-3 text-sm text-hoja-900/70 leading-relaxed"></p>
@@ -262,12 +288,17 @@ const jsonld = {
   </aside>
 </Layout>
 
-<script>
+<script define:vars={{ MIN, MAX }}>
   const $ = (id) => document.getElementById(id);
   const campos = ["peso", "deseado", "altura", "edad", "sexo", "cintura", "cuello",
                   "cadera", "actividad", "ritmo", "carbos"];
 
   const fmt = (n, d = 1) => Number(n).toFixed(d).replace(".", ",").replace(/,0$/, "");
+
+  /** Posición de un IMC en la barra, en porcentaje. Es la misma fórmula que usa
+   *  `pos()` en el frontmatter para dibujar las franjas, con los mismos límites:
+   *  si se toca una hay que tocar la otra. */
+  const posImc = (imc) => ((Math.min(MAX, Math.max(MIN, imc)) - MIN) / (MAX - MIN)) * 100;
 
   function calcular() {
     const peso = +$("peso").value;
@@ -297,15 +328,32 @@ const jsonld = {
     $("rangoIdeal").textContent = `${fmt(minIdeal)} – ${fmt(maxIdeal)}`;
     $("badgeImc").textContent = `IMC ${fmt(imc)}`;
 
-    // El marcador se posiciona sobre una escala de 0 a 40 de IMC.
-    $("marcador").style.left = `${Math.min(100, Math.max(0, (imc / 40) * 100))}%`;
+    // Misma escala que las franjas: se recibe ya calculada desde el frontmatter
+    // para que no puedan quedar desalineadas.
+    $("marcador").style.left = `${posImc(imc)}%`;
 
-    let cat, textoImc;
-    if (imc < 18.5) { cat = "bajo peso"; textoImc = "Estás por debajo del rango saludable. Antes de encarar una dieta de pérdida de peso, conviene consultar."; }
-    else if (imc < 25) { cat = "peso saludable"; textoImc = "Estás dentro del rango saludable para tu altura. Si igual querés bajar, que sea con un déficit chico para no perder músculo."; }
-    else if (imc < 30) { cat = "sobrepeso"; textoImc = "Estás por encima del rango. Un descenso del 5 al 10 % del peso ya mejora presión, glucemia y triglicéridos, aunque no llegues al rango ideal."; }
-    else { cat = "obesidad"; textoImc = "El IMC está en rango de obesidad. Vale mucho la pena hacer el proceso acompañado por un profesional, sobre todo si tomás medicación."; }
+    let cat, textoImc, colorBadge;
+    if (imc < 18.5) {
+      cat = "bajo peso";
+      textoImc = "Estás por debajo del rango saludable. Antes de encarar una dieta de pérdida de peso, conviene consultar.";
+      colorBadge = "bg-sky-100 text-sky-800";
+    } else if (imc < 25) {
+      cat = "peso saludable";
+      textoImc = "Estás dentro del rango saludable para tu altura. Si igual querés bajar, que sea con un déficit chico para no perder músculo.";
+      colorBadge = "bg-hoja-100 text-hoja-700";
+    } else if (imc < 30) {
+      cat = "sobrepeso";
+      textoImc = "Estás por encima del rango. Un descenso del 5 al 10 % del peso ya mejora presión, glucemia y triglicéridos, aunque no llegues al rango ideal.";
+      colorBadge = "bg-naranja-400/20 text-naranja-600";
+    } else {
+      cat = "obesidad";
+      textoImc = "El IMC está en rango de obesidad. Vale mucho la pena hacer el proceso acompañado por un profesional, sobre todo si tomás medicación.";
+      colorBadge = "bg-red-100 text-red-700";
+    }
     $("badgeImc").textContent = `IMC ${fmt(imc)} · ${cat}`;
+    // La pastilla toma el color de la franja: el número y el color tienen que
+    // decir lo mismo, o el color gana y la gente lee lo que no es.
+    $("badgeImc").className = `ml-auto text-xs px-3 py-1 rounded-full ${colorBadge}`;
     $("textoImc").textContent = textoImc;
 
     // ── Composición corporal: fórmula de la Marina de EE.UU. ───────

@@ -838,14 +838,111 @@ export const PLAN_SEMANAL = [
 ];
 
 // Lista de compras de la semana, agrupada como se recorre el súper.
+//
+// Las cantidades son **para una persona** y están partidas en `cant` / `unidad` /
+// `nombre` en lugar de escritas como texto ("1 kg de vacío") para que la página
+// pueda multiplicarlas por la cantidad de personas de la casa. El armado del
+// texto y el redondeo viven en `src/lib/porciones.js`: acá van sólo los datos.
+//
+// `escala: false` marca lo que **no se multiplica**. Una botella de aceite o el
+// frasco de pimentón rinden varias semanas: multiplicarlos por cuatro haría que
+// la lista pidiera cuatro botellas de vinagre, que es exactamente el error que
+// hace que la gente deje de usar la lista.
 export const LISTA_COMPRAS = [
-  { sector: "Carnicería y pescadería", items: ["1 kg de vacío", "600 g de pechuga de pollo", "6 muslos de pollo", "700 g de matambrito de cerdo", "900 g de carne picada", "2 filetes de merluza", "150 g de panceta", "200 g de jamón cocido", "1 paquete de jamón crudo"] },
-  { sector: "Verdulería", items: ["4 paltas", "1 atado de acelga", "1 atado de espinaca", "4 zucchinis", "3 berenjenas", "12 zapallitos redondos", "1 brócoli", "1 coliflor", "3 nabos", "1 atado de cebolla de verdeo", "1 puerro", "Rúcula", "2 cebollas", "1 morrón rojo", "2 cabezas de ajo", "Perejil y albahaca", "2 limones", "1 caja de frutillas"] },
-  { sector: "Lácteos y fiambrería", items: ["3 docenas de huevos", "250 g de manteca", "300 g de queso cremoso", "200 g de queso crema", "250 g de muzzarella", "150 g de provolone", "100 g de queso de cabra", "150 g de queso sardo", "Queso parmesano", "Queso rallado", "600 cc de crema de leche", "1 pote de yogur natural entero"] },
-  { sector: "Almacén", items: ["1 lata de atún al natural", "Aceite de oliva", "Aceitunas verdes", "Salsa de tomate sin azúcar", "Vinagre", "Vino blanco seco", "Orégano, pimentón, comino, ají molido, nuez moscada", "Sal gruesa"] },
-  { sector: "Dietética", items: ["1 kg de harina de almendras", "200 g de almendras", "100 g de nueces", "800 cc de leche de coco", "Aceite de coco", "Cacao amargo", "Semillas de chía", "Polvo de hornear", "Edulcorante (stevia o eritritol)", "Esencia de vainilla"] },
+  {
+    sector: "Carnicería y pescadería",
+    items: [
+      { cant: 1, unidad: "kg", nombre: "vacío" },
+      { cant: 600, unidad: "g", nombre: "pechuga de pollo" },
+      { cant: 6, unidad: "muslo", nombre: "pollo" },
+      { cant: 700, unidad: "g", nombre: "matambrito de cerdo" },
+      { cant: 900, unidad: "g", nombre: "carne picada" },
+      { cant: 2, unidad: "filete", nombre: "merluza" },
+      { cant: 150, unidad: "g", nombre: "panceta" },
+      { cant: 200, unidad: "g", nombre: "jamón cocido" },
+      { cant: 1, unidad: "paquete", nombre: "jamón crudo" },
+    ],
+  },
+  {
+    sector: "Verdulería",
+    items: [
+      { cant: 4, unidad: "palta" },
+      { cant: 1, unidad: "atado", nombre: "acelga" },
+      { cant: 1, unidad: "atado", nombre: "espinaca" },
+      { cant: 4, unidad: "zucchini" },
+      { cant: 3, unidad: "berenjena" },
+      { cant: 12, unidad: "zapallito redondo" },
+      { cant: 1, unidad: "brócoli", nombre: null },
+      { cant: 1, unidad: "coliflor", nombre: null },
+      { cant: 3, unidad: "nabo" },
+      { cant: 1, unidad: "atado", nombre: "cebolla de verdeo" },
+      { cant: 1, unidad: "puerro" },
+      { cant: 1, unidad: "paquete", nombre: "rúcula" },
+      { cant: 2, unidad: "cebolla" },
+      { cant: 1, unidad: "morrón rojo" },
+      { cant: 2, unidad: "cabeza", nombre: "ajo" },
+      { cant: 1, unidad: "atado", nombre: "perejil" },
+      { cant: 1, unidad: "paquete", nombre: "albahaca fresca" },
+      { cant: 2, unidad: "limón" },
+      { cant: 1, unidad: "caja", nombre: "frutillas" },
+    ],
+  },
+  {
+    sector: "Lácteos y fiambrería",
+    items: [
+      { cant: 3, unidad: "docena", nombre: "huevos" },
+      { cant: 250, unidad: "g", nombre: "manteca" },
+      { cant: 300, unidad: "g", nombre: "queso cremoso" },
+      { cant: 200, unidad: "g", nombre: "queso crema" },
+      { cant: 250, unidad: "g", nombre: "muzzarella" },
+      { cant: 150, unidad: "g", nombre: "provolone" },
+      { cant: 100, unidad: "g", nombre: "queso de cabra" },
+      { cant: 150, unidad: "g", nombre: "queso sardo" },
+      { cant: 100, unidad: "g", nombre: "queso parmesano" },
+      { cant: 1, unidad: "paquete", nombre: "queso rallado", escala: false },
+      { cant: 600, unidad: "cc", nombre: "crema de leche" },
+      { cant: 1, unidad: "pote", nombre: "yogur natural entero" },
+    ],
+  },
+  {
+    sector: "Almacén",
+    items: [
+      { cant: 1, unidad: "lata", nombre: "atún al natural" },
+      { cant: 1, unidad: "botella", nombre: "aceite de oliva", escala: false },
+      { cant: 1, unidad: "frasco", nombre: "aceitunas verdes", escala: false },
+      { cant: 1, unidad: "lata", nombre: "salsa de tomate sin azúcar" },
+      { cant: 1, unidad: "botella", nombre: "vinagre", escala: false },
+      { cant: 1, unidad: "botella", nombre: "vino blanco seco", escala: false },
+      { cant: null, nombre: "Orégano, pimentón, comino, ají molido, nuez moscada", escala: false },
+      { cant: 1, unidad: "paquete", nombre: "sal gruesa", escala: false },
+    ],
+  },
+  {
+    sector: "Dietética",
+    items: [
+      { cant: 1, unidad: "kg", nombre: "harina de almendras" },
+      { cant: 200, unidad: "g", nombre: "almendras" },
+      { cant: 100, unidad: "g", nombre: "nueces" },
+      { cant: 800, unidad: "cc", nombre: "leche de coco" },
+      { cant: 1, unidad: "frasco", nombre: "aceite de coco", escala: false },
+      { cant: 1, unidad: "paquete", nombre: "cacao amargo", escala: false },
+      { cant: 1, unidad: "paquete", nombre: "semillas de chía", escala: false },
+      { cant: 1, unidad: "paquete", nombre: "polvo de hornear", escala: false },
+      { cant: 1, unidad: "paquete", nombre: "edulcorante (stevia o eritritol)", escala: false },
+      { cant: 1, unidad: "frasco", nombre: "esencia de vainilla", escala: false },
+    ],
+  },
   // Van aparte porque no se compran todas las semanas: se mira la alacena y se
   // repone lo que falta. Si estuvieran mezcladas con lo demás, la lista daría la
-  // impresión de que hay que comprar sal y pimienta cada siete días.
-  { sector: "Alacena — revisá si te queda", items: ["Pimienta negra", "Caldo de verdura", "Manteca extra para cocinar", "Hielo"] },
+  // impresión de que hay que comprar sal y pimienta cada siete días. Ninguno
+  // escala: son los mismos frascos para uno o para seis.
+  {
+    sector: "Alacena — revisá si te queda",
+    items: [
+      { cant: null, nombre: "Pimienta negra", escala: false },
+      { cant: null, nombre: "Caldo de verdura", escala: false },
+      { cant: null, nombre: "Manteca extra para cocinar", escala: false },
+      { cant: null, nombre: "Hielo", escala: false },
+    ],
+  },
 ];

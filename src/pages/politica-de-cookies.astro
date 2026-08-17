@@ -1,0 +1,190 @@
+---
+import Legal from "../layouts/Legal.astro";
+import { ACTUALIZADO, CONTACTO } from "../data/legales.js";
+
+// Mismo texto base que la Política de Cookies de DAS LATAM
+// (daslatam.org/daslatam/politica-de-cookies/): la definición, los cuatro tipos
+// de cookies y las instrucciones por navegador se mantienen tal cual.
+//
+// Lo agregado es la tabla de lo que este sitio guarda realmente. Es lo que
+// convierte la política en algo verificable: cualquiera puede abrir las
+// herramientas de desarrollo, mirar el almacenamiento local y comprobar que las
+// claves son exactamente estas cuatro.
+const ALMACENAMIENTO = [
+  {
+    clave: "keto-lista-compras",
+    tipo: "Almacenamiento local",
+    que: "Qué ítems de la lista del súper tildaste.",
+    para: "Que puedas ir marcando mientras comprás, cerrar el navegador y volver sin perder el progreso.",
+    dura: "Hasta que la borres",
+  },
+  {
+    clave: "keto-personas",
+    tipo: "Almacenamiento local",
+    que: "Cuántas personas sos en tu casa (un número del 1 al 12).",
+    para: "Calcular las cantidades de la lista del súper y las porciones de las recetas sin volver a preguntártelo en cada página.",
+    dura: "Hasta que la borres",
+  },
+  {
+    clave: "keto-calendario",
+    tipo: "Almacenamiento local",
+    que: "Los días, horarios y avisos que elegiste para tus recordatorios.",
+    para: "Que la página de calendario aparezca como la dejaste la última vez.",
+    dura: "Hasta que la borres",
+  },
+  {
+    clave: "keto-visita",
+    tipo: "Almacenamiento de sesión",
+    que: "Una marca de que esta pestaña ya fue contada por el contador de visitas.",
+    para: "No sumar una visita nueva cada vez que recargás o cambiás de página.",
+    dura: "Se borra al cerrar la pestaña",
+  },
+];
+---
+
+<Legal
+  slug="politica-de-cookies"
+  titulo="Política de Cookies"
+  actualizado={ACTUALIZADO}
+  descripcion="Política de Cookies de Keto Argentina: qué son, qué tipos se utilizan, el detalle exacto de lo que el sitio guarda en tu navegador y cómo gestionarlas en cada navegador."
+>
+  <h2>¿Qué son las cookies?</h2>
+  <p>
+    Las cookies son pequeños archivos de texto que los sitios web colocan en tu dispositivo
+    al navegar por internet. Estas permiten recordar tus preferencias y mejorar tu
+    experiencia de usuario. Junto a las cookies existen tecnologías equivalentes —el{" "}
+    <em>almacenamiento local</em> y el <em>almacenamiento de sesión</em>— que cumplen la
+    misma función de recordar datos en tu dispositivo, y que en este sitio son, de hecho, las
+    que se usan.
+  </p>
+
+  <h2>¿Qué tipos de cookies utilizamos?</h2>
+  <p>En este Sitio se utilizan los siguientes tipos:</p>
+  <ul>
+    <li>
+      <strong>Cookies estrictamente necesarias:</strong> son esenciales para el
+      funcionamiento del sitio y no pueden ser desactivadas.
+    </li>
+    <li>
+      <strong>Cookies de rendimiento:</strong> nos ayudan a entender cómo los usuarios
+      interactúan con el sitio, recopilando información de forma anónima.
+    </li>
+    <li>
+      <strong>Cookies de funcionalidad:</strong> permiten recordar tus preferencias y
+      personalizar tu experiencia en el sitio.
+    </li>
+    <li>
+      <strong>Cookies de publicidad:</strong> utilizadas para mostrar anuncios relevantes
+      para ti, basados en tus intereses.
+    </li>
+  </ul>
+
+  <h2>Qué guarda exactamente este Sitio</h2>
+  <p>
+    El Sitio <strong>no usa cookies propias</strong>: usa almacenamiento local y de sesión,
+    que no viaja en cada pedido al servidor como sí lo hace una cookie. Son cuatro claves y
+    ninguna contiene datos personales. Podés verificarlo abriendo las herramientas de
+    desarrollo de tu navegador y mirando el almacenamiento de este sitio:
+  </p>
+  <div class="tabla">
+    <table>
+      <thead>
+        <tr>
+          <th>Clave</th>
+          <th>Tipo</th>
+          <th>Qué guarda</th>
+          <th>Para qué</th>
+          <th>Cuánto dura</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ALMACENAMIENTO.map((a) => (
+          <tr>
+            <td><code>{a.clave}</code></td>
+            <td>{a.tipo}</td>
+            <td>{a.que}</td>
+            <td>{a.para}</td>
+            <td>{a.dura}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <div class="aviso">
+    <p>
+      <strong>Nada de esto sale de tu dispositivo.</strong> Las listas tildadas, la cantidad
+      de personas de tu casa, la configuración del calendario y los datos que escribís en las
+      calculadoras se procesan y se guardan en tu propio navegador. El Sitio no tiene una
+      base de datos de visitantes en la que puedan estar.
+    </p>
+  </div>
+
+  <h2>Cookies de terceros</h2>
+  <p>
+    Si el Sitio muestra publicidad, la plataforma publicitaria puede colocar sus propias
+    cookies o identificadores para seleccionar los anuncios, limitar cuántas veces ves el
+    mismo y medir resultados. Esas cookies son de la plataforma, no nuestras, y se rigen por
+    sus propias políticas. Podés desactivar la publicidad personalizada de Google desde la
+    página de <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">configuración
+    de anuncios de Google</a>, y las de otras plataformas desde{" "}
+    <a href="https://www.youronlinechoices.com/" target="_blank" rel="noopener nofollow">Your
+    Online Choices</a>.
+  </p>
+  <p>
+    El <strong>contador de visitas</strong> del pie de página consulta un servicio propio, no
+    de terceros, y no coloca cookies: lo único que guarda en tu dispositivo es la marca de
+    sesión de la tabla de arriba. El detalle de cómo cuenta sin identificarte está en la{" "}
+    <a href="/politica-de-privacidad">Política de Privacidad</a>.
+  </p>
+
+  <h2>¿Cómo puedes gestionar las cookies?</h2>
+  <p>
+    Puedes configurar tu navegador para aceptar o rechazar cookies. A continuación, te
+    indicamos cómo hacerlo en los navegadores más comunes:
+  </p>
+
+  <h3>Google Chrome</h3>
+  <ul>
+    <li>Haz clic en los tres puntos en la esquina superior derecha y selecciona «Configuración».</li>
+    <li>Ve a «Privacidad y seguridad» y luego a «Cookies y otros datos de sitios».</li>
+    <li>Selecciona la opción que prefieras.</li>
+  </ul>
+
+  <h3>Mozilla Firefox</h3>
+  <ul>
+    <li>Haz clic en las tres líneas en la esquina superior derecha y selecciona «Ajustes».</li>
+    <li>Ve a «Privacidad y seguridad» y ajusta la configuración de cookies en la sección correspondiente.</li>
+  </ul>
+
+  <h3>Microsoft Edge</h3>
+  <ul>
+    <li>Haz clic en los tres puntos en la esquina superior derecha y selecciona «Configuración».</li>
+    <li>Ve a «Cookies y permisos del sitio» y ajusta las opciones según tus preferencias.</li>
+  </ul>
+
+  <h3>Safari</h3>
+  <ul>
+    <li>Ve a «Preferencias» y luego a «Privacidad».</li>
+    <li>Ajusta la configuración de cookies según tus preferencias.</li>
+  </ul>
+
+  <h3>Borrar lo que este Sitio guardó</h3>
+  <p>
+    En cualquier navegador, borrar los datos de este sitio elimina las cuatro claves de la
+    tabla de una sola vez. La consecuencia es únicamente práctica: se destildan las listas
+    del súper, la cantidad de personas vuelve a uno y el calendario vuelve a los horarios por
+    defecto. No se pierde nada más, porque no hay nada más.
+  </p>
+
+  <h2>Cambios en la Política de Cookies</h2>
+  <p>
+    Podemos actualizar esta Política de Cookies en cualquier momento. Te recomendamos
+    revisarla periódicamente para estar informado sobre cómo utilizamos las cookies.
+  </p>
+
+  <h2>Contacto</h2>
+  <p>
+    Si tienes preguntas sobre nuestra Política de Cookies, puedes contactarnos a través de{" "}
+    <a href={`mailto:${CONTACTO}`}>{CONTACTO}</a>.
+  </p>
+</Legal>

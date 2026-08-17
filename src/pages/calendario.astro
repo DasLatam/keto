@@ -1,0 +1,527 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { RUTINAS } from "../data/ejercicios.js";
+import { PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
+
+// Los datos van al cliente por un `<script type="application/json">` y no por
+// `define:vars`: usar `define:vars` marca el script como inline y le prohíbe los
+// imports, y acá hacen falta los de `src/lib/ics.js`.
+//
+// Y va un subconjunto, no los datos completos: para armar el .ics alcanza con el
+// nombre, los macros y los ingredientes de cada receta. Mandar las 49 recetas con
+// sus pasos y sus tips serían 40 KB de JavaScript para no usar casi nada.
+const DATOS = {
+  rutinas: RUTINAS.map((r) => ({
+    slug: r.slug,
+    nombre: r.nombre,
+    emoji: r.emoji,
+    resumen: r.resumen,
+    duracion: r.duracion,
+    frecuencia: r.frecuencia,
+    agenda: r.agenda,
+    bloques: r.bloques.map((b) => ({
+      nombre: b.nombre,
+      ejercicios: b.ejercicios.map((e) => ({ nombre: e.nombre })),
+    })),
+  })),
+  plan: PLAN_SEMANAL,
+  recetas: Object.fromEntries(
+    RECETAS.map((r) => [
+      r.slug,
+      {
+        slug: r.slug,
+        nombre: r.nombre,
+        porciones: r.porciones,
+        minutos: r.minutos,
+        macros: r.macros,
+        ingredientes: r.ingredientes,
+      },
+    ])
+  ),
+};
+
+const DIAS = [
+  ["MO", "L", "Lunes"],
+  ["TU", "M", "Martes"],
+  ["WE", "M", "Miércoles"],
+  ["TH", "J", "Jueves"],
+  ["FR", "V", "Viernes"],
+  ["SA", "S", "Sábado"],
+  ["SU", "D", "Domingo"],
+];
+
+const COMIDAS = [
+  ["desayuno", "Desayuno", "08:00"],
+  ["almuerzo", "Almuerzo", "13:00"],
+  ["merienda", "Merienda", "17:00"],
+  ["cena", "Cena", "21:00"],
+];
+
+const AVISOS = [
+  [0, "Sin aviso"],
+  [5, "5 minutos antes"],
+  [15, "15 minutos antes"],
+  [30, "30 minutos antes"],
+  [60, "1 hora antes"],
+];
+
+const FAQ = [
+  {
+    p: "¿Cómo agrego estos recordatorios a mi calendario?",
+    r: "Elegís los días y horarios, apretás «Descargar» y se baja un archivo .ics. En Android se abre solo con Google Calendar. En iPhone se abre con el Calendario y pregunta a qué calendario agregarlo. En la computadora, en Google Calendar es Configuración → Importar y exportar → Importar. Es el formato estándar de calendarios, así que también funciona en Outlook, Thunderbird y Apple Calendar.",
+  },
+  {
+    p: "¿Los recordatorios se repiten solos todas las semanas?",
+    r: "Sí. Cada evento se agenda con una regla de repetición semanal sin fecha de fin, así que la caminata del lunes queda puesta todos los lunes indefinidamente. No hay que volver a bajar nada.",
+  },
+  {
+    p: "Si cambio un horario, ¿tengo que borrar los eventos viejos?",
+    r: "No. Cada evento lleva un identificador fijo, así que al importar el archivo de nuevo el calendario actualiza el evento que ya existe en lugar de duplicarlo. Cambiás la hora, bajás otra vez y listo.",
+  },
+  {
+    p: "¿Necesito una cuenta o dejar mis datos en el sitio?",
+    r: "No hay cuenta ni servidor: el archivo se arma en tu propio navegador y no sale de tu teléfono hasta que vos lo importás en tu calendario. Lo único que se guarda es la configuración que elegís, en este dispositivo, para que la próxima vez que entres esté como la dejaste.",
+  },
+  {
+    p: "¿Conviene agendar también las comidas?",
+    r: "Depende de cómo uses el calendario. Son 28 eventos y a quien tiene la agenda llena de reuniones le puede resultar ruido. Lo que sí sirve mucho es el recordatorio de la compra semanal: la mayoría de los planes se caen el miércoles porque el domingo nadie fue al súper.",
+  },
+];
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((f) => ({
+    "@type": "Question",
+    name: f.p,
+    acceptedAnswer: { "@type": "Answer", text: f.r },
+  })),
+};
+---
+
+<Layout
+  titulo="Calendario y recordatorios de la rutina keto"
+  descripcion="Agendá la elongación de la mañana, las caminatas, la rutina de fuerza, las comidas del plan y la compra semanal. Se descarga un archivo que se importa en Google Calendar, iPhone u Outlook con los avisos ya puestos."
+  jsonld={jsonld}
+>
+  <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Agendá todo y dejá de decidir</h1>
+  <p class="mt-3 text-hoja-900/70 max-w-3xl leading-relaxed">
+    Elegí los días y los horarios que te sirven y bajate el calendario: la elongación de
+    la mañana, las caminatas, la rutina de fuerza, las comidas del plan y el recordatorio
+    de la compra, con los avisos puestos. Se importa en{" "}
+    <strong>Google Calendar, en el Calendario del iPhone o en Outlook</strong> y se repite
+    solo todas las semanas.
+  </p>
+
+  <div class="mt-8 grid lg:grid-cols-[1fr_minmax(0,340px)] gap-8 items-start">
+    <!-- ── Configuración ──────────────────────────────────────────── -->
+    <div class="space-y-5">
+      <section class="rounded-xl border border-hoja-100 bg-white p-6">
+        <h2 class="font-bold text-hoja-700 text-lg">Para empezar</h2>
+        <div class="mt-4 grid sm:grid-cols-2 gap-4">
+          <label class="block">
+            <span class="text-sm font-medium text-hoja-700">Arranco el</span>
+            <input type="date" id="desde"
+                   class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+            <span class="mt-1 block text-xs text-hoja-900/50">
+              El primer evento de cada serie cae en el próximo día que corresponda a partir de esta fecha.
+            </span>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-hoja-700">Somos en casa</span>
+            <div class="mt-1 flex items-center gap-2">
+              <button type="button" data-personas="-1" class="w-10 h-10 rounded-lg border border-hoja-200 text-hoja-700 text-xl leading-none hover:bg-hoja-50" aria-label="Una persona menos">−</button>
+              <output id="personas" class="w-14 text-center text-2xl font-bold text-hoja-700">1</output>
+              <button type="button" data-personas="1" class="w-10 h-10 rounded-lg border border-hoja-200 text-hoja-700 text-xl leading-none hover:bg-hoja-50" aria-label="Una persona más">+</button>
+            </div>
+            <span class="mt-1 block text-xs text-hoja-900/50">
+              Se usa para el recordatorio de la compra y para avisar cuántas veces hay que hacer cada receta. Es el mismo número que en la <a href="/lista-compras" class="text-naranja-600 hover:underline">lista del súper</a>.
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Rutinas de ejercicio -->
+      {DATOS.rutinas.map((r) => (
+        <section class="rounded-xl border border-hoja-100 bg-white p-6" data-rutina={r.slug}>
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" class="rutina-activa mt-1 w-5 h-5 rounded accent-hoja-600 shrink-0" checked />
+            <span class="min-w-0">
+              <span class="font-bold text-hoja-700 text-lg flex items-baseline gap-2">
+                <span aria-hidden="true">{r.emoji}</span> {r.nombre}
+              </span>
+              <span class="block text-sm text-hoja-900/60 mt-0.5">
+                {r.frecuencia} · {r.duracion} minutos ·{" "}
+                <a href={`/ejercicios/${r.slug}`} class="text-naranja-600 hover:underline">ver la rutina</a>
+              </span>
+            </span>
+          </label>
+
+          <div class="mt-4 grid sm:grid-cols-2 gap-4 pl-0 sm:pl-8">
+            <label class="block">
+              <span class="text-sm font-medium text-hoja-700">A las</span>
+              <input type="time" class="rutina-hora mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none"
+                     value={r.agenda.hora} />
+            </label>
+            <label class="block">
+              <span class="text-sm font-medium text-hoja-700">Avisame</span>
+              <select class="rutina-aviso mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
+                {AVISOS.map(([min, texto]) => (
+                  <option value={min} selected={min === r.agenda.aviso}>{texto}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <fieldset class="mt-4 pl-0 sm:pl-8">
+            <legend class="text-sm font-medium text-hoja-700">Qué días</legend>
+            <div class="mt-2 flex flex-wrap gap-1.5">
+              {DIAS.map(([id, corto, largo]) => (
+                <label class="cursor-pointer" title={largo}>
+                  <input type="checkbox" class="rutina-dia peer sr-only" value={id}
+                         checked={r.agenda.dias.includes(id)} />
+                  <span class="grid place-items-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-hoja-200 text-sm font-medium text-hoja-900/50 peer-checked:bg-hoja-600 peer-checked:text-crema-50 peer-checked:border-hoja-600 transition-colors">
+                    {corto}
+                  </span>
+                  <span class="sr-only">{largo}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </section>
+      ))}
+
+      <AdSlot formato="horizontal" clase="my-0" />
+
+      <!-- Comidas del plan -->
+      <section class="rounded-xl border border-hoja-100 bg-white p-6">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="comidas" class="mt-1 w-5 h-5 rounded accent-hoja-600 shrink-0" />
+          <span>
+            <span class="font-bold text-hoja-700 text-lg flex items-baseline gap-2">
+              <span aria-hidden="true">🍽</span> Las comidas del plan semanal
+            </span>
+            <span class="block text-sm text-hoja-900/60 mt-0.5">
+              Las 28 comidas del <a href="/plan-semanal" class="text-naranja-600 hover:underline">plan</a>,
+              cada una en su día, con los ingredientes y las calorías en la descripción del evento.
+              Son 28 eventos: si usás el calendario para trabajar, puede ser mucho ruido.
+            </span>
+          </span>
+        </label>
+
+        <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 pl-0 sm:pl-8">
+          {COMIDAS.map(([clave, etiqueta, hora]) => (
+            <label class="block">
+              <span class="text-sm font-medium text-hoja-700">{etiqueta}</span>
+              <input type="time" class="hora-comida mt-1 w-full rounded-lg border border-hoja-200 px-2 py-2 text-sm focus:border-hoja-500 focus:outline-none"
+                     data-comida={clave} value={hora} />
+            </label>
+          ))}
+        </div>
+      </section>
+
+      <!-- Compra semanal -->
+      <section class="rounded-xl border border-hoja-100 bg-white p-6">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="compra" class="mt-1 w-5 h-5 rounded accent-hoja-600 shrink-0" checked />
+          <span>
+            <span class="font-bold text-hoja-700 text-lg flex items-baseline gap-2">
+              <span aria-hidden="true">🛒</span> La compra de la semana
+            </span>
+            <span class="block text-sm text-hoja-900/60 mt-0.5">
+              Un recordatorio semanal con el enlace a la lista ya calculada para los que son en casa.
+            </span>
+          </span>
+        </label>
+
+        <div class="mt-4 grid sm:grid-cols-2 gap-4 pl-0 sm:pl-8">
+          <label class="block">
+            <span class="text-sm font-medium text-hoja-700">Qué día</span>
+            <select id="diaCompra" class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
+              {DIAS.map(([id, , largo]) => (
+                <option value={id} selected={id === "SA"}>{largo}</option>
+              ))}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-hoja-700">A las</span>
+            <input type="time" id="horaCompra" value="10:00"
+                   class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── Resumen y descarga ─────────────────────────────────────── -->
+    <aside class="space-y-5 lg:sticky lg:top-20">
+      <section class="rounded-xl border-2 border-naranja-400/50 bg-naranja-400/5 p-6">
+        <h2 class="font-bold text-hoja-700 text-lg">Tu semana</h2>
+
+        <div class="mt-4 space-y-1.5" id="vista">
+          {DIAS.map(([id, , largo]) => (
+            <div class="flex gap-2 text-sm" data-vista-dia={id}>
+              <span class="w-20 shrink-0 font-medium text-hoja-700">{largo}</span>
+              <span class="flex-1 text-hoja-900/60 leading-snug" data-vista-contenido>—</span>
+            </div>
+          ))}
+        </div>
+
+        <dl class="mt-5 pt-4 border-t border-naranja-400/30 space-y-1.5 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-hoja-900/60">Eventos por semana</dt>
+            <dd><strong id="totalEventos" class="text-hoja-700">—</strong></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-hoja-900/60">Minutos de ejercicio</dt>
+            <dd><strong id="totalMinutos" class="text-hoja-700">—</strong></dd>
+          </div>
+        </dl>
+
+        <button id="bajar"
+                class="mt-5 w-full px-5 py-3 rounded-lg bg-hoja-600 text-crema-50 font-medium hover:bg-hoja-700 transition-colors">
+          Descargar el calendario
+        </button>
+        <p id="estado" class="mt-2 text-xs text-center text-hoja-900/50" role="status" aria-live="polite">
+          Se arma en tu navegador. No se manda nada a ningún servidor.
+        </p>
+      </section>
+
+      <section class="rounded-xl border border-hoja-100 bg-white p-5">
+        <h2 class="font-semibold text-hoja-700">Cómo se importa</h2>
+        <dl class="mt-3 space-y-3 text-sm">
+          <div>
+            <dt class="font-medium text-hoja-700">Android</dt>
+            <dd class="text-hoja-900/65 leading-relaxed">Abrí el archivo descargado: Google Calendar lo toma solo.</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-hoja-700">iPhone</dt>
+            <dd class="text-hoja-900/65 leading-relaxed">Se abre con el Calendario y pregunta a qué calendario agregar los eventos.</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-hoja-700">Computadora</dt>
+            <dd class="text-hoja-900/65 leading-relaxed">
+              En Google Calendar: Configuración → Importar y exportar → Importar.
+              En Outlook: Archivo → Abrir y exportar → Importar.
+            </dd>
+          </div>
+        </dl>
+        <p class="mt-4 text-xs text-hoja-900/50 leading-relaxed">
+          Conviene importarlo en un calendario aparte (por ejemplo «Keto») y no en el
+          principal: así se puede ocultar de un toque, o borrar entero si algún día
+          molesta.
+        </p>
+      </section>
+    </aside>
+  </div>
+
+  <section class="mt-10 prosa max-w-3xl">
+    <h2 class="text-2xl font-bold text-hoja-700 mb-4">Preguntas frecuentes</h2>
+    <div class="space-y-3">
+      {FAQ.map((f) => (
+        <details class="group rounded-lg border border-hoja-100 bg-white p-4">
+          <summary class="font-medium text-hoja-700 cursor-pointer list-none flex justify-between items-center gap-4">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/70 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<script type="application/json" id="datos-calendario" set:html={JSON.stringify(DATOS)} />
+
+<script>
+  import { armarEventos, generarICS } from "../lib/ics.js";
+
+  const DATOS = JSON.parse(document.getElementById("datos-calendario").textContent);
+  const $ = (id) => document.getElementById(id);
+
+  // La cantidad de personas es la misma clave que usa /lista-compras: quien la
+  // configuró allá no la tiene que volver a poner acá.
+  const CLAVE_PERSONAS = "keto-personas";
+  const CLAVE_CFG = "keto-calendario";
+
+  const DIAS_ORDEN = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+  const NOMBRE_DIA = { MO: "Lunes", TU: "Martes", WE: "Miércoles", TH: "Jueves", FR: "Viernes", SA: "Sábado", SU: "Domingo" };
+
+  let personas = Number(localStorage.getItem(CLAVE_PERSONAS)) || 1;
+
+  /** Lee el estado de todos los controles de la página. */
+  function leerConfig() {
+    const rutinas = {};
+    for (const sec of document.querySelectorAll("[data-rutina]")) {
+      rutinas[sec.dataset.rutina] = {
+        activa: sec.querySelector(".rutina-activa").checked,
+        hora: sec.querySelector(".rutina-hora").value,
+        aviso: Number(sec.querySelector(".rutina-aviso").value),
+        dias: [...sec.querySelectorAll(".rutina-dia")].filter((c) => c.checked).map((c) => c.value),
+      };
+    }
+
+    const horasComida = {};
+    for (const inp of document.querySelectorAll(".hora-comida")) {
+      horasComida[inp.dataset.comida] = inp.value;
+    }
+
+    return {
+      // El input date da "2026-08-17": partido a mano en lugar de `new Date(texto)`,
+      // que lo interpreta como UTC y en Argentina devuelve el día anterior.
+      desde: fechaDesde($("desde").value),
+      rutinas,
+      comidas: $("comidas").checked,
+      horasComida,
+      compra: $("compra").checked,
+      diaCompra: $("diaCompra").value,
+      horaCompra: $("horaCompra").value,
+      personas,
+      RUTINAS: DATOS.rutinas,
+      plan: DATOS.plan,
+      recetas: DATOS.recetas,
+      sitio: location.origin,
+    };
+  }
+
+  function fechaDesde(texto) {
+    if (!texto) return new Date();
+    const [a, m, d] = texto.split("-").map(Number);
+    return new Date(a, m - 1, d);
+  }
+
+  /** Vista previa: qué cae cada día de la semana, con los eventos ya resueltos. */
+  function pintar() {
+    const cfg = leerConfig();
+    const eventos = armarEventos(cfg);
+
+    const porDia = Object.fromEntries(DIAS_ORDEN.map((d) => [d, []]));
+    for (const ev of eventos) {
+      for (const d of ev.dias) {
+        if (porDia[d]) porDia[d].push(ev);
+      }
+    }
+
+    for (const fila of document.querySelectorAll("[data-vista-dia]")) {
+      const lista = porDia[fila.dataset.vistaDia] ?? [];
+      lista.sort((a, b) => a.hora.localeCompare(b.hora));
+      const destino = fila.querySelector("[data-vista-contenido]");
+      destino.textContent = lista.length
+        ? lista.map((e) => `${e.hora} ${e.titulo}`).join(" · ")
+        : "—";
+      destino.classList.toggle("text-hoja-900/30", lista.length === 0);
+    }
+
+    $("totalEventos").textContent = eventos.reduce((n, e) => n + e.dias.length, 0);
+
+    // Sólo los minutos de ejercicio: las comidas y la compra ocupan lugar en el
+    // calendario pero no son actividad física, y sumarlas daría un número lindo
+    // y falso.
+    const slugs = new Set(DATOS.rutinas.map((r) => r.slug));
+    const minutos = eventos
+      .filter((e) => slugs.has(e.uid.replace(/^rutina-|@.*$/g, "")))
+      .reduce((t, e) => t + e.duracion * e.dias.length, 0);
+    $("totalMinutos").textContent = `${minutos} min`;
+
+    guardar(cfg);
+  }
+
+  function guardar(cfg) {
+    try {
+      localStorage.setItem(
+        CLAVE_CFG,
+        JSON.stringify({
+          rutinas: cfg.rutinas,
+          comidas: cfg.comidas,
+          horasComida: cfg.horasComida,
+          compra: cfg.compra,
+          diaCompra: cfg.diaCompra,
+          horaCompra: cfg.horaCompra,
+        })
+      );
+      localStorage.setItem(CLAVE_PERSONAS, String(personas));
+    } catch {
+      // Modo incógnito con el almacenamiento bloqueado: la página funciona igual,
+      // sólo no recuerda la configuración.
+    }
+  }
+
+  function restaurar() {
+    let g = null;
+    try { g = JSON.parse(localStorage.getItem(CLAVE_CFG) ?? "null"); } catch { g = null; }
+    if (!g) return;
+
+    for (const sec of document.querySelectorAll("[data-rutina]")) {
+      const c = g.rutinas?.[sec.dataset.rutina];
+      if (!c) continue;
+      sec.querySelector(".rutina-activa").checked = c.activa !== false;
+      if (c.hora) sec.querySelector(".rutina-hora").value = c.hora;
+      if (c.aviso != null) sec.querySelector(".rutina-aviso").value = String(c.aviso);
+      if (Array.isArray(c.dias)) {
+        for (const caja of sec.querySelectorAll(".rutina-dia")) {
+          caja.checked = c.dias.includes(caja.value);
+        }
+      }
+    }
+
+    if (typeof g.comidas === "boolean") $("comidas").checked = g.comidas;
+    if (typeof g.compra === "boolean") $("compra").checked = g.compra;
+    if (g.diaCompra) $("diaCompra").value = g.diaCompra;
+    if (g.horaCompra) $("horaCompra").value = g.horaCompra;
+    for (const inp of document.querySelectorAll(".hora-comida")) {
+      const h = g.horasComida?.[inp.dataset.comida];
+      if (h) inp.value = h;
+    }
+  }
+
+  function bajar() {
+    const cfg = leerConfig();
+    const eventos = armarEventos(cfg);
+
+    if (eventos.length === 0) {
+      $("estado").textContent = "No hay nada tildado: elegí al menos una rutina.";
+      return;
+    }
+
+    const ics = generarICS(eventos, "Keto Argentina");
+    const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "keto-rutina.ics";
+    a.click();
+    // Revocar en el mismo turno rompe la descarga en Safari: se le da un margen.
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    const n = eventos.reduce((t, e) => t + e.dias.length, 0);
+    $("estado").textContent = `Listo: ${n} recordatorios por semana en keto-rutina.ics.`;
+  }
+
+  // ── Arranque ────────────────────────────────────────────────────────
+  const hoy = new Date();
+  $("desde").value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+  $("desde").min = $("desde").value;
+
+  restaurar();
+  $("personas").textContent = String(personas);
+
+  for (const btn of document.querySelectorAll("[data-personas]")) {
+    btn.addEventListener("click", () => {
+      personas = Math.min(12, Math.max(1, personas + Number(btn.dataset.personas)));
+      $("personas").textContent = String(personas);
+      pintar();
+    });
+  }
+
+  // Todos los controles que cambian el resultado, enumerados. Un listener global
+  // en `document` también funcionaría, pero repinta con cada tecla en cualquier
+  // parte de la página, incluido el buscador del encabezado.
+  const CONTROLES =
+    ".rutina-activa, .rutina-hora, .rutina-aviso, .rutina-dia, .hora-comida, " +
+    "#desde, #comidas, #compra, #diaCompra, #horaCompra";
+  for (const control of document.querySelectorAll(CONTROLES)) {
+    control.addEventListener("change", pintar);
+  }
+
+  $("bajar").addEventListener("click", bajar);
+  pintar();
+</script>

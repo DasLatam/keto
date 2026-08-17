@@ -1,0 +1,209 @@
+---
+import Legal from "../layouts/Legal.astro";
+import { ACTUALIZADO, CONTACTO } from "../data/legales.js";
+
+// Mismo texto base que la Política de Privacidad de DAS LATAM
+// (daslatam.org/daslatam/politica-de-privacidad/), con la estructura y el tono
+// intactos, pero con los datos ajustados a lo que este sitio realmente hace.
+//
+// El ajuste no es cosmético y no se puede saltear: DAS LATAM declara recopilar
+// nombre, apellido y correo por formularios de contacto y suscripciones, y este
+// sitio **no tiene ningún formulario**. En cambio tiene tres cosas que allá no
+// existen y que sí hay que declarar: el almacenamiento local de las listas, la
+// publicidad de terceros y el contador de visitas. Una política que declara
+// tratamientos que no ocurren y omite los que sí ocurren es peor que no tenerla:
+// es falsa en las dos direcciones.
+---
+
+<Legal
+  slug="politica-de-privacidad"
+  titulo="Política de Privacidad"
+  actualizado={ACTUALIZADO}
+  descripcion="Política de Privacidad de Keto Argentina: qué datos se recopilan, con qué finalidad, cómo se tratan y cuáles son sus derechos según la Ley 25.326 de Protección de los Datos Personales."
+>
+  <h2>Introducción</h2>
+  <p>
+    Respetamos su privacidad y nos comprometemos a proteger la información relacionada con
+    su uso de este sitio web (en adelante, «el Sitio»). Esta Política de Privacidad describe
+    qué datos se recopilan, cómo se utilizan y cómo se protegen, de conformidad con la{" "}
+    <strong>Ley 25.326 de Protección de los Datos Personales</strong> de la República
+    Argentina y su reglamentación.
+  </p>
+
+  <h2>Responsable del Tratamiento de Datos</h2>
+  <p>
+    El responsable del tratamiento es el titular del Sitio, con correo electrónico de
+    contacto <a href={`mailto:${CONTACTO}`}>{CONTACTO}</a>.
+  </p>
+
+  <h2>Datos Personales Recopilados</h2>
+  <div class="aviso">
+    <p>
+      <strong>El Sitio no tiene formularios de contacto, registro ni suscripción, y no le
+      pide ningún dato personal en ningún momento.</strong> No hay cuentas de usuario, no se
+      recopilan nombre, apellido, correo electrónico ni teléfono, y no existe ninguna base
+      de datos de visitantes.
+    </p>
+  </div>
+  <p>Lo que sí ocurre, y por eso se declara, es lo siguiente:</p>
+  <ul>
+    <li>
+      <strong>Datos que quedan en su propio dispositivo.</strong> Las listas de compras
+      tildadas, la cantidad de personas de su casa y la configuración del calendario se
+      guardan en el almacenamiento local (<em>localStorage</em>) de su navegador.{" "}
+      <strong>Esa información nunca se envía a ningún servidor</strong>: queda en su
+      teléfono o computadora y usted puede borrarla en cualquier momento vaciando los datos
+      del sitio desde su navegador.
+    </li>
+    <li>
+      <strong>Datos que usted ingresa en las calculadoras.</strong> El peso, la altura, la
+      edad, el sexo y las medidas corporales que escriba en la calculadora de macros o en la
+      de calorías de las rutinas se procesan íntegramente en su navegador para mostrarle el
+      resultado. <strong>No se transmiten, no se almacenan y no quedan registrados</strong>:
+      al recargar la página desaparecen.
+    </li>
+    <li>
+      <strong>Contador de visitas.</strong> El Sitio muestra en su pie un contador de
+      visitas. Para contar una visita sin identificar a nadie, el servidor del contador
+      recibe su dirección IP y el tipo de navegador y los convierte de inmediato en un
+      código irreversible (una función <em>hash</em> con una clave secreta), que se conserva
+      un solo día únicamente para no contar dos veces a la misma persona. No se almacena su
+      dirección IP, ni el código permite recuperarla, ni queda registro de qué páginas
+      visitó.
+    </li>
+    <li>
+      <strong>Registros técnicos del servidor.</strong> Como cualquier sitio web, el
+      proveedor de alojamiento registra de forma automática datos técnicos de la conexión
+      (dirección IP, fecha y hora, navegador, página solicitada) con el fin de operar el
+      servicio y detectar abusos. Ese tratamiento lo realiza el proveedor de infraestructura
+      conforme a sus propias políticas.
+    </li>
+    <li>
+      <strong>Publicidad y medición de terceros.</strong> Si el Sitio muestra publicidad, la
+      plataforma publicitaria puede recopilar identificadores de dispositivo y de navegación
+      para seleccionar y medir los anuncios. Ese tratamiento se rige por las políticas de
+      esas plataformas y se detalla en la <a href="/politica-de-cookies">Política de
+      Cookies</a>.
+    </li>
+  </ul>
+
+  <h2>Finalidad del Tratamiento de Datos</h2>
+  <p>Los datos descriptos se utilizan exclusivamente para:</p>
+  <ul>
+    <li>Recordar sus preferencias y su progreso en las listas dentro de su propio dispositivo.</li>
+    <li>Mostrarle los resultados de las calculadoras.</li>
+    <li>Contabilizar de forma agregada y anónima la cantidad de visitas al Sitio.</li>
+    <li>Mantener el Sitio en funcionamiento, seguro y libre de abusos.</li>
+    <li>Sostener los costos del Sitio mediante publicidad, cuando la haya.</li>
+    <li>Cumplir con obligaciones legales.</li>
+  </ul>
+  <p>
+    <strong>No vendemos datos, no armamos perfiles de usuario y no enviamos correos</strong>
+    {" "}—entre otras razones, porque no tenemos su dirección.
+  </p>
+
+  <h2>Base Legal para el Tratamiento de Datos</h2>
+  <p>
+    Tratamos los datos con base en el interés legítimo en operar, medir y proteger el Sitio,
+    en su consentimiento cuando este es requerido —por ejemplo, para las cookies no
+    esenciales— y en el cumplimiento de obligaciones legales.
+  </p>
+
+  <h2>Compartición de Datos Personales</h2>
+  <p>
+    No compartimos datos personales con terceros, excepto cuando sea necesario para cumplir
+    con obligaciones legales o cuando usted haya dado su consentimiento explícito. Los
+    proveedores que intervienen en la operación del Sitio —alojamiento y, en su caso, la
+    plataforma publicitaria— acceden únicamente a los datos técnicos imprescindibles para
+    prestar su servicio.
+  </p>
+
+  <h2>Transferencias Internacionales</h2>
+  <p>
+    El Sitio se aloja en servidores que pueden estar ubicados fuera de la República
+    Argentina, al igual que las plataformas de publicidad. Esto implica que los datos
+    técnicos de conexión pueden ser tratados en el exterior por esos proveedores, conforme a
+    sus propias políticas y a las garantías previstas en la normativa aplicable.
+  </p>
+
+  <h2>Seguridad de los Datos</h2>
+  <p>
+    Implementamos medidas técnicas y organizativas adecuadas para proteger la información
+    contra pérdida, uso indebido, acceso no autorizado, divulgación, alteración o
+    destrucción. El Sitio se sirve íntegramente cifrado mediante HTTPS. La medida de
+    seguridad más importante, de todos modos, es de diseño:{" "}
+    <strong>los datos que no se recogen no pueden filtrarse</strong>, y el Sitio está
+    construido para procesar en su navegador todo lo que puede procesarse ahí.
+  </p>
+
+  <h2>Derechos del Usuario</h2>
+  <p>Usted tiene derecho a:</p>
+  <ul>
+    <li>Acceder a sus datos personales.</li>
+    <li>Rectificar datos inexactos o incompletos.</li>
+    <li>Solicitar la supresión de sus datos personales.</li>
+    <li>Oponerse al tratamiento de sus datos personales.</li>
+    <li>Solicitar la limitación del tratamiento de sus datos personales.</li>
+    <li>Retirar su consentimiento en cualquier momento.</li>
+  </ul>
+  <p>
+    Para ejercer estos derechos puede contactarnos a través del correo electrónico{" "}
+    <a href={`mailto:${CONTACTO}`}>{CONTACTO}</a>. Tenga en cuenta que, al no existir
+    cuentas ni base de datos de visitantes, en la mayoría de los casos{" "}
+    <strong>no hay dato personal alguno que podamos localizar asociado a usted</strong>: la
+    información que el Sitio guarda vive en su propio dispositivo y usted la controla
+    directamente desde la configuración de su navegador.
+  </p>
+  <div class="aviso">
+    <p>
+      La <strong>Agencia de Acceso a la Información Pública</strong>, en su carácter de
+      Órgano de Control de la Ley 25.326, tiene la atribución de atender las denuncias y
+      reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento
+      de las normas vigentes en materia de protección de datos personales.
+    </p>
+  </div>
+
+  <h2>Conservación de los Datos</h2>
+  <p>
+    Conservamos los datos durante el tiempo necesario para cumplir con las finalidades
+    descriptas en esta Política, a menos que se requiera o permita un período de conservación
+    más largo por ley. El código irreversible del contador de visitas se conserva{" "}
+    <strong>un día</strong>; los datos guardados en su navegador permanecen hasta que usted
+    los borre.
+  </p>
+
+  <h2>Menores de Edad</h2>
+  <p>
+    El Sitio no está dirigido a menores de 16 años ni recopila datos de ellos de forma
+    intencional. El contenido sobre dietas restrictivas no es apropiado para menores sin
+    supervisión profesional.
+  </p>
+
+  <h2>Cookies y Tecnologías Similares</h2>
+  <p>
+    El Sitio utiliza almacenamiento local y puede utilizar cookies para mejorar la
+    experiencia del usuario y para la publicidad. Puede configurar su navegador para
+    rechazar todas o algunas cookies, o para que le avise cuando se envíen. El detalle
+    completo está en la <a href="/politica-de-cookies">Política de Cookies</a>.
+  </p>
+
+  <h2>Enlaces a Sitios de Terceros</h2>
+  <p>
+    El Sitio puede contener enlaces a sitios web de terceros. No somos responsables de las
+    prácticas de privacidad de dichos sitios. Le recomendamos leer las políticas de
+    privacidad de cada sitio web que visite.
+  </p>
+
+  <h2>Modificaciones a esta Política de Privacidad</h2>
+  <p>
+    Nos reservamos el derecho de modificar esta Política de Privacidad en cualquier momento.
+    Cualquier cambio será publicado en esta página con una nueva fecha de actualización. Le
+    recomendamos revisar esta política periódicamente.
+  </p>
+
+  <h2>Contacto</h2>
+  <p>
+    Si tiene preguntas o inquietudes sobre esta Política de Privacidad, puede contactarnos a
+    través del correo electrónico <a href={`mailto:${CONTACTO}`}>{CONTACTO}</a>.
+  </p>
+</Legal>

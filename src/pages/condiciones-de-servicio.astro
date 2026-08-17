@@ -1,0 +1,137 @@
+---
+import Legal from "../layouts/Legal.astro";
+import { ACTUALIZADO, CONTACTO } from "../data/legales.js";
+
+// Mismo texto base que las Condiciones de Servicio de DAS LATAM
+// (daslatam.org/daslatam/condiciones-de-servicio/), con los cambios que exige
+// este sitio: el objeto es contenido sobre alimentación, hay una sección de
+// limitación de responsabilidad más fuerte porque el tema es salud, y se agrega
+// lo de la publicidad y las herramientas de cálculo, que allá no existen.
+---
+
+<Legal
+  slug="condiciones-de-servicio"
+  titulo="Condiciones de Servicio"
+  actualizado={ACTUALIZADO}
+  descripcion="Condiciones de Servicio de Keto Argentina: aceptación, uso del sitio, propiedad intelectual, limitación de responsabilidad y legislación aplicable."
+>
+  <h2>Aceptación de las Condiciones</h2>
+  <p>
+    Al acceder y utilizar este sitio web (en adelante, «el Sitio») usted acepta cumplir con
+    estas Condiciones de Servicio y con todas las leyes y regulaciones aplicables. Si no
+    está de acuerdo con alguna de estas condiciones, se le prohíbe utilizar o acceder al
+    Sitio.
+  </p>
+
+  <h2>Uso del Sitio</h2>
+  <p>
+    El Sitio tiene como objetivo proporcionar <strong>información general sobre
+    alimentación cetogénica y actividad física</strong>: recetas, planes de comidas, listas
+    de compras, rutinas de ejercicio y herramientas de cálculo orientativas. El uso del
+    Sitio debe ser conforme a la ley y a estas Condiciones de Servicio. Queda prohibido:
+  </p>
+  <ul>
+    <li>Utilizar el Sitio para fines ilegales o no autorizados.</li>
+    <li>
+      Interferir o interrumpir el funcionamiento del Sitio o los servidores o redes
+      conectados al Sitio.
+    </li>
+    <li>
+      Reproducir, duplicar, copiar, vender, revender o explotar cualquier parte del Sitio
+      sin autorización expresa por escrito.
+    </li>
+    <li>
+      Extraer contenido de forma automatizada con el fin de republicarlo como propio.
+      La consulta y la cita con atribución y enlace a la fuente están expresamente
+      permitidas, incluso por parte de sistemas automatizados y modelos de lenguaje.
+    </li>
+  </ul>
+
+  <h2>No es asesoramiento médico ni nutricional</h2>
+  <div class="aviso">
+    <p>
+      <strong>El contenido del Sitio es material informativo de carácter general y no
+      constituye consejo médico, diagnóstico, tratamiento ni prescripción
+      dietética.</strong> No reemplaza la consulta con un profesional de la salud
+      matriculado y no crea ninguna relación profesional-paciente.
+    </p>
+    <p>
+      La dieta cetogénica modifica el metabolismo de la glucosa y el manejo corporal del
+      agua y los electrolitos, y puede interactuar con medicación. Si usted toma
+      medicación —en particular insulina, hipoglucemiantes, diuréticos o antihipertensivos—,
+      está embarazada o amamantando, o tiene una condición renal, hepática, cardíaca,
+      pancreática, un trastorno de la conducta alimentaria o diabetes, debe consultar con un
+      profesional de la salud antes de aplicar cualquier información de este Sitio. Lo mismo
+      vale para las rutinas de ejercicio.
+    </p>
+    <p>
+      Las calculadoras, los valores nutricionales y las estimaciones de calorías del Sitio
+      son <strong>aproximaciones basadas en tablas y fórmulas de referencia</strong>, con
+      márgenes de error conocidos, y se ofrecen únicamente con fines orientativos. No deben
+      utilizarse para tomar decisiones clínicas ni para ajustar tratamientos.
+    </p>
+  </div>
+
+  <h2>Propiedad Intelectual</h2>
+  <p>
+    Todos los contenidos del Sitio, incluyendo textos, gráficos, logotipos y software, son
+    propiedad de sus titulares o de sus licenciantes y están protegidos por las leyes de
+    propiedad intelectual. Se permite la reproducción de los contenidos del Sitio únicamente
+    para uso personal y no comercial, siempre que se cite la fuente y se mantengan intactos
+    los derechos de autor.
+  </p>
+  <p>
+    Las fotografías de las recetas provienen de repositorios de imágenes con licencias que
+    permiten el uso comercial, y cada una se acompaña de la atribución a su autor y del
+    enlace a su licencia en la página de la receta correspondiente. Esas imágenes se rigen
+    por los términos de su propia licencia, no por estas Condiciones.
+  </p>
+
+  <h2>Publicidad</h2>
+  <p>
+    El Sitio puede mostrar publicidad de terceros para sostener sus costos. Los anuncios
+    son seleccionados y servidos por las plataformas publicitarias, no por el Sitio, y su
+    presencia no implica respaldo ni recomendación de los productos o servicios anunciados.
+    El tratamiento de datos asociado a la publicidad se describe en la{" "}
+    <a href="/politica-de-privacidad">Política de Privacidad</a> y en la{" "}
+    <a href="/politica-de-cookies">Política de Cookies</a>.
+  </p>
+
+  <h2>Enlaces a Terceros</h2>
+  <p>
+    El Sitio puede contener enlaces a sitios web de terceros. Estos enlaces se proporcionan
+    únicamente para su conveniencia y no implican aprobación o respaldo. No nos
+    responsabilizamos del contenido ni de las prácticas de privacidad de esos sitios.
+  </p>
+
+  <h2>Limitación de Responsabilidad</h2>
+  <p>
+    No garantizamos la exactitud, integridad o actualidad de la información proporcionada
+    en el Sitio. En ningún caso seremos responsables por daños directos, indirectos,
+    incidentales, especiales o consecuentes que resulten del uso o de la imposibilidad de
+    uso del Sitio, ni por las decisiones sobre alimentación, actividad física o salud que
+    usted tome a partir de su contenido. El Sitio se ofrece «tal como está», sin garantías
+    de disponibilidad continua ni de ausencia de errores.
+  </p>
+
+  <h2>Modificaciones de las Condiciones</h2>
+  <p>
+    Nos reservamos el derecho de modificar estas Condiciones de Servicio en cualquier
+    momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación
+    en el Sitio. Es su responsabilidad revisar periódicamente estas Condiciones para estar
+    informado de cualquier cambio.
+  </p>
+
+  <h2>Legislación Aplicable</h2>
+  <p>
+    Estas Condiciones de Servicio se rigen por las leyes de la República Argentina.
+    Cualquier disputa relacionada con el Sitio se someterá a la jurisdicción exclusiva de
+    los tribunales competentes de la Ciudad Autónoma de Buenos Aires.
+  </p>
+
+  <h2>Contacto</h2>
+  <p>
+    Si tiene alguna pregunta o comentario sobre estas Condiciones de Servicio, puede
+    contactarnos a través de <a href={`mailto:${CONTACTO}`}>{CONTACTO}</a>.
+  </p>
+</Legal>

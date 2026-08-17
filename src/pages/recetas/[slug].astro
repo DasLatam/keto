@@ -65,7 +65,7 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
   jsonld={jsonld}
 >
   <nav class="text-sm text-hoja-900/50 mb-4" aria-label="Miga de pan">
-    <a href="/" class="hover:underline">Inicio</a> ·
+    <a href="/" class="hover:underline">Inicio</a> ·{" "}
     <a href="/recetas" class="hover:underline">Recetas</a>
   </nav>
 
@@ -74,6 +74,14 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
 
     <p class="mt-3 text-hoja-900/60">
       ⏱ {minutos} minutos · {porciones} {porciones === 1 ? "porción" : "porciones"}
+      {" · "}{macros.calorias} calorías por porción
+    </p>
+
+    {/* Cuántas veces hay que hacerla para los que son en la casa. Se rellena en
+        el navegador con el número que se eligió en la lista del súper: el HTML
+        sale sin este aviso y aparece sólo si hay más de una persona, así que no
+        molesta a quien cocina para uno. */}
+    <p id="escala-porciones" class="mt-2 text-sm text-hoja-700 bg-hoja-100 rounded-lg px-3 py-2 hidden">
     </p>
 
     {credito && (
@@ -156,3 +164,24 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
 
   <a href="/recetas" class="inline-block mt-8 text-naranja-600 hover:underline">← Todas las recetas</a>
 </Layout>
+
+<script define:vars={{ porciones, calorias: macros.calorias }}>
+  // La cantidad de personas se elige una sola vez, en la lista del súper, y vale
+  // para todo el sitio.
+  const personas = Number(localStorage.getItem("keto-personas")) || 1;
+  if (personas > 1) {
+    const veces = Math.ceil(personas / porciones);
+    const caja = document.getElementById("escala-porciones");
+    const sobra = porciones * veces - personas;
+
+    caja.textContent =
+      veces === 1
+        ? `Son ${personas} en tu casa y esta receta rinde ${porciones}: con una vez alcanza` +
+          (sobra > 0 ? `, y sobra${sobra === 1 ? "" : "n"} ${sobra} ${sobra === 1 ? "porción" : "porciones"}.` : ".")
+        : `Son ${personas} en tu casa y esta receta rinde ${porciones}: hacela ${veces} veces` +
+          ` (${veces * porciones} porciones, ${veces * porciones * calorias} calorías en total)` +
+          (sobra > 0 ? `, y te sobra${sobra === 1 ? "" : "n"} ${sobra}.` : ".");
+
+    caja.classList.remove("hidden");
+  }
+</script>

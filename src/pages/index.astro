@@ -103,9 +103,12 @@ const jsonld = {
 
   <section class="py-8 grid gap-4 md:grid-cols-3">
     {[
-      { icono: "🛒", titulo: "Qué comprar", texto: "Lista de productos permitidos y prohibidos, con marcas que están en la góndola.", href: "/productos" },
-      { icono: "📅", titulo: "Plan semanal", texto: "Siete días armados, con la lista de compras agrupada por sector del súper.", href: "/plan-semanal" },
+      { icono: "🛒", titulo: "Lista del súper", texto: "La compra de la semana entera, agrupada por sector y con las cantidades calculadas para los que sean en tu casa.", href: "/lista-compras" },
+      { icono: "📋", titulo: "Plan semanal", texto: "Siete días armados con 28 recetas distintas, con las calorías y los carbos de cada comida y el total de cada día.", href: "/plan-semanal" },
       { icono: "🧮", titulo: "Calculadora", texto: "Tus gramos de grasa, proteína y carbos según peso, altura y objetivo.", href: "/calculadora" },
+      { icono: "💪", titulo: "Ejercicios", texto: "Elongación cada mañana, caminata de 40 minutos y fuerza con una silla, la pared y una banda elástica. Sin gimnasio.", href: "/ejercicios" },
+      { icono: "📅", titulo: "Calendario", texto: "Agendá las rutinas, las comidas y la compra semanal, con los avisos puestos, en Google Calendar o en el iPhone.", href: "/calendario" },
+      { icono: "🏷", titulo: "Qué comprar", texto: "Lista de productos permitidos y prohibidos, con marcas que están en la góndola.", href: "/productos" },
     ].map((c) => (
       <a href={c.href} class="rounded-xl border border-hoja-100 bg-white p-6 hover:border-hoja-500 hover:shadow-lg transition-all">
         <div class="text-3xl">{c.icono}</div>

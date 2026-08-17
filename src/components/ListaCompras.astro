@@ -1,0 +1,198 @@
+---
+// La lista del súper con el selector de cantidad de personas. Vive en un
+// componente porque aparece en dos lados —`/lista-compras` y embebida en
+// `/plan-semanal`— y las dos tienen que escalar igual y compartir los tildes.
+//
+// El escalado se hace en el cliente, no en el build: el HTML sale renderizado
+// para una persona y el JavaScript lo reescribe con el número guardado. Así la
+// página sigue siendo estática y cacheable, y quien tenga el JS bloqueado ve la
+// lista para una persona en lugar de no ver nada.
+import { LISTA_COMPRAS } from "../data/recetas.js";
+import { textoItem, claveItem, cuentaEscalables } from "../lib/porciones.js";
+
+const { titulo = null, compacto = false } = Astro.props;
+
+const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
+---
+
+<div class="lista-compras" data-lista>
+  <div class="flex flex-wrap items-center gap-3 gap-y-4">
+    {/* El selector es lo primero: si aparece debajo de la lista, la gente copia
+        las cantidades para una persona sin enterarse de que se podían escalar. */}
+    <div class="flex items-center gap-2 rounded-xl border border-hoja-100 bg-white px-3 py-2">
+      <span class="text-sm font-medium text-hoja-700">Somos</span>
+      <button
+        type="button" data-personas="-1"
+        class="w-9 h-9 rounded-lg border border-hoja-200 text-hoja-700 text-xl leading-none hover:bg-hoja-50 disabled:opacity-30"
+        aria-label="Una persona menos"
+      >−</button>
+      <output data-salida-personas class="w-8 text-center text-xl font-bold text-hoja-700">1</output>
+      <button
+        type="button" data-personas="1"
+        class="w-9 h-9 rounded-lg border border-hoja-200 text-hoja-700 text-xl leading-none hover:bg-hoja-50 disabled:opacity-30"
+        aria-label="Una persona más"
+      >+</button>
+      <span data-etiqueta-personas class="text-sm text-hoja-900/50">persona</span>
+    </div>
+
+    <span data-progreso class="text-sm font-medium text-hoja-700 bg-hoja-100 px-3 py-1.5 rounded-full">
+      0 de {totalItems}
+    </span>
+    <button type="button" data-limpiar class="text-sm text-naranja-600 hover:underline">Destildar todo</button>
+    {!compacto && (
+      <button type="button" data-imprimir class="text-sm text-naranja-600 hover:underline">Imprimir</button>
+    )}
+  </div>
+
+  <p class="mt-2 text-sm text-hoja-900/50 max-w-2xl leading-relaxed">
+    Lo que tildes queda guardado en este teléfono: podés ir marcando mientras comprás,
+    cerrar y volver. <span data-aviso-escala class="hidden">
+      Los frascos, botellas y condimentos <strong>no se multiplican</strong>: rinden varias
+      semanas igual para uno que para seis.
+    </span>
+  </p>
+
+  {titulo && <h2 class="mt-6 text-2xl font-bold text-hoja-700">{titulo}</h2>}
+
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    {LISTA_COMPRAS.map((s) => (
+      <section class="rounded-xl border border-hoja-100 bg-white p-5 break-inside-avoid">
+        <h3 class="font-semibold text-hoja-700 mb-3 flex items-baseline justify-between gap-2">
+          {s.sector}
+          <span class="text-xs font-normal text-hoja-900/40">{s.items.length}</span>
+        </h3>
+        <ul class="space-y-2.5">
+          {s.items.map((item) => (
+            <li>
+              <label class="flex items-start gap-3 cursor-pointer group">
+                {/* La clave del tilde no lleva la cantidad: si la llevara, mover
+                    el selector de personas cambiaría la clave y se destildaría
+                    todo lo que ya estaba marcado. */}
+                <input
+                  type="checkbox" class="compra mt-0.5 w-5 h-5 rounded accent-hoja-600 shrink-0"
+                  data-item={claveItem(s.sector, item)}
+                />
+                <span
+                  class="text-hoja-900/80 group-has-checked:line-through group-has-checked:text-hoja-900/35 transition-colors"
+                  data-texto
+                  data-cant={item.cant ?? ""}
+                  data-unidad={item.unidad ?? ""}
+                  data-nombre={item.nombre ?? ""}
+                  data-escala={item.escala === false ? "no" : "si"}
+                >
+                  {textoItem(item, 1)}
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+        {cuentaEscalables(s.items) === 0 && (
+          <p class="mt-3 text-xs text-hoja-900/45 leading-relaxed">
+            Nada de este sector se multiplica: son los mismos envases para uno o para seis.
+          </p>
+        )}
+      </section>
+    ))}
+  </div>
+</div>
+
+<script>
+  import { textoItem } from "../lib/porciones.js";
+
+  // Misma clave en las dos páginas que muestran la lista: si alguien tilda en
+  // /plan-semanal y abre /lista-compras, ve lo mismo. Dos listas con estados
+  // distintos serían peor que no guardar nada.
+  const CLAVE_TILDES = "keto-lista-compras";
+  // Compartida con /calendario, que la usa para el recordatorio de la compra.
+  const CLAVE_PERSONAS = "keto-personas";
+  const MAX_PERSONAS = 12;
+
+  for (const raiz of document.querySelectorAll("[data-lista]")) {
+    const cajas = [...raiz.querySelectorAll(".compra")];
+    const textos = [...raiz.querySelectorAll("[data-texto]")];
+    const progreso = raiz.querySelector("[data-progreso]");
+    const salida = raiz.querySelector("[data-salida-personas]");
+    const etiqueta = raiz.querySelector("[data-etiqueta-personas]");
+    const aviso = raiz.querySelector("[data-aviso-escala]");
+
+    let personas = Number(localStorage.getItem(CLAVE_PERSONAS)) || 1;
+    personas = Math.min(MAX_PERSONAS, Math.max(1, personas));
+
+    let guardado = {};
+    try {
+      guardado = JSON.parse(localStorage.getItem(CLAVE_TILDES) ?? "{}");
+    } catch {
+      guardado = {};
+    }
+
+    /** Reescribe las cantidades de todos los ítems para `personas` personas. */
+    function escalar() {
+      for (const el of textos) {
+        const cant = el.dataset.cant === "" ? null : Number(el.dataset.cant);
+        el.textContent = textoItem(
+          {
+            cant,
+            unidad: el.dataset.unidad || null,
+            nombre: el.dataset.nombre || null,
+            escala: el.dataset.escala === "no" ? false : true,
+          },
+          personas
+        );
+      }
+
+      salida.textContent = String(personas);
+      etiqueta.textContent = personas === 1 ? "persona" : "personas";
+      aviso.classList.toggle("hidden", personas === 1);
+
+      for (const btn of raiz.querySelectorAll("[data-personas]")) {
+        const paso = Number(btn.dataset.personas);
+        btn.disabled = personas + paso < 1 || personas + paso > MAX_PERSONAS;
+      }
+    }
+
+    function pintarProgreso() {
+      const n = cajas.filter((c) => c.checked).length;
+      progreso.textContent = `${n} de ${cajas.length}`;
+      progreso.classList.toggle("bg-hoja-600", n === cajas.length);
+      progreso.classList.toggle("text-crema-50", n === cajas.length);
+      progreso.classList.toggle("bg-hoja-100", n !== cajas.length);
+    }
+
+    function persistirTildes() {
+      const estado = {};
+      for (const c of cajas) if (c.checked) estado[c.dataset.item] = true;
+      try {
+        localStorage.setItem(CLAVE_TILDES, JSON.stringify(estado));
+      } catch {
+        /* almacenamiento bloqueado: la lista funciona, no recuerda */
+      }
+      pintarProgreso();
+    }
+
+    for (const c of cajas) {
+      c.checked = Boolean(guardado[c.dataset.item]);
+      c.addEventListener("change", persistirTildes);
+    }
+
+    for (const btn of raiz.querySelectorAll("[data-personas]")) {
+      btn.addEventListener("click", () => {
+        personas = Math.min(MAX_PERSONAS, Math.max(1, personas + Number(btn.dataset.personas)));
+        try {
+          localStorage.setItem(CLAVE_PERSONAS, String(personas));
+        } catch {
+          /* ídem */
+        }
+        escalar();
+      });
+    }
+
+    raiz.querySelector("[data-limpiar]")?.addEventListener("click", () => {
+      for (const c of cajas) c.checked = false;
+      persistirTildes();
+    });
+    raiz.querySelector("[data-imprimir]")?.addEventListener("click", () => window.print());
+
+    escalar();
+    pintarProgreso();
+  }
+</script>

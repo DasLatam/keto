@@ -1,6 +1,6 @@
 ---
 const { receta } = Astro.props;
-const { slug, nombre, minutos, macros, etiquetas, comida } = receta;
+const { slug, nombre, minutos, porciones, macros, etiquetas, comida } = receta;
 
 const NOMBRE_ETIQUETA = {
   "15min": "15 min",
@@ -36,8 +36,12 @@ const NOMBRE_ETIQUETA = {
       {nombre}
     </h3>
 
+    {/* Calorías y porciones arriba, junto al tiempo: son los dos datos que se
+        miran para decidir si la receta entra en el día y si alcanza para los que
+        son en la casa. Antes había que abrir la receta para verlos. */}
     <p class="mt-2 text-sm text-hoja-900/60">
-      ⏱ {minutos} min · {macros.carbos} g de carbos netos
+      ⏱ {minutos} min · <strong class="font-semibold text-hoja-700">{macros.calorias} cal</strong>
+      {" · "}{porciones} {porciones === 1 ? "porción" : "porciones"}
     </p>
 
     <dl class="mt-4 grid grid-cols-3 gap-2 text-center">
