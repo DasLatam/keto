@@ -60,6 +60,50 @@ El escalado ocurre **en el navegador**, no en el build: el HTML sale para una
 persona y el JS lo reescribe con el número guardado en `localStorage`. Así el
 sitio sigue siendo estático y quien tenga el JS bloqueado ve la lista para uno.
 
+## Las fotos de las recetas
+
+Muestran **el ingrediente principal, no el plato terminado**: la palta, el
+zucchini, el corte de carne crudo. Decisión de Ariel del 2026-08-17, y la página
+de cada receta lo dice al pie de la foto — la foto ilustra de qué está hecho el
+plato, no cómo va a quedar. Es una solución puente hasta tener fotos propias de
+los platos ya cocinados.
+
+El motivo es práctico: los archivos libres tienen miles de fotos buenas de una
+palta partida al medio y ninguna de un revuelto de zapallitos argentino.
+
+`scripts/bajar_imagenes.py` las baja de **Wikimedia Commons** en tres pasos, y el
+del medio es el que importa:
+
+```bash
+python3 scripts/bajar_imagenes.py --buscar     # candidatas a .revision-imagenes/
+#  … acá una persona las mira y escribe .revision-imagenes/elecciones.json …
+python3 scripts/bajar_imagenes.py --aplicar    # publica y reescribe creditos.json
+```
+
+**El paso de revisión no es opcional.** La versión anterior del script buscaba en
+Openverse y se quedaba con la primera candidata que descargara bien. Como esas
+búsquedas son sobre títulos y etiquetas y no sobre el contenido de la imagen, más
+de veinte de las cuarenta y nueve fotos no tenían nada que ver: «zapallitos
+rellenos» era **un tractor con estiércol**, «ensalada de repollo» una hamburguesa
+con papas fritas, y «flan de coco» una captura de pantalla de la receta de otro
+sitio con su URL y su logo impresos encima. Ninguna búsqueda automática puede
+garantizar que la foto muestre lo que dice.
+
+Para revisar, conviene armar hojas de contacto con PIL (una fila por receta, sus
+cuatro candidatas numeradas) y mirarlas: en tres rondas de ajuste de términos se
+llega a las 49. Los términos que fallan suelen fallar por homonimia — «chard» es
+un pueblo de Inglaterra, «portobello» una playa de Escocia, «paprika» un cultivar
+de rosa, y `cream jug` devuelve jarras de plata del Metropolitan.
+
+Requisitos que el script hace cumplir solo:
+
+- **Licencia comercial y con derivados.** El sitio lleva publicidad, y acá se
+  recorta y se redimensiona, que es una obra derivada: quedan afuera las NC y las
+  ND. Se prefiere CC0 y dominio público sobre CC BY, y CC BY sobre CC BY-SA.
+- **Atribución obligatoria**, guardada en `src/data/creditos.json` y mostrada al
+  pie de cada foto con enlace a la licencia.
+- **El término tiene que estar en el título** de Commons. Es el filtro que faltaba.
+
 ## Calendario y recordatorios (`/calendario`)
 
 `src/lib/ics.js` genera archivos iCalendar (RFC 5545) que se importan en Google

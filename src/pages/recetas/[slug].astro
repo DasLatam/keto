@@ -90,14 +90,25 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
             diferido empeora el LCP en vez de mejorarlo. */}
         <img
           src={`/img/recetas/${slug}.webp`}
-          alt={nombre}
+          alt={credito.materia
+            ? `${credito.materia}, el ingrediente principal de ${nombre.toLowerCase()}`
+            : nombre}
           width="1200"
           height="800"
           fetchpriority="high"
           decoding="async"
           class="w-full rounded-xl aspect-[3/2] object-cover bg-crema-200"
         />
-        <figcaption class="mt-1.5 text-xs text-hoja-900/40">
+        {/* La foto es del ingrediente, no del plato terminado, y la página lo
+            dice. Callárselo sería vender una foto por otra: quien mira espera
+            ver cómo le va a quedar, y esta foto no se lo promete. */}
+        <figcaption class="mt-1.5 text-xs text-hoja-900/45 leading-relaxed">
+          {credito.materia && (
+            <>
+              En la foto, <strong class="font-medium text-hoja-900/65">{credito.materia}</strong>:
+              el ingrediente principal, no el plato terminado. ·{" "}
+            </>
+          )}
           Foto: {credito.autor} ·{" "}
           <a href={credito.fuente} target="_blank" rel="noopener nofollow" class="hover:underline">
             {credito.licencia}

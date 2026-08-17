@@ -23,3 +23,7 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 logs/
+
+# Material de trabajo de scripts/bajar_imagenes.py: candidatas a revisar antes
+# de publicar. No va al repo, se regenera cuando haga falta.
+.revision-imagenes/

@@ -1,6 +1,13 @@
 ---
+import creditos from "../data/creditos.json";
+
 const { receta } = Astro.props;
 const { slug, nombre, minutos, porciones, macros, etiquetas, comida } = receta;
+
+// Las fotos son del ingrediente principal, no del plato terminado (ver
+// `scripts/bajar_imagenes.py`). El `alt` tiene que decir lo que se ve, o el
+// lector de pantalla anuncia un plato que la imagen no muestra.
+const materia = creditos[slug]?.materia;
 
 const NOMBRE_ETIQUETA = {
   "15min": "15 min",
@@ -22,7 +29,7 @@ const NOMBRE_ETIQUETA = {
         todas de una. */}
     <img
       src={`/img/recetas/${slug}.webp`}
-      alt={nombre}
+      alt={materia ? `${materia}, ingrediente principal de ${nombre.toLowerCase()}` : nombre}
       width="1200"
       height="800"
       loading="lazy"
