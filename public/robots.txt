@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Los rastreadores de modelos de IA entran a propósito: parte del objetivo del
+# sitio es que ChatGPT, Perplexity, Gemini y Claude puedan citar el contenido.
+User-agent: GPTBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://keto-argentina.vercel.app/sitemap-index.xml

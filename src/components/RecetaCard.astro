@@ -1,0 +1,51 @@
+---
+const { receta } = Astro.props;
+const { slug, nombre, minutos, macros, etiquetas, comida } = receta;
+
+const NOMBRE_ETIQUETA = {
+  "15min": "15 min",
+  economica: "Económica",
+  "pocos-ingredientes": "Pocos ingredientes",
+};
+---
+
+<article
+  class="group rounded-xl border border-hoja-100 bg-white overflow-hidden hover:border-hoja-500 hover:shadow-lg transition-all"
+  data-comida={comida}
+  data-etiquetas={etiquetas.join(" ")}
+>
+  <a href={`/recetas/${slug}`} class="block p-5">
+    <h3 class="font-semibold text-lg text-hoja-700 group-hover:text-hoja-600 leading-snug">
+      {nombre}
+    </h3>
+
+    <p class="mt-2 text-sm text-hoja-900/60">
+      ⏱ {minutos} min · {macros.carbos} g de carbos netos
+    </p>
+
+    <dl class="mt-4 grid grid-cols-3 gap-2 text-center">
+      <div class="rounded-lg bg-crema-100 py-2">
+        <dt class="text-[11px] uppercase tracking-wide text-hoja-900/50">Grasas</dt>
+        <dd class="font-semibold text-hoja-700">{macros.grasas} g</dd>
+      </div>
+      <div class="rounded-lg bg-crema-100 py-2">
+        <dt class="text-[11px] uppercase tracking-wide text-hoja-900/50">Proteína</dt>
+        <dd class="font-semibold text-hoja-700">{macros.proteinas} g</dd>
+      </div>
+      <div class="rounded-lg bg-crema-100 py-2">
+        <dt class="text-[11px] uppercase tracking-wide text-hoja-900/50">Carbos</dt>
+        <dd class="font-semibold text-naranja-600">{macros.carbos} g</dd>
+      </div>
+    </dl>
+
+    {etiquetas.length > 0 && (
+      <ul class="mt-4 flex flex-wrap gap-1.5">
+        {etiquetas.map((e) => (
+          <li class="text-[11px] px-2 py-0.5 rounded-full bg-hoja-100 text-hoja-700">
+            {NOMBRE_ETIQUETA[e] ?? e}
+          </li>
+        ))}
+      </ul>
+    )}
+  </a>
+</article>

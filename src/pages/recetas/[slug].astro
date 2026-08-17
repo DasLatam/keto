@@ -1,0 +1,112 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AdSlot from "../../components/AdSlot.astro";
+import { RECETAS } from "../../data/recetas.js";
+
+export function getStaticPaths() {
+  return RECETAS.map((receta) => ({ params: { slug: receta.slug }, props: { receta } }));
+}
+
+const { receta } = Astro.props;
+const { nombre, minutos, porciones, macros, ingredientes, pasos, tip } = receta;
+
+// Schema.org Recipe: es lo que hace que Google muestre la ficha con tiempo y
+// macros, y lo que permite que un modelo de IA cite la receta sin inventarla.
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  name: nombre,
+  inLanguage: "es-AR",
+  recipeCategory: "Keto",
+  recipeCuisine: "Argentina",
+  totalTime: `PT${minutos}M`,
+  recipeYield: `${porciones} ${porciones === 1 ? "porción" : "porciones"}`,
+  recipeIngredient: ingredientes,
+  recipeInstructions: pasos.map((p, i) => ({
+    "@type": "HowToStep",
+    position: i + 1,
+    text: p,
+  })),
+  nutrition: {
+    "@type": "NutritionInformation",
+    calories: `${macros.calorias} cal`,
+    fatContent: `${macros.grasas} g`,
+    proteinContent: `${macros.proteinas} g`,
+    carbohydrateContent: `${macros.carbos} g`,
+  },
+};
+---
+
+<Layout
+  titulo={nombre}
+  descripcion={`Receta keto: ${nombre}. ${minutos} minutos, ${macros.carbos} g de carbohidratos netos por porción. Con ingredientes que se consiguen en Argentina.`}
+  jsonld={jsonld}
+>
+  <nav class="text-sm text-hoja-900/50 mb-4" aria-label="Miga de pan">
+    <a href="/" class="hover:underline">Inicio</a> ·
+    <a href="/recetas" class="hover:underline">Recetas</a>
+  </nav>
+
+  <article class="prosa">
+    <h1 class="text-3xl md:text-4xl font-bold text-hoja-700 leading-tight">{nombre}</h1>
+
+    <p class="mt-3 text-hoja-900/60">
+      ⏱ {minutos} minutos · {porciones} {porciones === 1 ? "porción" : "porciones"}
+    </p>
+
+    <dl class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {[
+        ["Grasas", `${macros.grasas} g`],
+        ["Proteínas", `${macros.proteinas} g`],
+        ["Carbos netos", `${macros.carbos} g`],
+        ["Calorías", macros.calorias],
+      ].map(([k, v], i) => (
+        <div class="rounded-xl bg-white border border-hoja-100 py-3 text-center">
+          <dt class="text-xs uppercase tracking-wide text-hoja-900/50">{k}</dt>
+          <dd class:list={["text-xl font-bold", i === 2 ? "text-naranja-600" : "text-hoja-700"]}>{v}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <AdSlot formato="horizontal" />
+
+    <div class="grid md:grid-cols-[1fr_1.6fr] gap-8 mt-4">
+      <section>
+        <h2 class="text-xl font-bold text-hoja-700 mb-3">Ingredientes</h2>
+        <ul class="space-y-2">
+          {ingredientes.map((i) => (
+            <li class="flex gap-2 text-hoja-900/80">
+              <span class="text-naranja-500 shrink-0" aria-hidden="true">•</span>
+              <span>{i}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-hoja-700 mb-3">Preparación</h2>
+        <ol class="space-y-4">
+          {pasos.map((p, i) => (
+            <li class="flex gap-3">
+              <span class="shrink-0 w-7 h-7 rounded-full bg-hoja-600 text-crema-50 grid place-items-center text-sm font-semibold">
+                {i + 1}
+              </span>
+              <p class="text-hoja-900/80 leading-relaxed pt-0.5">{p}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
+
+    {tip && (
+      <aside class="mt-8 rounded-xl border-l-4 border-naranja-500 bg-naranja-400/10 p-5">
+        <p class="font-semibold text-naranja-600 mb-1">El detalle que cambia el resultado</p>
+        <p class="text-hoja-900/80 leading-relaxed">{tip}</p>
+      </aside>
+    )}
+  </article>
+
+  <AdSlot formato="rectangulo" />
+
+  <a href="/recetas" class="inline-block mt-4 text-naranja-600 hover:underline">← Todas las recetas</a>
+</Layout>

@@ -1,0 +1,28 @@
+---
+// Hueco reservado para AdSense.
+//
+// Existe aunque el anuncio todavía no esté activo, y **con altura fija**, a
+// propósito: si el espacio apareciera recién cuando carga el script, el contenido
+// saltaría hacia abajo y eso es exactamente lo que penaliza el CLS (Cumulative
+// Layout Shift) de Core Web Vitals. Reservar el lugar desde el HTML estático hace
+// que activar los anuncios no mueva un pixel.
+const { formato = "horizontal", clase = "" } = Astro.props;
+
+const ALTURAS = {
+  horizontal: "h-[90px] md:h-[90px]",
+  rectangulo: "h-[250px]",
+  lateral: "h-[600px]",
+};
+---
+
+<aside
+  class:list={[
+    "w-full flex items-center justify-center rounded-lg border border-dashed border-hoja-200 bg-crema-100 text-hoja-500/40 text-xs select-none my-6",
+    ALTURAS[formato] ?? ALTURAS.horizontal,
+    clase,
+  ]}
+  aria-hidden="true"
+  data-ad-slot={formato}
+>
+  Espacio publicitario
+</aside>

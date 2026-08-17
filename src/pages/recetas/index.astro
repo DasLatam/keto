@@ -1,0 +1,103 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AdSlot from "../../components/AdSlot.astro";
+import RecetaCard from "../../components/RecetaCard.astro";
+import { RECETAS, COMIDAS, ETIQUETAS } from "../../data/recetas.js";
+---
+
+<Layout
+  titulo="Recetas keto argentinas"
+  descripcion="Recetas keto con ingredientes que se consiguen en Argentina. Filtrá por tipo de comida, por las que salen en 15 minutos, por económicas o por pocos ingredientes."
+>
+  <h1 class="text-3xl font-bold text-hoja-700">Recetas</h1>
+  <p class="mt-2 text-hoja-900/70">
+    Todas con macros por porción y carbohidratos netos a la vista.
+  </p>
+
+  {/* Los filtros son HTML + un puñado de JS que muestra y oculta: no hay framework
+      ni hidratación. Con este volumen de recetas alcanza y sobra, y el HTML sale
+      completo para los buscadores y los scrapers de IA. */}
+  <div class="mt-6 space-y-3" id="filtros">
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por comida">
+      <button data-filtro="comida" data-valor="" class="chip chip-activo">Todas</button>
+      {COMIDAS.map((c) => (
+        <button data-filtro="comida" data-valor={c.id} class="chip">{c.nombre}</button>
+      ))}
+    </div>
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por característica">
+      <button data-filtro="etiqueta" data-valor="" class="chip chip-activo">Sin filtro</button>
+      {ETIQUETAS.map((e) => (
+        <button data-filtro="etiqueta" data-valor={e.id} class="chip">{e.nombre}</button>
+      ))}
+    </div>
+  </div>
+
+  <p id="contador" class="mt-4 text-sm text-hoja-900/50" aria-live="polite"></p>
+
+  <div id="grilla" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {RECETAS.map((r) => <RecetaCard receta={r} />)}
+  </div>
+
+  <p id="vacio" class="hidden mt-8 text-center text-hoja-900/60">
+    No hay recetas con esa combinación. Probá sacando un filtro.
+  </p>
+
+  <AdSlot formato="horizontal" />
+</Layout>
+
+<style>
+  /* CSS a mano y no `@apply`: en Tailwind v4 las utilidades no existen dentro de
+     un <style> con alcance de componente sin declarar `@reference`, y para tres
+     reglas no vale la pena arrastrar el archivo entero. */
+  .chip {
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-hoja-200);
+    background: #fff;
+    color: var(--color-hoja-700);
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .chip:hover {
+    border-color: var(--color-hoja-500);
+  }
+  .chip-activo {
+    background: var(--color-hoja-600);
+    border-color: var(--color-hoja-600);
+    color: var(--color-crema-50);
+  }
+</style>
+
+<script>
+  const estado = { comida: "", etiqueta: "" };
+  const tarjetas = [...document.querySelectorAll("#grilla article")];
+  const contador = document.getElementById("contador");
+  const vacio = document.getElementById("vacio");
+
+  function aplicar() {
+    let visibles = 0;
+    for (const t of tarjetas) {
+      const okComida = !estado.comida || t.dataset.comida === estado.comida;
+      const okEtiqueta =
+        !estado.etiqueta || t.dataset.etiquetas.split(" ").includes(estado.etiqueta);
+      const mostrar = okComida && okEtiqueta;
+      t.classList.toggle("hidden", !mostrar);
+      if (mostrar) visibles++;
+    }
+    contador.textContent = `${visibles} ${visibles === 1 ? "receta" : "recetas"}`;
+    vacio.classList.toggle("hidden", visibles > 0);
+  }
+
+  document.getElementById("filtros").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-filtro]");
+    if (!btn) return;
+    const tipo = btn.dataset.filtro;
+    estado[tipo] = btn.dataset.valor;
+    for (const otro of document.querySelectorAll(`button[data-filtro="${tipo}"]`)) {
+      otro.classList.toggle("chip-activo", otro === btn);
+    }
+    aplicar();
+  });
+
+  aplicar();
+</script>

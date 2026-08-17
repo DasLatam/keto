@@ -1,0 +1,102 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { PRODUCTOS, CATEGORIAS } from "../data/productos.js";
+---
+
+<Layout
+  titulo="Qué comprar: guía de productos keto en Argentina"
+  descripcion="Qué se puede y qué no en dieta keto, con marcas argentinas de Coto, Carrefour, Día y dietéticas. Carbohidratos netos por cada producto."
+>
+  <h1 class="text-3xl font-bold text-hoja-700">Qué comprar</h1>
+  <p class="mt-2 text-hoja-900/70 max-w-2xl">
+    Productos que se consiguen de verdad acá, con los carbohidratos netos cada 100 g.
+    Nada de importados de tienda online.
+  </p>
+
+  <div class="mt-6">
+    <label class="block max-w-md">
+      <span class="sr-only">Buscar producto</span>
+      <input
+        type="search" id="buscador" placeholder="Buscar: queso, harina, gaseosa…"
+        class="w-full rounded-lg border border-hoja-200 px-4 py-2.5 focus:border-hoja-500 focus:outline-none"
+      />
+    </label>
+  </div>
+
+  <p id="sinResultados" class="hidden mt-6 text-hoja-900/60">
+    No encontré ese producto. Probá con una palabra más general.
+  </p>
+
+  {CATEGORIAS.map((cat) => (
+    <section class="mt-10" data-categoria>
+      <h2 class="text-2xl font-bold text-hoja-700 flex items-center gap-2">
+        <span aria-hidden="true">{cat.emoji}</span> {cat.nombre}
+      </h2>
+
+      <div class="mt-4 space-y-2">
+        {PRODUCTOS.filter((p) => p.categoria === cat.id).map((p) => (
+          <article
+            data-producto
+            data-buscar={`${p.nombre} ${p.marcas ?? ""} ${p.nota}`.toLowerCase()}
+            class:list={[
+              "rounded-xl border bg-white p-4",
+              p.apto ? "border-hoja-200" : "border-red-200",
+            ]}
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <h3 class="font-semibold text-hoja-900 flex items-center gap-2 flex-wrap">
+                  <span class:list={["text-sm px-2 py-0.5 rounded-full shrink-0",
+                    p.apto ? "bg-hoja-100 text-hoja-700" : "bg-red-100 text-red-700"]}>
+                    {p.apto ? "Sí" : "No"}
+                  </span>
+                  {p.nombre}
+                </h3>
+                {p.marcas && (
+                  <p class="mt-1.5 text-sm text-hoja-900/50">
+                    <span class="font-medium">Dónde:</span> {p.marcas}
+                  </p>
+                )}
+                <p class="mt-1.5 text-sm text-hoja-900/70 leading-relaxed">{p.nota}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <div class:list={["text-lg font-bold", p.apto ? "text-hoja-700" : "text-red-600"]}>
+                  {p.carbos} g
+                </div>
+                <div class="text-[11px] text-hoja-900/40 leading-tight">carbos<br />netos/100 g</div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <AdSlot formato="horizontal" />
+</Layout>
+
+<script>
+  const buscador = document.getElementById("buscador");
+  const productos = [...document.querySelectorAll("[data-producto]")];
+  const secciones = [...document.querySelectorAll("[data-categoria]")];
+  const sinResultados = document.getElementById("sinResultados");
+
+  buscador.addEventListener("input", () => {
+    const q = buscador.value.trim().toLowerCase();
+    let total = 0;
+
+    for (const p of productos) {
+      const coincide = !q || p.dataset.buscar.includes(q);
+      p.classList.toggle("hidden", !coincide);
+      if (coincide) total++;
+    }
+    // Se esconde el encabezado de la categoría que quedó sin ningún producto
+    // visible: si no, quedan títulos flotando sobre el vacío.
+    for (const s of secciones) {
+      const vivos = s.querySelectorAll("[data-producto]:not(.hidden)").length;
+      s.classList.toggle("hidden", vivos === 0);
+    }
+    sinResultados.classList.toggle("hidden", total > 0);
+  });
+</script>

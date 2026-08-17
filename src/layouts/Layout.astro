@@ -1,0 +1,132 @@
+---
+import "../styles/global.css";
+
+const {
+  titulo,
+  descripcion,
+  imagen = "/og-default.png",
+  jsonld = null,
+} = Astro.props;
+
+const SITIO = "Keto Argentina";
+const url = new URL(Astro.url.pathname, Astro.site ?? "https://keto-argentina.vercel.app");
+
+const NAV = [
+  { href: "/plan-semanal", texto: "Plan semanal" },
+  { href: "/recetas", texto: "Recetas" },
+  { href: "/productos", texto: "Qué comprar" },
+  { href: "/calculadora", texto: "Calculadora" },
+];
+---
+
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href={url.href} />
+
+    <title>{titulo} · {SITIO}</title>
+    <meta name="description" content={descripcion} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITIO} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={url.href} />
+    <meta property="og:image" content={new URL(imagen, url).href} />
+    <meta property="og:locale" content="es_AR" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* Los datos estructurados son lo que hace que Google muestre la receta con
+        foto y tiempo, y que los modelos de IA puedan citar el contenido. Cada
+        página pasa el suyo. */}
+    {jsonld && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />
+    )}
+
+    {/* AdSense: el script va acá, comentado hasta tener el ID aprobado. Los
+        huecos (<AdSlot />) ya están reservados en el maquetado para que activarlo
+        no mueva nada de lugar — que es lo que arruina los Core Web Vitals. */}
+    {/*
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX"
+            crossorigin="anonymous"></script>
+    */}
+  </head>
+
+  <body class="min-h-screen flex flex-col">
+    <header class="bg-hoja-700 text-crema-50 sticky top-0 z-50 shadow-md">
+      <div class="mx-auto max-w-5xl px-4">
+        <div class="flex items-center justify-between h-14">
+          <a href="/" class="font-bold text-lg tracking-tight flex items-center gap-2">
+            <span aria-hidden="true">🥑</span> Keto Argentina
+          </a>
+
+          <nav class="hidden md:flex gap-1" aria-label="Principal">
+            {NAV.map((i) => (
+              <a
+                href={i.href}
+                class="px-3 py-2 rounded-md text-sm hover:bg-hoja-600 transition-colors"
+              >
+                {i.texto}
+              </a>
+            ))}
+          </nav>
+
+          <button
+            id="btn-menu"
+            class="md:hidden p-2 rounded-md hover:bg-hoja-600"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            aria-controls="menu-movil"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        <nav id="menu-movil" class="md:hidden hidden pb-3" aria-label="Principal móvil">
+          {NAV.map((i) => (
+            <a href={i.href} class="block px-3 py-2 rounded-md text-sm hover:bg-hoja-600">
+              {i.texto}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1 mx-auto max-w-5xl w-full px-4 py-8">
+      <slot />
+    </main>
+
+    <footer class="bg-hoja-900 text-crema-100 mt-12">
+      <div class="mx-auto max-w-5xl px-4 py-8 text-sm space-y-4">
+        <div class="flex flex-wrap gap-x-6 gap-y-2">
+          {NAV.map((i) => (
+            <a href={i.href} class="hover:text-naranja-400 transition-colors">{i.texto}</a>
+          ))}
+        </div>
+        <p class="text-crema-200/70 leading-relaxed max-w-3xl">
+          Este sitio es material informativo, no consejo médico. La dieta cetogénica
+          cambia cómo el cuerpo maneja el azúcar y los líquidos: si tomás medicación,
+          estás embarazada o tenés una condición renal, hepática o diabetes,
+          consultá con un profesional antes de empezar.
+        </p>
+        <p class="text-crema-200/50">© {new Date().getFullYear()} Keto Argentina</p>
+      </div>
+    </footer>
+
+    <script>
+      // Menú móvil. Diez líneas de JS y nada más: el resto del sitio es HTML
+      // estático, que es lo que mantiene los Core Web Vitals en verde.
+      const btn = document.getElementById("btn-menu");
+      const menu = document.getElementById("menu-movil");
+      btn?.addEventListener("click", () => {
+        const abierto = menu.classList.toggle("hidden") === false;
+        btn.setAttribute("aria-expanded", String(abierto));
+      });
+    </script>
+  </body>
+</html>

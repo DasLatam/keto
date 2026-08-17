@@ -1,0 +1,155 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+---
+
+<Layout
+  titulo="Calculadora de macros keto"
+  descripcion="Calculá tus macros keto: gramos de grasa, proteína y carbohidratos netos por día según tu peso, altura, edad y objetivo."
+>
+  <h1 class="text-3xl font-bold text-hoja-700">Calculadora de macros</h1>
+  <p class="mt-2 text-hoja-900/70 max-w-2xl">
+    Estima cuánta grasa, proteína y carbohidratos comer por día. Usa la fórmula de
+    Mifflin-St Jeor para el gasto basal, que es la que mejor predice en población
+    general.
+  </p>
+
+  <div class="mt-8 grid md:grid-cols-2 gap-8">
+    <form id="form" class="space-y-4 rounded-xl border border-hoja-100 bg-white p-6">
+      <div class="grid grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm font-medium text-hoja-700">Peso (kg)</span>
+          <input type="number" id="peso" value="80" min="35" max="250" step="0.5" required
+                 class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-hoja-700">Altura (cm)</span>
+          <input type="number" id="altura" value="175" min="120" max="230" required
+                 class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-hoja-700">Edad</span>
+          <input type="number" id="edad" value="40" min="15" max="100" required
+                 class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-hoja-700">Sexo</span>
+          <select id="sexo" class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
+            <option value="m">Masculino</option>
+            <option value="f">Femenino</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="block">
+        <span class="text-sm font-medium text-hoja-700">Actividad</span>
+        <select id="actividad" class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
+          <option value="1.2">Sedentario (trabajo de escritorio)</option>
+          <option value="1.375" selected>Ligera (camino, 1-2 días de ejercicio)</option>
+          <option value="1.55">Moderada (3-5 días de ejercicio)</option>
+          <option value="1.725">Alta (6-7 días de ejercicio)</option>
+        </select>
+      </label>
+
+      <label class="block">
+        <span class="text-sm font-medium text-hoja-700">Objetivo</span>
+        <select id="objetivo" class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
+          <option value="-0.20" selected>Bajar de peso (déficit del 20%)</option>
+          <option value="0">Mantener</option>
+          <option value="0.10">Ganar músculo (superávit del 10%)</option>
+        </select>
+      </label>
+
+      <label class="block">
+        <span class="text-sm font-medium text-hoja-700">
+          Carbos netos por día: <output id="carbosOut" class="text-naranja-600 font-bold">25</output> g
+        </span>
+        <input type="range" id="carbos" min="20" max="50" value="25" step="5"
+               class="mt-2 w-full accent-hoja-600" />
+      </label>
+    </form>
+
+    <div class="rounded-xl border border-hoja-100 bg-white p-6">
+      <h2 class="font-bold text-hoja-700 text-lg">Tus números diarios</h2>
+
+      <p class="mt-1 text-sm text-hoja-900/50">
+        Calorías objetivo: <strong id="kcal" class="text-hoja-700">—</strong>
+      </p>
+
+      <div class="mt-5 space-y-3">
+        <div class="rounded-lg bg-crema-100 p-4 flex justify-between items-baseline">
+          <span class="text-sm text-hoja-900/60">Grasas</span>
+          <span><strong id="gGrasas" class="text-2xl text-hoja-700">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+        </div>
+        <div class="rounded-lg bg-crema-100 p-4 flex justify-between items-baseline">
+          <span class="text-sm text-hoja-900/60">Proteínas</span>
+          <span><strong id="gProte" class="text-2xl text-hoja-700">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+        </div>
+        <div class="rounded-lg bg-naranja-400/10 p-4 flex justify-between items-baseline">
+          <span class="text-sm text-hoja-900/60">Carbos netos</span>
+          <span><strong id="gCarbos" class="text-2xl text-naranja-600">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+        </div>
+      </div>
+
+      <p class="mt-5 text-xs text-hoja-900/50 leading-relaxed">
+        La proteína se fija en 1,6 g por kilo de peso, que es lo que sostiene la masa
+        muscular en déficit. Los carbos los elegís vos con la barra. La grasa completa
+        el resto de las calorías: es la variable de ajuste, no un objetivo a alcanzar.
+      </p>
+    </div>
+  </div>
+
+  <AdSlot formato="horizontal" />
+
+  <section class="mt-4 prosa max-w-3xl">
+    <h2 class="text-2xl font-bold text-hoja-700 mb-3">Cómo leer estos números</h2>
+    <p class="text-hoja-900/70 leading-relaxed">
+      Los gramos de grasa son un techo, no una meta: si un día terminás satisfecho con
+      menos, está bien. Los de proteína sí conviene alcanzarlos, sobre todo si entrenás.
+      Y los carbohidratos son el único número que no hay que pasar, porque es el que
+      define si el cuerpo entra en cetosis o no.
+    </p>
+    <p class="text-hoja-900/70 leading-relaxed mt-3">
+      Si recién empezás, poné la barra en 20 gramos las primeras dos semanas. Después,
+      si te sentís bien y la balanza se mueve, podés probar subiendo a 30 o 35.
+    </p>
+  </section>
+</Layout>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const campos = ["peso", "altura", "edad", "sexo", "actividad", "objetivo", "carbos"];
+
+  function calcular() {
+    const peso = +$("peso").value;
+    const altura = +$("altura").value;
+    const edad = +$("edad").value;
+    const sexo = $("sexo").value;
+    const actividad = +$("actividad").value;
+    const ajuste = +$("objetivo").value;
+    const carbos = +$("carbos").value;
+
+    if (!peso || !altura || !edad) return;
+
+    // Mifflin-St Jeor: metabolismo basal.
+    const tmb = 10 * peso + 6.25 * altura - 5 * edad + (sexo === "m" ? 5 : -161);
+    const kcal = Math.round(tmb * actividad * (1 + ajuste));
+
+    // La proteína se ancla al peso corporal, no a las calorías: es lo que protege
+    // la masa muscular cuando se come en déficit.
+    const gProte = Math.round(peso * 1.6);
+    // La grasa absorbe lo que sobra. 9 cal/g la grasa, 4 la proteína y los carbos.
+    const gGrasas = Math.max(0, Math.round((kcal - gProte * 4 - carbos * 4) / 9));
+
+    $("kcal").textContent = `${kcal} cal`;
+    $("gGrasas").textContent = gGrasas;
+    $("gProte").textContent = gProte;
+    $("gCarbos").textContent = carbos;
+    $("carbosOut").textContent = carbos;
+  }
+
+  for (const id of campos) {
+    $(id).addEventListener("input", calcular);
+  }
+  calcular();
+</script>

@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Paleta: verde hoja, crema, naranja cálido. Se define acá como tokens para que
+   el resto del sitio no repita hexadecimales sueltos. */
+@theme {
+  --color-hoja-50: #f2f8f0;
+  --color-hoja-100: #e0efdb;
+  --color-hoja-200: #c3e0b9;
+  --color-hoja-500: #4f8f3f;
+  --color-hoja-600: #3d7231;
+  --color-hoja-700: #2f5926;
+  --color-hoja-900: #1c3517;
+
+  --color-crema-50: #fdfcf7;
+  --color-crema-100: #f8f5ea;
+  --color-crema-200: #efe9d6;
+
+  --color-naranja-400: #f0a04b;
+  --color-naranja-500: #e8871e;
+  --color-naranja-600: #c96f12;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-crema-50);
+  color: var(--color-hoja-900);
+}
+
+/* Ariel pide el cuerpo de texto justificado en todos los sitios. Con hyphens,
+   porque justificar sin partir palabras deja ríos blancos en pantallas angostas
+   — y este sitio se usa sobre todo desde el celular. */
+.prosa p,
+.prosa li {
+  text-align: justify;
+  hyphens: auto;
+}

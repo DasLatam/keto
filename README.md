@@ -1,23 +1,43 @@
-# Keto Argentina
+# Astro Starter Kit: Minimal
 
-Guía práctica y web de recetas para hacer dieta keto en Argentina: productos que se
-consiguen en Coto, Carrefour, Día, Jumbo y dietéticas, cortes de carne locales y
-modismos de acá.
+```sh
+npm create astro@latest -- --template minimal
+```
 
-## Qué incluye
+> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
 
-- **Plan semanal interactivo** — desayunos, almuerzos, meriendas, cenas y colaciones.
-- **Listas de compras** con checkboxes para marcar en el súper o la verdulería.
-- **Filtros de recetas** — "en 15 minutos", "económicas", "pocos ingredientes".
-- **Guía de productos y marcas argentinas** — permitidos y prohibidos.
-- **Calculadora de macros** — peso, altura y objetivo → grasas, proteínas y carbos netos.
+## 🚀 Project Structure
 
-## Stack
+Inside of your Astro project, you'll see the following folders and files:
 
-Astro (SSG) + Tailwind CSS, deploy en Vercel. Mobile-first, Core Web Vitals en verde,
-datos estructurados JSON-LD (`Recipe`, `FAQPage`, `HowTo`, `Article`) y espacios
-reservados para AdSense.
+```text
+/
+├── public/
+├── src/
+│   └── pages/
+│       └── index.astro
+└── package.json
+```
 
-## Estado
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
 
-En construcción.
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+
+Any static assets, like images, can be placed in the `public/` directory.
+
+## 🧞 Commands
+
+All commands are run from the root of the project, from a terminal:
+
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `npm install`             | Installs dependencies                            |
+| `npm run dev`             | Starts local dev server at `localhost:4321`      |
+| `npm run build`           | Build your production site to `./dist/`          |
+| `npm run preview`         | Preview your build locally, before deploying     |
+| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `npm run astro -- --help` | Get help using the Astro CLI                     |
+
+## 👀 Want to learn more?
+
+Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

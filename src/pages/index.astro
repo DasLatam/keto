@@ -1,0 +1,128 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import RecetaCard from "../components/RecetaCard.astro";
+import { RECETAS } from "../data/recetas.js";
+
+const destacadas = RECETAS.filter((r) => r.etiquetas.includes("15min")).slice(0, 3);
+
+// Las preguntas frecuentes cumplen doble función: le sirven al que llega, y son
+// lo que Google y los modelos de IA citan como respuesta directa. Por eso van
+// también en JSON-LD y no sólo como HTML.
+const FAQ = [
+  {
+    p: "¿Se puede hacer keto en Argentina sin gastar una fortuna?",
+    r: "Sí. La base de la dieta —huevos, carne, queso, verduras de hoja, aceite— es comida de todos los días. Lo caro son los productos «keto» importados, que no hacen falta. Los cortes con más grasa, que en keto son los mejores, suelen ser los más baratos de la carnicería.",
+  },
+  {
+    p: "¿Cuántos carbohidratos por día son «keto»?",
+    r: "El rango habitual es de 20 a 50 gramos de carbohidratos netos por día. Los carbos netos son los carbohidratos totales menos la fibra. Cuanto más bajo, más rápido entra el cuerpo en cetosis, pero también cuesta más sostenerlo.",
+  },
+  {
+    p: "¿Puedo tomar mate en keto?",
+    r: "Sí, el mate amargo no tiene carbohidratos. El problema es el azúcar: un mate dulce puede sumar más carbos que una comida entera. Si necesitás endulzarlo, va con stevia o eritritol.",
+  },
+  {
+    p: "¿Qué es la «gripe keto» y cómo se evita?",
+    r: "Los primeros días pueden aparecer dolor de cabeza, cansancio y calambres. Casi siempre es falta de agua y de sal: al bajar los carbos, el cuerpo elimina más líquido y con él sodio, potasio y magnesio. Tomar más agua y salar bien la comida suele resolverlo.",
+  },
+  {
+    p: "¿Se puede comer asado en keto?",
+    r: "El asado es de las comidas más compatibles que hay. Carne, achuras y chorizo puro entran sin problema. Lo que queda afuera es el pan, la ensalada de papa y las salsas dulces como la barbacoa.",
+  },
+];
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: "Keto Argentina",
+      url: "https://keto-argentina.vercel.app",
+      inLanguage: "es-AR",
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+  ],
+};
+---
+
+<Layout
+  titulo="Dieta keto en Argentina"
+  descripcion="Guía práctica de dieta keto con productos que se consiguen en Argentina: recetas, plan semanal, qué comprar en Coto o Carrefour y calculadora de macros."
+  jsonld={jsonld}
+>
+  <section class="text-center py-8 md:py-14">
+    <h1 class="text-3xl md:text-5xl font-bold text-hoja-700 leading-tight">
+      Dieta keto, con lo que hay en el súper de acá
+    </h1>
+    <p class="mt-4 text-lg text-hoja-900/70 max-w-2xl mx-auto">
+      Recetas, plan semanal y listas de compras pensadas para Argentina: cortes de
+      carne de la carnicería, marcas de góndola y productos de dietética de barrio.
+      Sin ingredientes importados que nadie consigue.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3 justify-center">
+      <a
+        href="/plan-semanal"
+        class="px-6 py-3 rounded-lg bg-hoja-600 text-crema-50 font-medium hover:bg-hoja-700 transition-colors"
+      >
+        Ver el plan de la semana
+      </a>
+      <a
+        href="/calculadora"
+        class="px-6 py-3 rounded-lg border-2 border-naranja-500 text-naranja-600 font-medium hover:bg-naranja-500 hover:text-white transition-colors"
+      >
+        Calcular mis macros
+      </a>
+    </div>
+  </section>
+
+  <AdSlot formato="horizontal" />
+
+  <section class="py-6">
+    <div class="flex items-baseline justify-between mb-5">
+      <h2 class="text-2xl font-bold text-hoja-700">Rápidas, en 15 minutos</h2>
+      <a href="/recetas" class="text-sm text-naranja-600 hover:underline">Ver todas →</a>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {destacadas.map((r) => <RecetaCard receta={r} />)}
+    </div>
+  </section>
+
+  <section class="py-8 grid gap-4 md:grid-cols-3">
+    {[
+      { icono: "🛒", titulo: "Qué comprar", texto: "Lista de productos permitidos y prohibidos, con marcas que están en la góndola.", href: "/productos" },
+      { icono: "📅", titulo: "Plan semanal", texto: "Siete días armados, con la lista de compras agrupada por sector del súper.", href: "/plan-semanal" },
+      { icono: "🧮", titulo: "Calculadora", texto: "Tus gramos de grasa, proteína y carbos según peso, altura y objetivo.", href: "/calculadora" },
+    ].map((c) => (
+      <a href={c.href} class="rounded-xl border border-hoja-100 bg-white p-6 hover:border-hoja-500 hover:shadow-lg transition-all">
+        <div class="text-3xl">{c.icono}</div>
+        <h3 class="mt-3 font-semibold text-lg text-hoja-700">{c.titulo}</h3>
+        <p class="mt-1 text-sm text-hoja-900/60 leading-relaxed">{c.texto}</p>
+      </a>
+    ))}
+  </section>
+
+  <AdSlot formato="rectangulo" />
+
+  <section class="py-8 prosa">
+    <h2 class="text-2xl font-bold text-hoja-700 mb-6">Preguntas frecuentes</h2>
+    <div class="space-y-3">
+      {FAQ.map((f) => (
+        <details class="group rounded-lg border border-hoja-100 bg-white p-4">
+          <summary class="font-medium text-hoja-700 cursor-pointer list-none flex justify-between items-center gap-4">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/70 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+</Layout>
