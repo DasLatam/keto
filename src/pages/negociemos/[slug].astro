@@ -2,12 +2,15 @@
 import Layout from "../../layouts/Layout.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import { NEGOCIACIONES } from "../../data/negociemos.js";
+import Relacionados from "../../components/Relacionados.astro";
+import { paraNegociacion } from "../../lib/relacionar.js";
 
 export function getStaticPaths() {
   return NEGOCIACIONES.map((n) => ({ params: { slug: n.slug }, props: { n } }));
 }
 
 const { n } = Astro.props;
+const relacionados = paraNegociacion(n);
 
 const ESTADO = {
   si: { etiqueta: "Sí", clase: "bg-hoja-100 text-hoja-700", fila: "border-hoja-200" },
@@ -35,6 +38,14 @@ const jsonld = {
         name: f.p,
         acceptedAnswer: { "@type": "Answer", text: f.r },
       })),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: new URL("/", Astro.site).href },
+        { "@type": "ListItem", position: 2, name: "Negociemos", item: new URL("/negociemos", Astro.site).href },
+        { "@type": "ListItem", position: 3, name: n.titulo },
+      ],
     },
   ],
 };
@@ -116,6 +127,8 @@ const jsonld = {
       ))}
     </div>
   </article>
+
+  <Relacionados items={relacionados} />
 
   <a href="/negociemos" class="inline-block mt-8 text-naranja-600 hover:underline">
     ← Todas las comparativas

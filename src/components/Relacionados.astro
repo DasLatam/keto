@@ -1,0 +1,45 @@
+---
+// Enlaces a contenido relacionado al pie de cada página.
+//
+// Sirve para dos cosas a la vez. Para el lector: alguien que acaba de leer una
+// receta con palta probablemente quiera saber qué otras frutas entran. Para la
+// indexación: las páginas huérfanas —a las que no apunta nadie desde adentro del
+// sitio— se rastrean tarde y mal, y con 65 páginas ese riesgo es real.
+//
+// Se pasa una lista ya armada; este componente sólo la pinta.
+const { titulo = "Seguí leyendo", items = [] } = Astro.props;
+
+const COLOR = {
+  Receta: "bg-hoja-100 text-hoja-700",
+  Negociemos: "bg-naranja-400/20 text-naranja-600",
+  Evidencia: "bg-sky-100 text-sky-800",
+  Guía: "bg-crema-200 text-hoja-900/70",
+};
+---
+
+{items.length > 0 && (
+  <section class="mt-12 pt-8 border-t border-hoja-100">
+    <h2 class="text-xl font-bold text-hoja-700 mb-4">{titulo}</h2>
+    <div class="grid gap-3 sm:grid-cols-2">
+      {items.map((i) => (
+        <a
+          href={i.href}
+          class="group rounded-xl border border-hoja-100 bg-white p-4 hover:border-hoja-500 hover:shadow-md transition-all"
+        >
+          <span
+            class:list={[
+              "inline-block text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full",
+              COLOR[i.tipo] ?? COLOR["Guía"],
+            ]}
+          >
+            {i.tipo}
+          </span>
+          <h3 class="mt-2 font-medium text-hoja-700 group-hover:text-naranja-600 leading-snug">
+            {i.texto}
+          </h3>
+          {i.nota && <p class="mt-1 text-sm text-hoja-900/55 leading-relaxed">{i.nota}</p>}
+        </a>
+      ))}
+    </div>
+  </section>
+)}

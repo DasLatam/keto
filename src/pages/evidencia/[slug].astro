@@ -2,12 +2,15 @@
 import Layout from "../../layouts/Layout.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import { ARTICULOS } from "../../data/evidencia.js";
+import Relacionados from "../../components/Relacionados.astro";
+import { paraEvidencia } from "../../lib/relacionar.js";
 
 export function getStaticPaths() {
   return ARTICULOS.map((a) => ({ params: { slug: a.slug }, props: { a } }));
 }
 
 const { a } = Astro.props;
+const relacionados = paraEvidencia(a);
 
 // `citation` lleva las fuentes al grafo de datos estructurados: es lo que permite
 // que un modelo de IA vea de dónde sale cada afirmación en vez de tener que
@@ -35,6 +38,14 @@ const jsonld = {
         name: f.p,
         acceptedAnswer: { "@type": "Answer", text: f.r },
       })),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: new URL("/", Astro.site).href },
+        { "@type": "ListItem", position: 2, name: "Evidencia", item: new URL("/evidencia", Astro.site).href },
+        { "@type": "ListItem", position: 3, name: a.titulo },
+      ],
     },
   ],
 };
@@ -119,4 +130,6 @@ const jsonld = {
       </p>
     </aside>
   </article>
+
+  <Relacionados items={relacionados} />
 </Layout>

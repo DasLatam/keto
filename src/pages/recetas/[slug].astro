@@ -3,6 +3,8 @@ import Layout from "../../layouts/Layout.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import { RECETAS } from "../../data/recetas.js";
 import creditos from "../../data/creditos.json";
+import Relacionados from "../../components/Relacionados.astro";
+import { paraReceta } from "../../lib/relacionar.js";
 
 export function getStaticPaths() {
   return RECETAS.map((receta) => ({ params: { slug: receta.slug }, props: { receta } }));
@@ -15,11 +17,20 @@ const { slug, nombre, minutos, porciones, macros, ingredientes, pasos, tip } = r
 // licencia de uso comercial, y esas licencias exigen atribuir al autor. En un
 // sitio con AdSense, no atribuir es un problema legal, no un detalle.
 const credito = creditos[slug];
+const relacionados = paraReceta(receta);
 
 // Schema.org Recipe: es lo que hace que Google muestre la ficha con tiempo y
 // macros, y lo que permite que un modelo de IA cite la receta sin inventarla.
-const jsonld = {
-  "@context": "https://schema.org",
+const miga = {
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Inicio", item: new URL("/", Astro.site).href },
+    { "@type": "ListItem", position: 2, name: "Recetas", item: new URL("/recetas", Astro.site).href },
+    { "@type": "ListItem", position: 3, name: nombre },
+  ],
+};
+
+const receta_ld = {
   "@type": "Recipe",
   name: nombre,
   inLanguage: "es-AR",
@@ -44,6 +55,8 @@ const jsonld = {
     carbohydrateContent: `${macros.carbos} g`,
   },
 };
+
+const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] };
 ---
 
 <Layout
@@ -139,5 +152,7 @@ const jsonld = {
 
   <AdSlot formato="rectangulo" />
 
-  <a href="/recetas" class="inline-block mt-4 text-naranja-600 hover:underline">← Todas las recetas</a>
+  <Relacionados items={relacionados} />
+
+  <a href="/recetas" class="inline-block mt-8 text-naranja-600 hover:underline">← Todas las recetas</a>
 </Layout>
