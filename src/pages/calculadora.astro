@@ -13,8 +13,11 @@ const SANO = 25;     // por debajo: peso saludable
 const SOBRE = 30;    // por debajo: sobrepeso; por encima: obesidad
 
 /** Posición de un IMC en la barra, en porcentaje. La usan las franjas (en el
- *  build) y el marcador (en el navegador), para que no puedan desalinearse. */
-const pos = (imc) => ((Math.min(MAX, Math.max(MIN, imc)) - MIN) / (MAX - MIN)) * 100;
+ *  build) y el marcador (en el navegador), para que no puedan desalinearse.
+ *  Redondeado a dos decimales: sin eso, 18,5 emite `width:14.000000000000002%`
+ *  en el HTML, que funciona pero queda escrito para siempre en la página. */
+const pos = (imc) =>
+  Math.round(((Math.min(MAX, Math.max(MIN, imc)) - MIN) / (MAX - MIN)) * 10000) / 100;
 
 const FAQ = [
   {
