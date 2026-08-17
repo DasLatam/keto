@@ -14,7 +14,24 @@ const NOMBRE_ETIQUETA = {
   data-comida={comida}
   data-etiquetas={etiquetas.join(" ")}
 >
-  <a href={`/recetas/${slug}`} class="block p-5">
+  <a href={`/recetas/${slug}`} class="block">
+    {/* `width`/`height` explícitos y `aspect-[3/2]`: la foto ocupa su lugar antes
+        de cargar, así la grilla no salta y el CLS queda en cero. `lazy` en todas
+        menos las de arriba de todo, que Astro no puede saber cuáles son — con
+        este volumen de tarjetas la diferencia es menor que el costo de cargarlas
+        todas de una. */}
+    <img
+      src={`/img/recetas/${slug}.webp`}
+      alt={nombre}
+      width="1200"
+      height="800"
+      loading="lazy"
+      decoding="async"
+      class="w-full aspect-[3/2] object-cover bg-crema-200"
+      onerror="this.style.display='none'"
+    />
+
+    <div class="p-5">
     <h3 class="font-semibold text-lg text-hoja-700 group-hover:text-hoja-600 leading-snug">
       {nombre}
     </h3>
@@ -47,5 +64,6 @@ const NOMBRE_ETIQUETA = {
         ))}
       </ul>
     )}
+    </div>
   </a>
 </article>
