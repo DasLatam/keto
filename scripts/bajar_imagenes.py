@@ -83,6 +83,14 @@ CONSULTAS = {
     "pollo-al-curry-con-coco": "chicken curry bowl",
     "budin-de-limon-keto": "lemon cake slice",
     "sopa-de-zapallo-y-jengibre": "pumpkin soup bowl",
+    "tortilla-de-jamon-y-queso-al-microondas": "omelette ham cheese",
+    "ensalada-caprese-con-palta": "caprese salad tomato",
+    "pechuga-rellena-con-espinaca-y-queso": "stuffed chicken breast",
+    "revuelto-gramajo-keto": "scrambled eggs ham",
+    "lomo-al-champignon": "steak mushroom sauce",
+    "cheesecake-keto-sin-horno": "cheesecake slice plate",
+    "sopa-crema-de-champignones": "mushroom soup bowl",
+    "brochetas-de-pollo-y-morron": "chicken skewers grilled",
 }
 
 # Openverse indexa mucho dibujo, ilustración y foto de producto sobre fondo
