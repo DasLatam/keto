@@ -1,0 +1,135 @@
+---
+// Buscador interno. Vive en el header, así que está en todas las páginas.
+//
+// El índice (`/buscar.json`) se baja **una sola vez, al escribir la primera
+// letra**, no al cargar la página: la mayoría de las visitas no busca nada y no
+// tiene por qué pagar esa descarga.
+//
+// El componente se renderiza **dos veces** —una para escritorio y otra dentro del
+// menú del celular—, así que nada acá puede depender de un `id` fijo: dos
+// elementos con el mismo id son HTML inválido y `getElementById` devuelve sólo
+// el primero, con lo que el buscador del celular quedaba muerto. Se resuelve con
+// `data-buscador` y búsquedas relativas a la raíz de cada instancia.
+---
+
+<div class="relative" data-buscador>
+  <input
+    type="search"
+    data-q
+    aria-label="Buscar en el sitio"
+    placeholder="Buscar receta, producto…"
+    autocomplete="off"
+    class="w-full md:w-56 lg:w-64 rounded-lg bg-hoja-600/60 text-crema-50 placeholder-crema-100/50 px-3 py-1.5 text-sm border border-hoja-500/50 focus:bg-crema-50 focus:text-hoja-900 focus:placeholder-hoja-900/40 focus:outline-none focus:border-naranja-400 transition-colors"
+  />
+
+  <div
+    data-resultados
+    role="listbox"
+    aria-label="Resultados de búsqueda"
+    class="hidden absolute right-0 mt-2 w-[min(92vw,26rem)] max-h-[70vh] overflow-y-auto rounded-xl bg-white shadow-2xl border border-hoja-100 z-50"
+  >
+  </div>
+</div>
+
+<script>
+  // El índice es uno solo aunque haya varias instancias del buscador: se comparte
+  // entre todas para no bajarlo dos veces.
+  let indice = null;
+  let cargando = null;
+
+  const norm = (s) =>
+    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+  function cargarIndice() {
+    if (indice) return Promise.resolve(indice);
+    if (cargando) return cargando;
+    cargando = fetch("/buscar.json")
+      .then((r) => r.json())
+      .then((docs) => {
+        indice = docs.map((d) => ({ ...d, _b: norm(d.b), _t: norm(d.t) }));
+        return indice;
+      })
+      .catch(() => (indice = []));
+    return cargando;
+  }
+
+  function buscar(q) {
+    const terminos = norm(q).split(/\s+/).filter(Boolean);
+    if (!terminos.length || !indice) return [];
+    return indice
+      .map((d) => {
+        // Todos los términos tienen que aparecer. Puntúa más alto si el término
+        // está en el título, que es lo que la gente espera ver primero.
+        let puntos = 0;
+        for (const t of terminos) {
+          if (!d._b.includes(t)) return null;
+          puntos += d._t.includes(t) ? 3 : 1;
+        }
+        return { d, puntos };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.puntos - a.puntos)
+      .slice(0, 8)
+      .map((x) => x.d);
+  }
+
+  const escapar = (s) =>
+    s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function activar(raiz) {
+    const input = raiz.querySelector("[data-q]");
+    const caja = raiz.querySelector("[data-resultados]");
+
+    function pintar(items, q) {
+      if (!q.trim()) {
+        caja.classList.add("hidden");
+        return;
+      }
+      caja.innerHTML = items.length
+        ? items
+            .map(
+              (d) => `
+        <a href="${d.u}" class="block px-4 py-3 hover:bg-crema-100 border-b border-hoja-100 last:border-0">
+          <div class="flex items-baseline gap-2">
+            <span class="font-medium text-hoja-700 leading-snug">${escapar(d.t)}</span>
+            <span class="ml-auto shrink-0 text-[10px] uppercase tracking-wide text-hoja-900/40">${escapar(d.s)}</span>
+          </div>
+          <p class="mt-0.5 text-xs text-hoja-900/60 leading-relaxed">${escapar(d.d)}</p>
+        </a>`
+            )
+            .join("")
+        : `<p class="p-4 text-sm text-hoja-900/60">No encontré nada con «${escapar(q)}». Probá con una palabra más general.</p>`;
+      caja.classList.remove("hidden");
+    }
+
+    let t = null;
+    input.addEventListener("input", () => {
+      clearTimeout(t);
+      cargarIndice().then(() => {
+        // 120 ms: filtrar es instantáneo, pero repintar en cada tecla hace que la
+        // lista parpadee mientras se escribe.
+        t = setTimeout(() => pintar(buscar(input.value), input.value), 120);
+      });
+    });
+
+    input.addEventListener("focus", cargarIndice);
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        caja.classList.add("hidden");
+        input.blur();
+      }
+      // Enter va al primer resultado: es lo que espera quien busca algo concreto.
+      if (e.key === "Enter") {
+        const primero = caja.querySelector("a");
+        if (primero) window.location.href = primero.getAttribute("href");
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!raiz.contains(e.target)) caja.classList.add("hidden");
+    });
+  }
+
+  document.querySelectorAll("[data-buscador]").forEach(activar);
+</script>

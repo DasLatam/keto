@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Buscador from "../components/Buscador.astro";
 
 const {
   titulo,
@@ -75,15 +76,16 @@ const NAV_EXTRA = [
             <span aria-hidden="true">🥑</span> Keto Argentina
           </a>
 
-          <nav class="hidden md:flex gap-1" aria-label="Principal">
+          <nav class="hidden md:flex gap-1 items-center" aria-label="Principal">
             {NAV.map((i) => (
               <a
                 href={i.href}
-                class="px-3 py-2 rounded-md text-sm hover:bg-hoja-600 transition-colors"
+                class="px-2.5 py-2 rounded-md text-sm hover:bg-hoja-600 transition-colors whitespace-nowrap"
               >
                 {i.texto}
               </a>
             ))}
+            <div class="ml-2"><Buscador /></div>
           </nav>
 
           <button
@@ -100,6 +102,7 @@ const NAV_EXTRA = [
         </div>
 
         <nav id="menu-movil" class="md:hidden hidden pb-3" aria-label="Principal móvil">
+          <div class="px-1 pb-2"><Buscador /></div>
           {[...NAV, ...NAV_EXTRA].map((i) => (
             <a href={i.href} class="block px-3 py-2 rounded-md text-sm hover:bg-hoja-600">
               {i.texto}
