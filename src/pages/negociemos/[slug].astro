@@ -1,0 +1,123 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AdSlot from "../../components/AdSlot.astro";
+import { NEGOCIACIONES } from "../../data/negociemos.js";
+
+export function getStaticPaths() {
+  return NEGOCIACIONES.map((n) => ({ params: { slug: n.slug }, props: { n } }));
+}
+
+const { n } = Astro.props;
+
+const ESTADO = {
+  si: { etiqueta: "Sí", clase: "bg-hoja-100 text-hoja-700", fila: "border-hoja-200" },
+  negociable: { etiqueta: "Negociable", clase: "bg-naranja-400/20 text-naranja-600", fila: "border-naranja-400/40" },
+  no: { etiqueta: "No", clase: "bg-red-100 text-red-700", fila: "border-red-200" },
+};
+
+// Article + FAQPage juntos. El FAQPage es lo que hace que Google pueda mostrar la
+// respuesta directa y que un modelo de IA cite la comparativa sin inventarla.
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      headline: n.titulo,
+      description: n.resumen,
+      inLanguage: "es-AR",
+      about: { "@type": "Thing", name: "Dieta cetogénica" },
+      articleSection: "Qué sí, qué no, negociemos",
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: n.faq.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+  ],
+};
+---
+
+<Layout titulo={n.titulo} descripcion={n.resumen} jsonld={jsonld}>
+  <nav class="text-sm text-hoja-900/50 mb-4" aria-label="Miga de pan">
+    <a href="/" class="hover:underline">Inicio</a> ·
+    <a href="/negociemos" class="hover:underline">Negociemos</a>
+  </nav>
+
+  <article class="prosa">
+    <h1 class="text-3xl md:text-4xl font-bold text-hoja-700 leading-tight">{n.titulo}</h1>
+    <p class="mt-2 text-lg text-hoja-900/60">{n.pregunta}</p>
+
+    {/* El veredicto va primero y en un bloque destacado: es la respuesta directa
+        que buscan tanto el lector apurado como los motores generativos. */}
+    <div class="mt-6 rounded-xl border-l-4 border-hoja-600 bg-hoja-50 p-5">
+      <p class="text-sm font-semibold uppercase tracking-wide text-hoja-600 mb-2">
+        La respuesta corta
+      </p>
+      <p class="text-hoja-900/85 leading-relaxed">{n.veredicto}</p>
+    </div>
+
+    <AdSlot formato="horizontal" />
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-4 mb-4">Opción por opción</h2>
+
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[520px] text-left border-separate border-spacing-y-2">
+        <thead>
+          <tr class="text-xs uppercase tracking-wide text-hoja-900/40">
+            <th class="px-3 pb-1">Opción</th>
+            <th class="px-3 pb-1 whitespace-nowrap">Carbos netos</th>
+            <th class="px-3 pb-1">Veredicto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {n.opciones.map((o) => (
+            <tr class="align-top">
+              <td class:list={["px-3 py-3 bg-white border rounded-l-lg", ESTADO[o.estado].fila]}>
+                <span class="font-semibold text-hoja-900 block">{o.nombre}</span>
+                <span class="text-sm text-hoja-900/60 leading-relaxed block mt-1">{o.texto}</span>
+              </td>
+              <td class:list={["px-3 py-3 bg-white border-y whitespace-nowrap", ESTADO[o.estado].fila]}>
+                <span class="font-bold text-lg text-hoja-700">{o.carbos} g</span>
+                <span class="block text-xs text-hoja-900/40">{o.porcion}</span>
+              </td>
+              <td class:list={["px-3 py-3 bg-white border rounded-r-lg", ESTADO[o.estado].fila]}>
+                <span class:list={["text-xs px-2 py-1 rounded-full whitespace-nowrap", ESTADO[o.estado].clase]}>
+                  {ESTADO[o.estado].etiqueta}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-4">Por qué</h2>
+    <div class="space-y-4">
+      {n.desarrollo.map((p) => (
+        <p class="text-hoja-900/80 leading-relaxed">{p}</p>
+      ))}
+    </div>
+
+    <AdSlot formato="rectangulo" />
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-4 mb-4">Preguntas frecuentes</h2>
+    <div class="space-y-3">
+      {n.faq.map((f) => (
+        <details class="group rounded-lg border border-hoja-100 bg-white p-4">
+          <summary class="font-medium text-hoja-700 cursor-pointer list-none flex justify-between items-center gap-4">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/70 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
+  </article>
+
+  <a href="/negociemos" class="inline-block mt-8 text-naranja-600 hover:underline">
+    ← Todas las comparativas
+  </a>
+</Layout>
