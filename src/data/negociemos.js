@@ -18,6 +18,8 @@ export const CATEGORIAS_NEG = [
   { id: "carbos", nombre: "Los clásicos con almidón" },
   { id: "panificados", nombre: "Pan y galletitas" },
   { id: "dulce", nombre: "Lo dulce" },
+  { id: "fiambres", nombre: "Fiambres y quesos" },
+  { id: "frutas", nombre: "Frutas" },
 ];
 
 export const NEGOCIACIONES = [
@@ -177,6 +179,105 @@ export const NEGOCIACIONES = [
       { p: "¿La leche descremada es mejor que la entera para keto?", r: "No, es peor. Sacarle la grasa no le saca la lactosa: la descremada tiene alrededor de 10 gramos de carbohidratos por vaso contra 9,4 de la entera, y sacia menos." },
       { p: "¿Cuánta leche puedo tomar en keto?", r: "Un chorrito en el café, no mucho más. Un vaso de leche entera son casi 10 gramos, entre un quinto y la mitad del presupuesto diario según en qué nivel estés." },
       { p: "¿La leche de almendras sirve para keto?", r: "Sí, siempre que sea la versión sin azúcar: menos de 1 gramo por vaso. La común viene endulzada y llega a 12 gramos." },
+    ],
+  },
+  {
+    slug: "banana-manzana-frutilla-o-palta",
+    categoria: "frutas",
+    titulo: "¿Banana, manzana, frutilla o palta?",
+    pregunta: "¿Qué fruta puedo comer sin salirme de cetosis?",
+    resumen: "La palta y los frutos rojos entran cómodos. La banana es la peor de todas y una sola puede ser tu día entero.",
+    veredicto:
+      "La palta es la única fruta que se puede comer sin pensar: 2 gramos netos por media unidad. Los frutos rojos entran en porción chica. La manzana ya se lleva medio día de carbohidratos y la banana, en una sola unidad, se lleva el día completo si estás en 20 gramos.",
+    opciones: [
+      { nombre: "Palta", porcion: "½ unidad", carbos: 2, estado: "si",
+        texto: "Botánicamente es una fruta y es la reina de keto: casi todo grasa, casi nada de azúcar." },
+      { nombre: "Frutillas", porcion: "1 taza", carbos: 8, estado: "negociable",
+        texto: "La mejor de las frutas dulces. Una taza entra si el resto del día viene tranquilo." },
+      { nombre: "Arándanos", porcion: "½ taza", carbos: 9, estado: "negociable",
+        texto: "Más concentrados que la frutilla: media taza ya son 9 gramos. Van de a puñado, no de a bol." },
+      { nombre: "Manzana", porcion: "1 unidad mediana", carbos: 20, estado: "no",
+        texto: "La fruta \u00absana\u00bb por excelencia, y son 20 g netos: el día entero si estás en keto estricto." },
+      { nombre: "Banana", porcion: "1 unidad mediana", carbos: 24, estado: "no",
+        texto: "La más alta de las frutas comunes. Nada que hacer en keto, ni siquiera media." },
+      { nombre: "Uvas", porcion: "1 taza", carbos: 26, estado: "no",
+        texto: "El problema es que se comen sin registrar cuántas van. Un racimo chico se pasa de los 30 g." },
+    ],
+    desarrollo: [
+      "La regla que sirve para no memorizar tablas: cuanto más dulce sabe una fruta, más carbohidratos tiene. Es obvio y funciona. La palta no sabe dulce y tiene 2 gramos; la banana sabe muy dulce y tiene 24.",
+      "La segunda regla es el tamaño de la porción real. Los frutos rojos entran no porque sean mágicos, sino porque se comen de a puñado. La uva tiene un problema parecido al del maní: se come sin contar, y ahí es donde se va el día.",
+      "Mención especial para el limón: dos cucharadas de jugo tienen menos de 1 gramo. Es el condimento que salva ensaladas, pescados y agua saborizada casera sin costo de carbohidratos.",
+    ],
+    faq: [
+      { p: "¿Qué frutas se pueden comer en keto?", r: "La palta sin restricción (2 gramos netos por media unidad) y los frutos rojos en porción chica: frutillas, arándanos, frambuesas. El limón y la lima también, como condimento." },
+      { p: "¿Puedo comer una banana en keto?", r: "No. Una banana mediana tiene unos 24 gramos de carbohidratos netos, que es el presupuesto diario completo de una dieta keto estricta." },
+      { p: "¿La manzana es keto?", r: "No. Una manzana mediana ronda los 20 gramos netos. Su fama de saludable es merecida en general, pero no la hace compatible con cetosis." },
+    ],
+  },
+
+  {
+    slug: "jamon-crudo-salame-mortadela-o-salchichas",
+    categoria: "fiambres",
+    titulo: "¿Jamón crudo, salame, mortadela o salchichas?",
+    pregunta: "En la fiambrería, ¿qué llevo y qué dejo?",
+    resumen: "El jamón crudo y el salame puro entran sin problema. La mortadela y las salchichas traen almidón y azúcar agregados.",
+    veredicto:
+      "El jamón crudo y el salame puro son prácticamente cero carbohidratos: sólo carne, sal y tiempo. La mortadela, las salchichas y el jamón cocido barato llevan almidón, fécula y azúcar como relleno, y ahí pueden aparecer entre 3 y 6 gramos cada 100 gramos.",
+    opciones: [
+      { nombre: "Jamón crudo", porcion: "100 g", carbos: 0.5, estado: "si",
+        texto: "Carne, sal y estacionamiento. De lo más seguro que hay en la fiambrería." },
+      { nombre: "Salame puro / longaniza", porcion: "100 g", carbos: 1, estado: "si",
+        texto: "Fijate que diga puro. Los industriales baratos pueden traer fécula." },
+      { nombre: "Bondiola curada", porcion: "100 g", carbos: 0.5, estado: "si",
+        texto: "Igual que el crudo: carne y sal. Cara, pero rinde en poca cantidad." },
+      { nombre: "Jamón cocido", porcion: "100 g", carbos: 3, estado: "negociable",
+        texto: "Depende muchísimo de la marca. El de primera calidad ronda 1 g; el más económico llega a 5 por los agregados." },
+      { nombre: "Mortadela", porcion: "100 g", carbos: 5, estado: "no",
+        texto: "Lleva almidón como ligante. Además suele tener azúcar en la formulación." },
+      { nombre: "Salchichas tipo viena", porcion: "2 unidades", carbos: 6, estado: "no",
+        texto: "Fécula, azúcar y jarabe de maíz. De lo peor de la góndola para keto." },
+    ],
+    desarrollo: [
+      "La lógica de este grupo es simple: cuanto más procesado y más barato, más relleno tiene. Los fiambres tradicionales —crudo, salame, bondiola— se hacen con carne, sal y tiempo, y no necesitan nada más. Los industriales usan almidón y fécula para dar textura y retener agua, porque el agua pesa y se vende.",
+      "El jamón cocido es el caso donde más conviene leer la etiqueta, porque el rango es enorme. Uno de primera calidad tiene menos de 1 gramo cada 100. Uno económico puede tener 5, y la diferencia no se nota al comerlo.",
+      "Un detalle que sorprende: buena parte de las pancetas ahumadas de góndola traen azúcar agregada en el curado. No es mucha, pero si desayunás panceta todos los días conviene buscar una sin.",
+    ],
+    faq: [
+      { p: "¿El jamón crudo es keto?", r: "Sí, es de las mejores opciones de la fiambrería: alrededor de 0,5 gramos de carbohidratos cada 100 gramos, porque se hace sólo con carne, sal y estacionamiento." },
+      { p: "¿Puedo comer mortadela en keto?", r: "No conviene. Lleva almidón como ligante y suele tener azúcar en la formulación: unos 5 gramos cada 100." },
+      { p: "¿Qué fiambre tiene menos carbohidratos?", r: "El jamón crudo y la bondiola curada, con alrededor de 0,5 gramos cada 100. El salame puro está apenas arriba, en torno a 1 gramo." },
+    ],
+  },
+
+  {
+    slug: "coca-zero-agua-saborizada-o-soda",
+    categoria: "bebidas",
+    titulo: "¿Coca Zero, agua saborizada o soda?",
+    pregunta: "¿Las gaseosas sin azúcar rompen la dieta?",
+    resumen: "Las tres versiones zero no aportan carbohidratos. Las aguas saborizadas comunes sí, y engañan porque parecen agua.",
+    veredicto:
+      "Las gaseosas sin azúcar no tienen carbohidratos y no sacan de cetosis: Coca Zero, Paso de los Toros sin azúcar y Sprite Zero entran sin problema. La trampa está en las aguas saborizadas comunes, que parecen agua pero llevan entre 6 y 8 gramos de azúcar cada 200 ml.",
+    opciones: [
+      { nombre: "Agua y soda", porcion: "1 vaso", carbos: 0, estado: "si",
+        texto: "En keto se pierde más líquido y sal. Tomar más agua de la que tomabas antes no es una recomendación genérica: previene la \u00abgripe keto\u00bb." },
+      { nombre: "Gaseosas zero / sin azúcar", porcion: "1 lata", carbos: 0, estado: "si",
+        texto: "Cero carbohidratos. Sirven para el antojo dulce sin costo, que es más útil de lo que parece cuando arrancás." },
+      { nombre: "Agua saborizada zero", porcion: "1 botella", carbos: 0, estado: "si",
+        texto: "Fijate que diga zero o sin azúcar. La diferencia con la común es el día entero de carbohidratos." },
+      { nombre: "Agua saborizada común", porcion: "500 ml", carbos: 17, estado: "no",
+        texto: "La trampa más común del kiosco: parece agua, se toma como agua, y tiene casi tanta azúcar como una gaseosa." },
+      { nombre: "Jugos exprimidos y de caja", porcion: "1 vaso", carbos: 22, estado: "no",
+        texto: "Aun el natural sin azúcar agregada es azúcar de fruta sin la fibra que la frenaba." },
+    ],
+    desarrollo: [
+      "Sobre los edulcorantes de las gaseosas zero hay mucho ruido. Lo que muestra la evidencia disponible es que no elevan la glucosa ni la insulina de forma significativa, así que no interrumpen la cetosis. Lo que sí puede pasar, y varía mucho entre personas, es que el sabor dulce mantenga el antojo de dulce.",
+      "La hidratación merece un párrafo propio porque es la causa número uno de que la gente la pase mal la primera semana. Al bajar los carbohidratos, el cuerpo vacía las reservas de glucógeno y con ellas elimina el agua que retenían, y con el agua se van sodio, potasio y magnesio. El dolor de cabeza y los calambres de los primeros días casi siempre son eso.",
+      "La solución es poco elegante y bastante efectiva: tomar más agua de la que tomabas y salar la comida más de lo que te enseñaron. Un caldo con sal a la tarde resuelve buena parte de la gripe keto.",
+    ],
+    faq: [
+      { p: "¿La Coca Zero saca de cetosis?", r: "No. No aporta carbohidratos ni eleva la glucosa de forma significativa, así que no interrumpe la cetosis. Lo único a tener en cuenta es que a algunas personas el sabor dulce les mantiene el antojo." },
+      { p: "¿Las aguas saborizadas son keto?", r: "Sólo las versiones zero o sin azúcar. Las comunes tienen entre 6 y 8 gramos de azúcar cada 200 ml, unos 17 gramos en una botella de medio litro." },
+      { p: "¿Cuánta agua hay que tomar en keto?", r: "Más de la habitual. Al vaciarse las reservas de glucógeno se pierde el agua que retenían junto con sodio, potasio y magnesio, y esa pérdida es la causa más común del dolor de cabeza y los calambres de los primeros días." },
     ],
   },
 ];

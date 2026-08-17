@@ -86,4 +86,85 @@ export const ARTICULOS = [
       },
     ],
   },
+  {
+    slug: "gripe-keto-por-que-pasa-y-como-evitarla",
+    titulo: "La «gripe keto»: qué dice la investigación y cómo se evita",
+    bajada:
+      "Dolor de cabeza, cansancio y calambres en los primeros días. No es una gripe ni una desintoxicación: es pérdida de sodio y de agua, y se previene.",
+    actualizado: "2026-08-17",
+    resumen_directo:
+      "Los síntomas de los primeros días —dolor de cabeza, mareo, náuseas, fatiga y poca tolerancia al ejercicio— aparecen sobre todo por hipovolemia: al bajar los carbohidratos, el cuerpo elimina sodio y agua. La literatura apunta a la reposición de sodio, potasio y magnesio, y a tomar más líquido, como la forma de prevenirlos. Suelen resolverse en días o pocas semanas.",
+    secciones: [
+      {
+        titulo: "Qué se reporta y con qué frecuencia",
+        parrafos: [
+          "Los síntomas descritos con más frecuencia al arrancar son dolor de cabeza, mareo, náuseas, vómitos, fatiga, baja tolerancia al ejercicio y constipación. En una revisión narrativa que analizó reportes de un foro abierto con 300 participantes, 101 mencionaron síntomas de este tipo, concentrados en las primeras cuatro semanas: casi la mitad describió un cuadro parecido a una gripe, un 24,8 % dolor de cabeza y un 17,8 % fatiga.",
+          "El nombre «gripe keto» es popular, no clínico. No hay infección ni fiebre: la coincidencia es con la sensación general de malestar y cansancio.",
+        ],
+      },
+      {
+        titulo: "Por qué pasa",
+        parrafos: [
+          "La explicación con más respaldo es la hipovolemia: una caída del volumen de líquido circulante. Al reducir los carbohidratos, baja la insulina, y una de las funciones de la insulina es indicarle al riñón que retenga sodio. Con menos insulina, el riñón elimina más sodio y con él se va el agua — un efecto natriurético y diurético bien documentado en esta dieta.",
+          "A eso se suma el vaciado de las reservas de glucógeno. Cada gramo de glucógeno se almacena junto con unos tres gramos de agua, así que al agotarlo se pierde bastante líquido en pocos días. Es también la razón por la que la balanza baja mucho la primera semana y después se frena: esa parte fue agua, no grasa.",
+          "El tercer factor es la menor ingesta de algunos micronutrientes, en particular potasio y magnesio, que suelen venir de alimentos que quedan fuera de la dieta.",
+        ],
+      },
+      {
+        titulo: "Qué hacer",
+        parrafos: [
+          "La literatura apunta a lo mismo en todos los casos: cubrir sodio y potasio de forma deliberada, y aumentar la ingesta de líquido. Salar la comida más de lo habitual deja de ser un pecado y pasa a ser parte del plan, algo contraintuitivo para quien viene de años escuchando lo contrario.",
+          "En la práctica, un caldo salado a media tarde durante la primera semana resuelve buena parte del cuadro. El magnesio suele ser el que falta cuando aparecen calambres nocturnos.",
+          "Y conviene tener expectativas realistas: los efectos se concentran en la fase de adaptación y tienden a resolverse en días o pocas semanas. Si a las cuatro semanas seguís igual, eso ya no es adaptación y vale la pena consultar.",
+        ],
+      },
+      {
+        titulo: "Cuándo esta dieta no es para vos",
+        parrafos: [
+          "Hay contraindicaciones documentadas e interacciones con medicación que no se negocian por cuenta propia. Las más relevantes son la medicación para diabetes —insulina y sulfonilureas, por riesgo de hipoglucemia—, los antihipertensivos, y ciertos trastornos metabólicos poco frecuentes.",
+          "También hay que considerar enfermedad hepática o pancreática, antecedentes de cálculos renales y trastornos de la conducta alimentaria.",
+        ],
+      },
+    ],
+    fuentes: [
+      {
+        cita: "Harvey CJDC, Schofield GM, Williden M. The use of nutritional supplements to induce ketosis and reduce symptoms associated with keto-induction: a narrative review.",
+        url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5858534/",
+        nota: "Revisión narrativa sobre síntomas de keto-inducción y su relación con hidratación y micronutrientes.",
+      },
+      {
+        cita: "The ketogenic diet is not for everyone: contraindications, side effects, and drug interactions.",
+        url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12777878/",
+        nota: "Contraindicaciones, efectos adversos e interacciones con medicación.",
+      },
+      {
+        cita: "Masood W, Annamaraju P, Khan Suheb MZ, Uppaluri KR. The Ketogenic Diet: Clinical Applications, Evidence-based Indications, and Implementation. StatPearls, NCBI Bookshelf.",
+        url: "https://www.ncbi.nlm.nih.gov/books/NBK499830/",
+        nota: "Efectos adversos frecuentes y su curso temporal.",
+      },
+      {
+        cita: "The effects of a 6-week controlled, hypocaloric ketogenic diet, with and without exogenous ketone salts, on cognitive performance and mood states in overweight and obese adults.",
+        url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9563373/",
+        nota: "Ensayo controlado sobre rendimiento cognitivo y estado de ánimo durante la adaptación.",
+      },
+    ],
+    faq: [
+      {
+        p: "¿Qué es la gripe keto y cuánto dura?",
+        r: "Es el conjunto de síntomas de los primeros días de la dieta: dolor de cabeza, mareo, náuseas, fatiga y poca tolerancia al ejercicio. Se concentra en las primeras semanas y tiende a resolverse en días o pocas semanas. No es una infección ni una desintoxicación.",
+      },
+      {
+        p: "¿Por qué me duele la cabeza al empezar keto?",
+        r: "Principalmente por pérdida de sodio y de agua. Al bajar los carbohidratos cae la insulina, y con ella la señal que le indica al riñón retener sodio, así que se elimina más sodio y más líquido. Reponer sal y tomar más agua suele resolverlo.",
+      },
+      {
+        p: "¿Cómo se evita la gripe keto?",
+        r: "Cubriendo sodio y potasio de forma deliberada y aumentando la ingesta de líquido desde el primer día. Salar la comida más de lo habitual y tomar un caldo salado durante la primera semana es la medida más efectiva y más simple.",
+      },
+      {
+        p: "¿Por qué bajo mucho de peso la primera semana y después se frena?",
+        r: "Porque esa bajada inicial es en buena parte agua. Cada gramo de glucógeno se almacena con unos tres gramos de agua, y al agotar esas reservas se pierde el líquido que retenían. La pérdida de grasa viene después y es más lenta.",
+      },
+    ],
+  },
 ];
