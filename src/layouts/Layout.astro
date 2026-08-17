@@ -9,10 +9,11 @@ const {
 } = Astro.props;
 
 const SITIO = "Keto Argentina";
-const url = new URL(Astro.url.pathname, Astro.site ?? "https://keto-argentina.vercel.app");
+const url = new URL(Astro.url.pathname, Astro.site ?? "https://ketofacil.vercel.app");
 
 const NAV = [
   { href: "/plan-semanal", texto: "Plan semanal" },
+  { href: "/lista-compras", texto: "Lista del súper" },
   { href: "/recetas", texto: "Recetas" },
   { href: "/negociemos", texto: "Negociemos" },
   { href: "/evidencia", texto: "Evidencia" },

@@ -18,8 +18,9 @@ const COMIDAS_DIA = [
 >
   <h1 class="text-3xl font-bold text-hoja-700">Plan de la semana</h1>
   <p class="mt-2 text-hoja-900/70 max-w-2xl">
-    Siete días resueltos. Las recetas se repiten a propósito: cocinar de más una vez
-    y comerlo dos veces es lo que hace que un plan se sostenga más allá del jueves.
+    Siete días resueltos con <strong>28 recetas distintas</strong>: no se repite ninguna
+    comida en toda la semana. Cada una enlaza a su receta completa, con los pasos y el
+    error típico que hay que evitar.
   </p>
 
   <div class="mt-8 overflow-x-auto">
@@ -68,9 +69,10 @@ const COMIDAS_DIA = [
   <section class="mt-4">
     <div class="flex items-baseline justify-between flex-wrap gap-2">
       <h2 class="text-2xl font-bold text-hoja-700">Lista de compras</h2>
-      <button id="limpiar" class="text-sm text-naranja-600 hover:underline">
-        Destildar todo
-      </button>
+      <div class="flex gap-4">
+        <a href="/lista-compras" class="text-sm text-naranja-600 hover:underline">Verla en página aparte →</a>
+        <button id="limpiar" class="text-sm text-naranja-600 hover:underline">Destildar todo</button>
+      </div>
     </div>
     <p class="mt-1 text-sm text-hoja-900/60">
       Agrupada como se recorre el súper. Lo que tildes queda guardado en este

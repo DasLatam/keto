@@ -1,0 +1,161 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { LISTA_COMPRAS, PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
+
+const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
+const CLAVES = ["desayuno", "almuerzo", "merienda", "cena"];
+
+const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
+
+// Qué receta usa cada ingrediente clave. Sirve para el bloque de abajo: si alguien
+// se saltea una comida, quiere saber qué puede no comprar.
+const recetasSemana = PLAN_SEMANAL.flatMap((d) =>
+  CLAVES.map((c) => porSlug[d[c]]).filter(Boolean)
+);
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Lista de compras keto semanal",
+  numberOfItems: totalItems,
+  itemListElement: LISTA_COMPRAS.flatMap((s, si) =>
+    s.items.map((item, ii) => ({
+      "@type": "ListItem",
+      position: si * 100 + ii + 1,
+      name: item,
+    }))
+  ),
+};
+---
+
+<Layout
+  titulo="Lista de compras keto semanal"
+  descripcion="La lista completa del supermercado para una semana entera de dieta keto: todo lo que necesitás para las 28 comidas del plan, agrupado por sector y con checkboxes."
+  jsonld={jsonld}
+>
+  <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Lista del súper, una semana</h1>
+  <p class="mt-3 text-hoja-900/70 max-w-2xl leading-relaxed">
+    Todo lo que hace falta para las <strong>28 comidas</strong> del plan semanal: siete
+    desayunos, siete almuerzos, siete meriendas y siete cenas, sin repetir ninguna
+    receta. Está agrupada como se recorre el súper para no ir y volver entre góndolas.
+  </p>
+
+  <div class="mt-6 flex flex-wrap items-center gap-3">
+    <span id="progreso" class="text-sm font-medium text-hoja-700 bg-hoja-100 px-3 py-1.5 rounded-full">
+      0 de {totalItems}
+    </span>
+    <button id="limpiar" class="text-sm text-naranja-600 hover:underline">Destildar todo</button>
+    <button id="imprimir" class="text-sm text-naranja-600 hover:underline">Imprimir</button>
+  </div>
+  <p class="mt-2 text-sm text-hoja-900/50">
+    Lo que tildes queda guardado en este teléfono: podés ir marcando mientras comprás,
+    cerrar y volver.
+  </p>
+
+  <div class="mt-8 grid gap-4 sm:grid-cols-2">
+    {LISTA_COMPRAS.map((s) => (
+      <section class="rounded-xl border border-hoja-100 bg-white p-5 break-inside-avoid">
+        <h2 class="font-semibold text-hoja-700 mb-3 flex items-baseline justify-between gap-2">
+          {s.sector}
+          <span class="text-xs font-normal text-hoja-900/40">{s.items.length}</span>
+        </h2>
+        <ul class="space-y-2.5">
+          {s.items.map((item) => (
+            <li>
+              <label class="flex items-start gap-3 cursor-pointer group">
+                <input type="checkbox" class="compra mt-0.5 w-5 h-5 rounded accent-hoja-600 shrink-0"
+                       data-item={`${s.sector}::${item}`} />
+                <span class="text-hoja-900/80 group-has-checked:line-through group-has-checked:text-hoja-900/35 transition-colors">
+                  {item}
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <AdSlot formato="horizontal" />
+
+  <section class="mt-4 no-print">
+    <h2 class="text-2xl font-bold text-hoja-700">Qué se cocina con todo esto</h2>
+    <p class="mt-1 text-sm text-hoja-900/60">
+      Las 28 recetas que cubre esta compra. Si vas a saltear alguna comida, mirá acá qué
+      podés no llevar.
+    </p>
+
+    <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {PLAN_SEMANAL.map((d) => (
+        <div class="rounded-xl border border-hoja-100 bg-white p-4">
+          <h3 class="font-semibold text-hoja-700 text-sm">{d.dia}</h3>
+          <ul class="mt-2 space-y-1">
+            {CLAVES.map((c) => {
+              const r = porSlug[d[c]];
+              return r ? (
+                <li class="text-sm">
+                  <a href={`/recetas/${r.slug}`} class="text-hoja-900/70 hover:text-naranja-600">
+                    {r.nombre}
+                  </a>
+                </li>
+              ) : null;
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <p class="mt-8 text-sm text-hoja-900/50 max-w-2xl leading-relaxed no-print">
+    Las cantidades están calculadas para <strong>una persona</strong>. Si son dos,
+    duplicá carnes, verduras y lácteos; lo de la dietética y la alacena rinde para
+    varias semanas.
+  </p>
+</Layout>
+
+<style>
+  @media print {
+    .no-print, header, footer, aside { display: none !important; }
+    .grid { display: block; }
+    section { break-inside: avoid; margin-bottom: 1rem; }
+  }
+</style>
+
+<script>
+  // Misma clave que la lista embebida en /plan-semanal: si alguien tilda en una
+  // página y abre la otra, ve lo mismo. Dos listas con estados distintos serían
+  // peor que no guardar nada.
+  const CLAVE = "keto-lista-compras";
+  const cajas = [...document.querySelectorAll(".compra")];
+  const progreso = document.getElementById("progreso");
+
+  let guardado = {};
+  try { guardado = JSON.parse(localStorage.getItem(CLAVE) ?? "{}"); } catch { guardado = {}; }
+
+  function pintar() {
+    const n = cajas.filter((c) => c.checked).length;
+    progreso.textContent = `${n} de ${cajas.length}`;
+    progreso.classList.toggle("bg-hoja-600", n === cajas.length);
+    progreso.classList.toggle("text-crema-50", n === cajas.length);
+    progreso.classList.toggle("bg-hoja-100", n !== cajas.length);
+  }
+
+  function persistir() {
+    const estado = {};
+    for (const c of cajas) if (c.checked) estado[c.dataset.item] = true;
+    localStorage.setItem(CLAVE, JSON.stringify(estado));
+    pintar();
+  }
+
+  for (const c of cajas) {
+    c.checked = Boolean(guardado[c.dataset.item]);
+    c.addEventListener("change", persistir);
+  }
+  document.getElementById("limpiar").addEventListener("click", () => {
+    for (const c of cajas) c.checked = false;
+    persistir();
+  });
+  document.getElementById("imprimir").addEventListener("click", () => window.print());
+  pintar();
+</script>

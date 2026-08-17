@@ -1,35 +1,70 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
+
+const FAQ = [
+  {
+    p: "¿Cuánto debería pesar según mi altura?",
+    r: "El rango saludable se calcula con el índice de masa corporal entre 18,5 y 25. Para 1,75 m, por ejemplo, va de 57 a 76 kilos. Es un rango amplio a propósito: no distingue músculo de grasa, así que una persona muy entrenada puede estar sana por encima de 25.",
+  },
+  {
+    p: "¿Cuánto peso se puede bajar por semana de forma saludable?",
+    r: "Entre 0,5 y 1 % del peso corporal por semana. Para alguien de 90 kilos son unos 450 a 900 gramos. Bajar más rápido casi siempre significa perder músculo y agua además de grasa, y hace mucho más probable recuperarlo.",
+  },
+  {
+    p: "¿Por qué bajo 3 kilos la primera semana de keto?",
+    r: "Es agua, no grasa. Cada gramo de glucógeno retiene unos 3 gramos de agua, y al bajar los carbohidratos esas reservas se vacían. Es real en la balanza pero no es pérdida de grasa, y por eso se estanca en la segunda semana.",
+  },
+  {
+    p: "¿Qué es la masa magra y por qué importa en keto?",
+    r: "Es todo lo que no es grasa: músculo, huesos, órganos y agua. Importa porque la proteína diaria se calcula sobre ella, no sobre el peso total. Preservarla es lo que hace que bajes grasa y no músculo.",
+  },
+];
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((f) => ({
+    "@type": "Question",
+    name: f.p,
+    acceptedAnswer: { "@type": "Answer", text: f.r },
+  })),
+};
 ---
 
 <Layout
-  titulo="Calculadora de macros keto"
-  descripcion="Calculá tus macros keto: gramos de grasa, proteína y carbohidratos netos por día según tu peso, altura, edad y objetivo."
+  titulo="Calculadora keto: macros, peso ideal y cuánto vas a tardar"
+  descripcion="Calculá tus macros keto, cuánto deberías pesar según tu altura, tu masa magra y grasa corporal, y cuánto tiempo te va a llevar llegar al peso que querés."
+  jsonld={jsonld}
 >
-  <h1 class="text-3xl font-bold text-hoja-700">Calculadora de macros</h1>
-  <p class="mt-2 text-hoja-900/70 max-w-2xl">
-    Estima cuánta grasa, proteína y carbohidratos comer por día. Usa la fórmula de
-    Mifflin-St Jeor para el gasto basal, que es la que mejor predice en población
-    general.
+  <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Calculadora keto</h1>
+  <p class="mt-2 text-hoja-900/70 max-w-2xl leading-relaxed">
+    Tus macros diarios, cuánto deberías pesar según tu altura, cuánto de tu cuerpo
+    es músculo y cuánto tiempo te va a llevar llegar al peso que querés.
   </p>
 
-  <div class="mt-8 grid md:grid-cols-2 gap-8">
-    <form id="form" class="space-y-4 rounded-xl border border-hoja-100 bg-white p-6">
+  <div class="mt-8 grid lg:grid-cols-[minmax(0,380px)_1fr] gap-8 items-start">
+    <!-- ── Formulario ─────────────────────────────────────────────── -->
+    <form id="form" class="space-y-4 rounded-xl border border-hoja-100 bg-white p-6 lg:sticky lg:top-20">
       <div class="grid grid-cols-2 gap-4">
         <label class="block">
-          <span class="text-sm font-medium text-hoja-700">Peso (kg)</span>
-          <input type="number" id="peso" value="80" min="35" max="250" step="0.5" required
+          <span class="text-sm font-medium text-hoja-700">Peso actual (kg)</span>
+          <input type="number" id="peso" value="90" min="35" max="250" step="0.5"
                  class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
         </label>
         <label class="block">
+          <span class="text-sm font-medium text-hoja-700">Peso deseado (kg)</span>
+          <input type="number" id="deseado" value="78" min="35" max="250" step="0.5"
+                 class="mt-1 w-full rounded-lg border border-naranja-400 px-3 py-2 focus:border-naranja-500 focus:outline-none" />
+        </label>
+        <label class="block">
           <span class="text-sm font-medium text-hoja-700">Altura (cm)</span>
-          <input type="number" id="altura" value="175" min="120" max="230" required
+          <input type="number" id="altura" value="175" min="120" max="230"
                  class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
         </label>
         <label class="block">
           <span class="text-sm font-medium text-hoja-700">Edad</span>
-          <input type="number" id="edad" value="40" min="15" max="100" required
+          <input type="number" id="edad" value="40" min="15" max="100"
                  class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
         </label>
         <label class="block">
@@ -39,7 +74,24 @@ import AdSlot from "../components/AdSlot.astro";
             <option value="f">Femenino</option>
           </select>
         </label>
+        <label class="block">
+          <span class="text-sm font-medium text-hoja-700">Cintura (cm)</span>
+          <input type="number" id="cintura" value="98" min="50" max="200"
+                 class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+        </label>
       </div>
+
+      <label class="block" id="wrapCuello">
+        <span class="text-sm font-medium text-hoja-700">Cuello (cm)</span>
+        <input type="number" id="cuello" value="39" min="25" max="70"
+               class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+      </label>
+
+      <label class="block hidden" id="wrapCadera">
+        <span class="text-sm font-medium text-hoja-700">Cadera (cm)</span>
+        <input type="number" id="cadera" value="100" min="50" max="200"
+               class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none" />
+      </label>
 
       <label class="block">
         <span class="text-sm font-medium text-hoja-700">Actividad</span>
@@ -52,11 +104,11 @@ import AdSlot from "../components/AdSlot.astro";
       </label>
 
       <label class="block">
-        <span class="text-sm font-medium text-hoja-700">Objetivo</span>
-        <select id="objetivo" class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
-          <option value="-0.20" selected>Bajar de peso (déficit del 20%)</option>
-          <option value="0">Mantener</option>
-          <option value="0.10">Ganar músculo (superávit del 10%)</option>
+        <span class="text-sm font-medium text-hoja-700">Ritmo de bajada</span>
+        <select id="ritmo" class="mt-1 w-full rounded-lg border border-hoja-200 px-3 py-2 focus:border-hoja-500 focus:outline-none">
+          <option value="0.005">Tranquilo — 0,5% del peso por semana</option>
+          <option value="0.0075" selected>Recomendado — 0,75% por semana</option>
+          <option value="0.01">Rápido — 1% por semana</option>
         </select>
       </label>
 
@@ -64,92 +116,286 @@ import AdSlot from "../components/AdSlot.astro";
         <span class="text-sm font-medium text-hoja-700">
           Carbos netos por día: <output id="carbosOut" class="text-naranja-600 font-bold">25</output> g
         </span>
-        <input type="range" id="carbos" min="20" max="50" value="25" step="5"
-               class="mt-2 w-full accent-hoja-600" />
+        <input type="range" id="carbos" min="20" max="50" value="25" step="5" class="mt-2 w-full accent-hoja-600" />
       </label>
     </form>
 
-    <div class="rounded-xl border border-hoja-100 bg-white p-6">
-      <h2 class="font-bold text-hoja-700 text-lg">Tus números diarios</h2>
+    <!-- ── Resultados ─────────────────────────────────────────────── -->
+    <div class="space-y-6">
+      <!-- Cuánto deberías pesar -->
+      <section class="rounded-xl border border-hoja-100 bg-white p-6">
+        <h2 class="font-bold text-hoja-700 text-lg">¿Cuánto deberías pesar?</h2>
+        <p class="mt-1 text-sm text-hoja-900/50">Rango saludable para tu altura, según índice de masa corporal.</p>
 
-      <p class="mt-1 text-sm text-hoja-900/50">
-        Calorías objetivo: <strong id="kcal" class="text-hoja-700">—</strong>
-      </p>
+        <div class="mt-4 flex items-baseline gap-2 flex-wrap">
+          <strong id="rangoIdeal" class="text-3xl text-hoja-700">—</strong>
+          <span class="text-hoja-900/50">kg</span>
+          <span id="badgeImc" class="ml-auto text-xs px-3 py-1 rounded-full bg-crema-200 text-hoja-900/60">IMC —</span>
+        </div>
 
-      <div class="mt-5 space-y-3">
-        <div class="rounded-lg bg-crema-100 p-4 flex justify-between items-baseline">
-          <span class="text-sm text-hoja-900/60">Grasas</span>
-          <span><strong id="gGrasas" class="text-2xl text-hoja-700">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+        <!-- Barra de IMC: la posición del marcador dice más que el número -->
+        <div class="mt-5">
+          <div class="relative h-3 rounded-full overflow-hidden flex">
+            <div class="bg-sky-300" style="width:18.5%"></div>
+            <div class="bg-hoja-500" style="width:16.5%"></div>
+            <div class="bg-naranja-400" style="width:15%"></div>
+            <div class="bg-red-400" style="width:50%"></div>
+            <div id="marcador" class="absolute top-[-4px] w-1 h-5 bg-hoja-900 rounded-full transition-all" style="left:0%"></div>
+          </div>
+          <div class="mt-1.5 flex justify-between text-[11px] text-hoja-900/40">
+            <span>Bajo</span><span>18,5</span><span>25</span><span>30</span><span>Obesidad</span>
+          </div>
         </div>
-        <div class="rounded-lg bg-crema-100 p-4 flex justify-between items-baseline">
-          <span class="text-sm text-hoja-900/60">Proteínas</span>
-          <span><strong id="gProte" class="text-2xl text-hoja-700">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
-        </div>
-        <div class="rounded-lg bg-naranja-400/10 p-4 flex justify-between items-baseline">
-          <span class="text-sm text-hoja-900/60">Carbos netos</span>
-          <span><strong id="gCarbos" class="text-2xl text-naranja-600">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
-        </div>
-      </div>
+        <p id="textoImc" class="mt-3 text-sm text-hoja-900/70 leading-relaxed"></p>
+      </section>
 
-      <p class="mt-5 text-xs text-hoja-900/50 leading-relaxed">
-        La proteína se fija en 1,6 g por kilo de peso, que es lo que sostiene la masa
-        muscular en déficit. Los carbos los elegís vos con la barra. La grasa completa
-        el resto de las calorías: es la variable de ajuste, no un objetivo a alcanzar.
-      </p>
+      <!-- Composición corporal -->
+      <section class="rounded-xl border border-hoja-100 bg-white p-6">
+        <h2 class="font-bold text-hoja-700 text-lg">Cuánto de vos es músculo</h2>
+        <p class="mt-1 text-sm text-hoja-900/50">
+          Estimado con el método de la Marina de Estados Unidos, que usa medidas con cinta métrica.
+        </p>
+
+        <div class="mt-4 grid grid-cols-3 gap-3">
+          <div class="rounded-lg bg-crema-100 p-3 text-center">
+            <div class="text-[11px] uppercase tracking-wide text-hoja-900/50">Grasa</div>
+            <div><strong id="pctGrasa" class="text-2xl text-naranja-600">—</strong><span class="text-sm text-hoja-900/40">%</span></div>
+          </div>
+          <div class="rounded-lg bg-crema-100 p-3 text-center">
+            <div class="text-[11px] uppercase tracking-wide text-hoja-900/50">Masa magra</div>
+            <div><strong id="kgMagra" class="text-2xl text-hoja-700">—</strong><span class="text-sm text-hoja-900/40">kg</span></div>
+          </div>
+          <div class="rounded-lg bg-crema-100 p-3 text-center">
+            <div class="text-[11px] uppercase tracking-wide text-hoja-900/50">Índice masa magra</div>
+            <div><strong id="imm" class="text-2xl text-hoja-700">—</strong></div>
+          </div>
+        </div>
+        <p id="textoGrasa" class="mt-3 text-sm text-hoja-900/70 leading-relaxed"></p>
+      </section>
+
+      <AdSlot formato="horizontal" clase="my-0" />
+
+      <!-- Cuánto vas a tardar -->
+      <section class="rounded-xl border-2 border-naranja-400/50 bg-naranja-400/5 p-6">
+        <h2 class="font-bold text-hoja-700 text-lg">De dónde a dónde, y en cuánto</h2>
+
+        <div class="mt-4 flex items-center gap-3 text-center">
+          <div class="flex-1">
+            <div class="text-[11px] uppercase tracking-wide text-hoja-900/50">Hoy</div>
+            <strong id="pesoHoy" class="text-2xl text-hoja-700">—</strong>
+          </div>
+          <div class="text-naranja-500 text-2xl" aria-hidden="true">→</div>
+          <div class="flex-1">
+            <div class="text-[11px] uppercase tracking-wide text-hoja-900/50">Objetivo</div>
+            <strong id="pesoObj" class="text-2xl text-naranja-600">—</strong>
+          </div>
+          <div class="flex-1 border-l border-naranja-400/30 pl-3">
+            <div class="text-[11px] uppercase tracking-wide text-hoja-900/50">Diferencia</div>
+            <strong id="diferencia" class="text-2xl text-hoja-700">—</strong>
+          </div>
+        </div>
+
+        <div class="mt-5 rounded-lg bg-white p-4">
+          <p class="text-sm text-hoja-900/60">Te va a llevar aproximadamente</p>
+          <p class="mt-0.5"><strong id="tiempo" class="text-2xl text-hoja-700">—</strong></p>
+          <p id="fechaMeta" class="mt-1 text-sm text-hoja-900/50"></p>
+        </div>
+
+        <p id="avisoRitmo" class="mt-3 text-sm leading-relaxed"></p>
+      </section>
+
+      <!-- Macros -->
+      <section class="rounded-xl border border-hoja-100 bg-white p-6">
+        <h2 class="font-bold text-hoja-700 text-lg">Tus macros diarios</h2>
+        <p class="mt-1 text-sm text-hoja-900/50">
+          Calorías objetivo: <strong id="kcal" class="text-hoja-700">—</strong>
+          <span id="kcalMant" class="text-hoja-900/40"></span>
+        </p>
+
+        <div class="mt-4 space-y-3">
+          <div class="rounded-lg bg-crema-100 p-4 flex justify-between items-baseline">
+            <span class="text-sm text-hoja-900/60">Grasas</span>
+            <span><strong id="gGrasas" class="text-2xl text-hoja-700">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+          </div>
+          <div class="rounded-lg bg-crema-100 p-4 flex justify-between items-baseline">
+            <span class="text-sm text-hoja-900/60">Proteínas</span>
+            <span><strong id="gProte" class="text-2xl text-hoja-700">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+          </div>
+          <div class="rounded-lg bg-naranja-400/10 p-4 flex justify-between items-baseline">
+            <span class="text-sm text-hoja-900/60">Carbos netos</span>
+            <span><strong id="gCarbos" class="text-2xl text-naranja-600">—</strong> <span class="text-sm text-hoja-900/50">g</span></span>
+          </div>
+        </div>
+
+        <p class="mt-4 text-xs text-hoja-900/50 leading-relaxed">
+          La proteína se calcula sobre tu <strong>masa magra</strong> (2 g por kilo), no
+          sobre el peso total: es lo que protege el músculo mientras bajás. Los carbos
+          los elegís vos. La grasa completa el resto — es la variable de ajuste, no una
+          meta a alcanzar.
+        </p>
+      </section>
     </div>
   </div>
 
-  <AdSlot formato="horizontal" />
-
-  <section class="mt-4 prosa max-w-3xl">
-    <h2 class="text-2xl font-bold text-hoja-700 mb-3">Cómo leer estos números</h2>
-    <p class="text-hoja-900/70 leading-relaxed">
-      Los gramos de grasa son un techo, no una meta: si un día terminás satisfecho con
-      menos, está bien. Los de proteína sí conviene alcanzarlos, sobre todo si entrenás.
-      Y los carbohidratos son el único número que no hay que pasar, porque es el que
-      define si el cuerpo entra en cetosis o no.
-    </p>
-    <p class="text-hoja-900/70 leading-relaxed mt-3">
-      Si recién empezás, poné la barra en 20 gramos las primeras dos semanas. Después,
-      si te sentís bien y la balanza se mueve, podés probar subiendo a 30 o 35.
-    </p>
+  <section class="mt-10 prosa max-w-3xl">
+    <h2 class="text-2xl font-bold text-hoja-700 mb-4">Preguntas frecuentes</h2>
+    <div class="space-y-3">
+      {FAQ.map((f) => (
+        <details class="group rounded-lg border border-hoja-100 bg-white p-4">
+          <summary class="font-medium text-hoja-700 cursor-pointer list-none flex justify-between items-center gap-4">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/70 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
   </section>
+
+  <aside class="mt-8 rounded-xl bg-crema-100 border border-hoja-100 p-5 max-w-3xl">
+    <p class="text-sm text-hoja-900/70 leading-relaxed">
+      <strong class="text-hoja-700">Son estimaciones.</strong> El IMC no distingue
+      músculo de grasa y el método de la cinta métrica tiene un margen de error de unos
+      3 puntos porcentuales. Sirven para orientarte y ver la tendencia, no para
+      diagnosticar nada.
+    </p>
+  </aside>
 </Layout>
 
 <script>
   const $ = (id) => document.getElementById(id);
-  const campos = ["peso", "altura", "edad", "sexo", "actividad", "objetivo", "carbos"];
+  const campos = ["peso", "deseado", "altura", "edad", "sexo", "cintura", "cuello",
+                  "cadera", "actividad", "ritmo", "carbos"];
+
+  const fmt = (n, d = 1) => Number(n).toFixed(d).replace(".", ",").replace(/,0$/, "");
 
   function calcular() {
     const peso = +$("peso").value;
-    const altura = +$("altura").value;
+    const deseado = +$("deseado").value;
+    const alturaCm = +$("altura").value;
     const edad = +$("edad").value;
     const sexo = $("sexo").value;
+    const cintura = +$("cintura").value;
+    const cuello = +$("cuello").value;
+    const cadera = +$("cadera").value;
     const actividad = +$("actividad").value;
-    const ajuste = +$("objetivo").value;
+    const ritmo = +$("ritmo").value;
     const carbos = +$("carbos").value;
 
-    if (!peso || !altura || !edad) return;
+    // La fórmula de la Marina necesita cadera sólo en mujeres: se muestra el campo
+    // que corresponde para no pedir una medida que no se va a usar.
+    $("wrapCadera").classList.toggle("hidden", sexo !== "f");
+    $("wrapCuello").classList.toggle("hidden", false);
 
-    // Mifflin-St Jeor: metabolismo basal.
-    const tmb = 10 * peso + 6.25 * altura - 5 * edad + (sexo === "m" ? 5 : -161);
-    const kcal = Math.round(tmb * actividad * (1 + ajuste));
+    if (!peso || !alturaCm || !edad) return;
+    const altura = alturaCm / 100;
 
-    // La proteína se ancla al peso corporal, no a las calorías: es lo que protege
-    // la masa muscular cuando se come en déficit.
-    const gProte = Math.round(peso * 1.6);
-    // La grasa absorbe lo que sobra. 9 cal/g la grasa, 4 la proteína y los carbos.
+    // ── Cuánto deberías pesar: rango de IMC 18,5 a 25 ──────────────
+    const imc = peso / (altura * altura);
+    const minIdeal = 18.5 * altura * altura;
+    const maxIdeal = 25 * altura * altura;
+    $("rangoIdeal").textContent = `${fmt(minIdeal)} – ${fmt(maxIdeal)}`;
+    $("badgeImc").textContent = `IMC ${fmt(imc)}`;
+
+    // El marcador se posiciona sobre una escala de 0 a 40 de IMC.
+    $("marcador").style.left = `${Math.min(100, Math.max(0, (imc / 40) * 100))}%`;
+
+    let cat, textoImc;
+    if (imc < 18.5) { cat = "bajo peso"; textoImc = "Estás por debajo del rango saludable. Antes de encarar una dieta de pérdida de peso, conviene consultar."; }
+    else if (imc < 25) { cat = "peso saludable"; textoImc = "Estás dentro del rango saludable para tu altura. Si igual querés bajar, que sea con un déficit chico para no perder músculo."; }
+    else if (imc < 30) { cat = "sobrepeso"; textoImc = "Estás por encima del rango. Un descenso del 5 al 10 % del peso ya mejora presión, glucemia y triglicéridos, aunque no llegues al rango ideal."; }
+    else { cat = "obesidad"; textoImc = "El IMC está en rango de obesidad. Vale mucho la pena hacer el proceso acompañado por un profesional, sobre todo si tomás medicación."; }
+    $("badgeImc").textContent = `IMC ${fmt(imc)} · ${cat}`;
+    $("textoImc").textContent = textoImc;
+
+    // ── Composición corporal: fórmula de la Marina de EE.UU. ───────
+    // Usa logaritmos sobre las circunferencias. Margen de error de unos ±3 puntos,
+    // pero no necesita balanza de bioimpedancia ni calibre.
+    let pctGrasa;
+    if (sexo === "m") {
+      pctGrasa = 495 / (1.0324 - 0.19077 * Math.log10(cintura - cuello) + 0.15456 * Math.log10(alturaCm)) - 450;
+    } else {
+      pctGrasa = 495 / (1.29579 - 0.35004 * Math.log10(cintura + cadera - cuello) + 0.22100 * Math.log10(alturaCm)) - 450;
+    }
+    pctGrasa = Math.min(70, Math.max(3, pctGrasa));
+    const kgMagra = peso * (1 - pctGrasa / 100);
+    // Índice de masa magra: masa magra sobre altura al cuadrado. A diferencia del
+    // IMC, distingue a alguien musculoso de alguien con sobrepeso.
+    const indiceMagra = kgMagra / (altura * altura);
+
+    $("pctGrasa").textContent = fmt(pctGrasa);
+    $("kgMagra").textContent = fmt(kgMagra);
+    $("imm").textContent = fmt(indiceMagra);
+
+    const refGrasa = sexo === "m"
+      ? [{ h: 14, t: "muy bajo, nivel atlético" }, { h: 18, t: "en forma" }, { h: 25, t: "promedio" }]
+      : [{ h: 21, t: "muy bajo, nivel atlético" }, { h: 25, t: "en forma" }, { h: 32, t: "promedio" }];
+    const nivel = refGrasa.find((r) => pctGrasa < r.h)?.t ?? "por encima del promedio";
+    $("textoGrasa").textContent =
+      `Un ${fmt(pctGrasa)} % de grasa corporal es ${nivel} para tu sexo. Tenés unos ${fmt(kgMagra)} kg de masa magra: ese es el número que hay que defender mientras bajás, y sobre el que se calcula tu proteína diaria.`;
+
+    // ── Peso actual vs deseado y tiempo ────────────────────────────
+    const dif = peso - deseado;
+    $("pesoHoy").textContent = `${fmt(peso)} kg`;
+    $("pesoObj").textContent = `${fmt(deseado)} kg`;
+    $("diferencia").textContent = `${dif > 0 ? "−" : dif < 0 ? "+" : ""}${fmt(Math.abs(dif))} kg`;
+
+    const aviso = $("avisoRitmo");
+    if (Math.abs(dif) < 0.5) {
+      $("tiempo").textContent = "Ya estás ahí";
+      $("fechaMeta").textContent = "";
+      aviso.textContent = "Tu peso deseado es prácticamente el actual. Si querés recomponer —bajar grasa y subir músculo— el objetivo no es la balanza sino el porcentaje de grasa.";
+      aviso.className = "mt-3 text-sm leading-relaxed text-hoja-900/70";
+    } else if (dif < 0) {
+      $("tiempo").textContent = "Querés subir de peso";
+      $("fechaMeta").textContent = "";
+      aviso.textContent = "Tu peso deseado es mayor que el actual. Esta calculadora está pensada para bajar; para subir masa muscular hacen falta superávit calórico y entrenamiento de fuerza.";
+      aviso.className = "mt-3 text-sm leading-relaxed text-hoja-900/70";
+    } else {
+      // El ritmo se recalcula sobre el peso que va quedando: bajar 0,75 % de 90 kilos
+      // no es lo mismo que 0,75 % de 78. Se simula semana a semana.
+      let p = peso, semanas = 0;
+      while (p > deseado && semanas < 520) { p -= p * ritmo; semanas++; }
+      const meses = semanas / 4.345;
+      $("tiempo").textContent = semanas <= 8
+        ? `${semanas} semanas`
+        : `${semanas} semanas (unos ${fmt(meses)} meses)`;
+
+      const meta = new Date();
+      meta.setDate(meta.getDate() + semanas * 7);
+      $("fechaMeta").textContent = `Si arrancás hoy, llegarías alrededor de ${meta.toLocaleDateString("es-AR", { month: "long", year: "numeric" })}.`;
+
+      const kgSem = peso * ritmo;
+      if (deseado < minIdeal) {
+        aviso.innerHTML = `<strong>Ojo:</strong> tu peso deseado (${fmt(deseado)} kg) está por debajo del rango saludable para tu altura, que arranca en ${fmt(minIdeal)} kg. Vale la pena revisar el objetivo.`;
+        aviso.className = "mt-3 text-sm leading-relaxed text-red-700 bg-red-50 rounded-lg p-3";
+      } else {
+        aviso.textContent = `Son unos ${fmt(kgSem)} kg por semana. La primera semana vas a ver bastante más en la balanza: es agua, no grasa, porque al vaciar las reservas de glucógeno se pierde el líquido que retenían.`;
+        aviso.className = "mt-3 text-sm leading-relaxed text-hoja-900/70";
+      }
+    }
+
+    // ── Macros ─────────────────────────────────────────────────────
+    // Mifflin-St Jeor para el gasto basal, y el déficit sale del ritmo elegido:
+    // 1 kg de grasa son unas 7700 calorías.
+    const tmb = 10 * peso + 6.25 * alturaCm - 5 * edad + (sexo === "m" ? 5 : -161);
+    const mantenimiento = tmb * actividad;
+    const deficitDiario = dif > 0 ? (peso * ritmo * 7700) / 7 : 0;
+    // Nunca por debajo del 65% del mantenimiento: un déficit más agresivo se come
+    // el músculo y frena el metabolismo.
+    const kcal = Math.round(Math.max(mantenimiento * 0.65, mantenimiento - deficitDiario));
+
+    const gProte = Math.round(kgMagra * 2);
     const gGrasas = Math.max(0, Math.round((kcal - gProte * 4 - carbos * 4) / 9));
 
     $("kcal").textContent = `${kcal} cal`;
+    $("kcalMant").textContent = ` (mantenimiento: ${Math.round(mantenimiento)})`;
     $("gGrasas").textContent = gGrasas;
     $("gProte").textContent = gProte;
     $("gCarbos").textContent = carbos;
     $("carbosOut").textContent = carbos;
   }
 
-  for (const id of campos) {
-    $(id).addEventListener("input", calcular);
-  }
+  for (const id of campos) $(id)?.addEventListener("input", calcular);
   calcular();
 </script>

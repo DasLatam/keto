@@ -550,4 +550,8 @@ export const LISTA_COMPRAS = [
   { sector: "Lácteos y fiambrería", items: ["3 docenas de huevos", "250 g de manteca", "300 g de queso cremoso", "200 g de queso crema", "250 g de muzzarella", "150 g de provolone", "100 g de queso de cabra", "150 g de queso sardo", "Queso parmesano", "Queso rallado", "600 cc de crema de leche", "1 pote de yogur natural entero"] },
   { sector: "Almacén", items: ["1 lata de atún al natural", "Aceite de oliva", "Aceitunas verdes", "Salsa de tomate sin azúcar", "Vinagre", "Vino blanco seco", "Orégano, pimentón, comino, ají molido, nuez moscada", "Sal gruesa"] },
   { sector: "Dietética", items: ["1 kg de harina de almendras", "200 g de almendras", "100 g de nueces", "800 cc de leche de coco", "Aceite de coco", "Cacao amargo", "Semillas de chía", "Polvo de hornear", "Edulcorante (stevia o eritritol)", "Esencia de vainilla"] },
+  // Van aparte porque no se compran todas las semanas: se mira la alacena y se
+  // repone lo que falta. Si estuvieran mezcladas con lo demás, la lista daría la
+  // impresión de que hay que comprar sal y pimienta cada siete días.
+  { sector: "Alacena — revisá si te queda", items: ["Pimienta negra", "Caldo de verdura", "Manteca extra para cocinar", "Hielo"] },
 ];

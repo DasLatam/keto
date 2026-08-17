@@ -7,7 +7,7 @@ import sitemap from "@astrojs/sitemap";
 // canonical y las Open Graph del Layout apunten a algo real. Cuando el dominio
 // definitivo esté en Vercel, se cambia acá y nada más.
 export default defineConfig({
-  site: "https://keto-argentina.vercel.app",
+  site: "https://ketofacil.vercel.app",
   vite: {
     plugins: [tailwindcss()],
   },
