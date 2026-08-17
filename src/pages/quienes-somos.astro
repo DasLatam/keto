@@ -1,0 +1,140 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { RECETAS } from "../data/recetas.js";
+import { NEGOCIACIONES } from "../data/negociemos.js";
+import { ARTICULOS } from "../data/evidencia.js";
+
+// Google evalúa contenido de salud con criterios E-E-A-T: experiencia,
+// especialización, autoridad y confiabilidad. Para un sitio de nutrición, la
+// página que más pesa no es una receta más — es ésta, y sobre todo el hecho de
+// decir con claridad **qué no somos**. Un sitio que se presenta como fuente
+// médica sin serlo es exactamente lo que los criterios penalizan.
+
+const totalFuentes = ARTICULOS.reduce((n, a) => n + a.fuentes.length, 0);
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "AboutPage",
+      name: "Quiénes somos",
+      inLanguage: "es-AR",
+    },
+    {
+      "@type": "Organization",
+      name: "Keto Argentina",
+      url: "https://ketofacil.vercel.app",
+      description:
+        "Guía práctica de dieta cetogénica adaptada al mercado argentino: recetas, plan semanal, lista de compras y comparativas con productos que se consiguen en Argentina.",
+      knowsAbout: ["Dieta cetogénica", "Nutrición", "Recetas argentinas"],
+      areaServed: { "@type": "Country", name: "Argentina" },
+    },
+  ],
+};
+---
+
+<Layout
+  titulo="Quiénes somos"
+  descripcion="Qué es Keto Argentina, cómo elaboramos el contenido, de dónde salen los datos de carbohidratos y qué no somos: no damos consejo médico."
+  jsonld={jsonld}
+>
+  <article class="prosa max-w-3xl">
+    <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Quiénes somos</h1>
+
+    <p class="mt-4 text-lg text-hoja-900/75 leading-relaxed">
+      Keto Argentina es una guía práctica de dieta cetogénica hecha para el mercado
+      argentino. Nació de una constatación simple: casi todo el material sobre keto
+      que circula en español está traducido del inglés y pide ingredientes que acá
+      no se consiguen, o los pide con nombres que en la verdulería nadie entiende.
+    </p>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-3">Qué hacemos distinto</h2>
+    <p class="text-hoja-900/80 leading-relaxed">
+      Todo el contenido está escrito pensando en cómo se compra y se cocina acá. Los
+      cortes de carne son los de la carnicería argentina —vacío, entraña, matambrito,
+      peceto—, las marcas son las de la góndola de Coto, Carrefour o Día, y los
+      productos menos comunes se indican dónde conseguirlos, que casi siempre es la
+      dietética de barrio y no una tienda online.
+    </p>
+    <p class="text-hoja-900/80 leading-relaxed mt-3">
+      Cada receta incluye <strong>el error que la arruina</strong>. No porque quede
+      lindo, sino porque es lo que separa una receta que sale de una que no: por qué
+      hay que exprimir la acelga, por qué el coliflor de la pizza va dentro de un
+      repasador, por qué la almendra se quema antes que el pan rallado.
+    </p>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-3">De dónde salen los números</h2>
+    <p class="text-hoja-900/80 leading-relaxed">
+      Los valores de carbohidratos son <strong>netos</strong> —carbohidratos totales
+      menos fibra— y provienen de tablas de composición de alimentos de referencia.
+      Son estimaciones para decidir parado frente a la góndola, no valores de
+      laboratorio: dos quesos cremosos de marcas distintas pueden diferir, y la
+      etiqueta del producto que tenés en la mano siempre gana sobre lo que diga acá.
+    </p>
+    <p class="text-hoja-900/80 leading-relaxed mt-3">
+      Los macros de las recetas están calculados por porción sobre las cantidades
+      indicadas. Si cambiás las proporciones, cambian.
+    </p>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-3">Cómo tratamos la evidencia</h2>
+    <p class="text-hoja-900/80 leading-relaxed">
+      En la sección <a href="/evidencia" class="text-hoja-700 underline decoration-hoja-200 underline-offset-2 hover:text-naranja-600">Evidencia</a>{" "}
+      hay una regla que no se negocia: <strong>no citamos nada que no hayamos
+      verificado que existe</strong>. Cada afirmación lleva su enlace a PubMed o al
+      NCBI para que puedas leer la fuente original. Hoy son {totalFuentes} fuentes
+      enlazadas.
+    </p>
+    <p class="text-hoja-900/80 leading-relaxed mt-3">
+      Y contamos también <strong>lo que no está probado</strong>: que la ventaja de
+      keto sobre otras dietas se achica después del año, que los efectos sobre el
+      colesterol varían mucho entre personas, que no hay buena evidencia sobre
+      sostener cetosis estricta durante años. Un sitio que sólo cuenta la mitad buena
+      no te sirve para decidir.
+    </p>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-3">Qué NO somos</h2>
+    <div class="rounded-xl border-l-4 border-naranja-500 bg-naranja-400/10 p-5">
+      <p class="text-hoja-900/85 leading-relaxed">
+        <strong>Esto no es consejo médico y no reemplaza a un profesional.</strong>{" "}
+        No somos médicos ni nutricionistas matriculados. Lo que hay acá es
+        información práctica y divulgación con las fuentes a la vista.
+      </p>
+      <p class="text-hoja-900/85 leading-relaxed mt-3">
+        La dieta cetogénica cambia cómo el cuerpo maneja el azúcar y los líquidos, y
+        eso tiene consecuencias reales si tomás medicación. Consultá con un
+        profesional <strong>antes de empezar</strong> si tomás medicación para
+        diabetes o presión, si estás embarazada o amamantando, si tenés enfermedad
+        renal, hepática o pancreática, o si tenés antecedentes de trastornos de la
+        conducta alimentaria.
+      </p>
+    </div>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-3">Cómo se sostiene el sitio</h2>
+    <p class="text-hoja-900/80 leading-relaxed">
+      Con publicidad. Los espacios publicitarios están señalizados y no se mezclan
+      con el contenido: no hay recomendaciones pagas disfrazadas de consejo, ni
+      marcas que hayan pagado para aparecer en la guía de productos. Cuando
+      mencionamos una marca es porque está en la góndola y sirve, o porque no sirve.
+    </p>
+
+    <h2 class="text-2xl font-bold text-hoja-700 mt-10 mb-3">Correcciones</h2>
+    <p class="text-hoja-900/80 leading-relaxed">
+      Si encontrás un dato equivocado, una receta que no sale o una cita mal
+      atribuida, avisanos: se corrige y se deja registrado. En un sitio sobre
+      alimentación, un número mal puesto no es un detalle de estilo.
+    </p>
+
+    <div class="mt-10 grid grid-cols-3 gap-3 text-center">
+      {[
+        [RECETAS.length, "recetas"],
+        [NEGOCIACIONES.length, "comparativas"],
+        [totalFuentes, "fuentes citadas"],
+      ].map(([n, t]) => (
+        <div class="rounded-xl border border-hoja-100 bg-white py-4">
+          <div class="text-2xl font-bold text-hoja-700">{n}</div>
+          <div class="text-xs text-hoja-900/50">{t}</div>
+        </div>
+      ))}
+    </div>
+  </article>
+</Layout>

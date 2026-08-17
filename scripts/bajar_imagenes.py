@@ -73,6 +73,16 @@ CONSULTAS = {
     "huevos-duros-con-sal-y-oliva": "boiled eggs halved",
     "aceitunas-y-queso-en-cubos": "olives cheese cubes",
     "palta-con-limon-y-sal": "avocado half lemon",
+    "provoleta-a-la-parrilla": "grilled cheese pan",
+    "chicharron-de-cerdo-casero": "pork crackling snack",
+    "ensalada-de-repollo-y-zanahoria": "coleslaw salad bowl",
+    "salmon-rosado-con-manteca-de-hierbas": "salmon fillet herbs",
+    "huevos-a-la-cazuela-con-espinaca": "baked eggs spinach",
+    "coliflor-gratinado-con-queso": "cauliflower cheese gratin",
+    "chips-de-queso-al-horno": "cheese crisps snack",
+    "pollo-al-curry-con-coco": "chicken curry bowl",
+    "budin-de-limon-keto": "lemon cake slice",
+    "sopa-de-zapallo-y-jengibre": "pumpkin soup bowl",
 }
 
 # Openverse indexa mucho dibujo, ilustración y foto de producto sobre fondo
