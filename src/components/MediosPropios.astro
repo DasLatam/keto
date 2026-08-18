@@ -66,9 +66,24 @@ const URL_MEDIOS =
    * llegan a aparecer. Es además como se comportan los Shorts nativamente.
    * `loop` sobre un video suelto exige repetir el id en `playlist`.
    */
+  /**
+   * El marco 9:16 va como estilo **inline** y no como clase.
+   *
+   * Astro le pone scope a los estilos del componente: `.shorts` se compila a
+   * `.shorts[data-astro-cid-xxxx]`. Estos elementos los crea JavaScript con
+   * innerHTML y no llevan ese atributo, así que la regla no les aplicaba nunca:
+   * el contenedor quedaba sin ancho ni alto y el video era invisible. Un estilo
+   * inline no depende de que nadie le ponga un atributo.
+   *
+   * Los Shorts son 1080×1920, así que 9:16 los muestra sin recortar una banda.
+   */
+  const ESTILO_MARCO = "aspect-ratio:9/16;width:min(17rem,100%);border:0";
+
   const parametros = (id) =>
     new URLSearchParams({
-      autoplay: "1",        // el iframe se inserta al tocar: se espera que arranque
+      // Sin `autoplay`: el video está incrustado desde que se abre la receta, y
+      // que arranque solo —con sonido— a quien viene a leer una receta es
+      // exactamente lo que hace cerrar la pestaña.
       loop: "1",
       playlist: id,         // sin esto, `loop` no hace nada en un video solo
       rel: "0",             // relacionados sólo del mismo canal (lo máximo posible)
@@ -113,27 +128,18 @@ const URL_MEDIOS =
       const videos = [];
 
       for (const v of reg.youtube ?? []) {
-        // Tarjeta primero, iframe recién al tocarla. El reproductor de YouTube
-        // pesa cientos de kilobytes y contacta a Google apenas se dibuja: si se
-        // incrustara de entrada, abrir una receta le contaría la visita a Google
-        // sin que nadie haya pedido ver nada. Así, hasta el toque no sale nada
-        // de acá — y una vez tocado, el short se reproduce dentro del sitio.
-        //
-        // Sin miniatura de i.ytimg.com por lo mismo: esa imagen también es de
-        // Google y cargarla delataría la visita igual que el iframe.
+        // El reproductor va incrustado directamente: es lo que Ariel pidió, y
+        // así se ve la miniatura del propio YouTube en vez de un recuadro vacío.
+        // `youtube-nocookie.com` es la versión sin cookies de publicidad — no
+        // evita que Google sepa de la visita, pero es lo mejor disponible sin
+        // renunciar a incrustar. `loading="lazy"` para que no frene la página.
         videos.push(`
-          <div class="shorts relative rounded-xl overflow-hidden bg-hoja-900"
-               data-short="${esc(v)}">
-            <button type="button" class="absolute inset-0 w-full h-full grid place-items-center
-                                         gap-3 text-crema-50 group cursor-pointer"
-                    aria-label="Reproducir el video de ${esc(nombre)}">
-              <span class="w-16 h-16 rounded-full bg-crema-50/15 grid place-items-center text-3xl
-                           group-hover:bg-crema-50/25 transition" aria-hidden="true">▶</span>
-              <span class="text-sm px-4 text-center leading-snug">
-                Ver el video<br><span class="text-crema-50/60 text-xs">se carga al tocarlo</span>
-              </span>
-            </button>
-          </div>`);
+          <iframe style="${ESTILO_MARCO}" class="rounded-xl bg-hoja-900"
+                  src="https://www.youtube-nocookie.com/embed/${esc(v)}?${parametros(v)}"
+                  title="Video de ${esc(nombre)}" loading="lazy" frameborder="0"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; encrypted-media; picture-in-picture; web-share"
+                  allowfullscreen></iframe>`);
       }
 
       for (const m of reg.medios ?? []) {
@@ -142,11 +148,9 @@ const URL_MEDIOS =
         // celular, y recortarlo para que llene un marco vertical se come medio
         // plano. Que sobre negro a los costados es preferible.
         videos.push(`
-          <div class="shorts rounded-xl overflow-hidden bg-hoja-900">
-            <video controls preload="metadata" playsinline
-                   class="w-full h-full object-contain"
-                   src="${esc(m.url)}"></video>
-          </div>`);
+          <video controls preload="metadata" playsinline
+                 style="${ESTILO_MARCO}" class="rounded-xl bg-hoja-900 object-contain"
+                 src="${esc(m.url)}"></video>`);
       }
 
       // ── Fotos ─────────────────────────────────────────────────────────────
@@ -176,24 +180,5 @@ const URL_MEDIOS =
       /* Sin conexión con el panel no hay bloque, y la receta se lee igual. */
     });
 
-  // El iframe se inserta al tocar la tarjeta, no antes.
-  fila?.addEventListener("click", (e) => {
-    const caja = e.target.closest("[data-short]");
-    if (!caja) return;
-    const id = caja.dataset.short;
-    caja.innerHTML =
-      `<iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/${esc(id)}?${parametros(id)}"` +
-      ` title="Video de ${esc(nombre)}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"` +
-      ` referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-    delete caja.dataset.short;
-  });
 </script>
 
-<style>
-  /* 9:16 con un ancho que no desborde en un teléfono angosto. Los Shorts son
-     1080×1920, así que este marco los muestra sin recortar ni una banda. */
-  .shorts {
-    width: min(17rem, 100%);
-    aspect-ratio: 9 / 16;
-  }
-</style>
