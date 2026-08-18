@@ -169,10 +169,16 @@ para siempre.
 | `fuerza-en-casa` | 41,4 min | La rutina de fuerza, en tiempo real |
 | `caminata-1-por-que-funciona` | 40,1 min | La evidencia + 6 desayunos |
 | `caminata-2-lo-que-te-van-a-decir` | 42,3 min | Las comparativas + 6 almuerzos |
-| `caminata-3-el-super-y-la-semana` | ~40 min | Productos, plan semanal + 6 cenas |
+| `caminata-3-el-super-y-la-semana` | 56,5 min | Productos, plan semanal + 6 cenas |
 
-Son 176 minutos y 80 MB en total. Generarlos completos: ~35 min de modelo (gemini)
+Son 196 minutos y 90 MB en total. Generarlos completos: ~35 min de modelo (gemini)
 y ~30 min de piper.
+
+**La duración pedida es orientativa, no un contrato.** `--minutos 45` dio 40, 42 y
+36; rehacer la tercera con `--minutos 52` dio 56,5. La dispersión no la produce el
+objetivo sino cuánto se pasa el modelo del largo pedido en cada bloque y cuántos
+bloques caen al respaldo, y eso cambia en cada corrida. Si un audio tiene que caer
+en una ventana estrecha, hay que generar y medir, no calcular.
 
 ```bash
 node scripts/audios/exportar.mjs                        # volcar el contenido del sitio

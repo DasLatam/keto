@@ -16,5 +16,32 @@
     "titulo": "Fuerza en casa",
     "clase": "rutina",
     "generado": "2026-08-18"
+  },
+  "caminata-1-por-que-funciona": {
+    "archivo": "caminata-1-por-que-funciona.mp3",
+    "segundos": 2406.6,
+    "minutos": 40.1,
+    "bytes": 19253865,
+    "titulo": "Caminata 1 — Por qué funciona",
+    "clase": "caminata",
+    "generado": "2026-08-18"
+  },
+  "caminata-2-lo-que-te-van-a-decir": {
+    "archivo": "caminata-2-lo-que-te-van-a-decir.mp3",
+    "segundos": 2535.7,
+    "minutos": 42.3,
+    "bytes": 20286646,
+    "titulo": "Caminata 2 — Lo que te van a decir",
+    "clase": "caminata",
+    "generado": "2026-08-18"
+  },
+  "caminata-3-el-super-y-la-semana": {
+    "archivo": "caminata-3-el-super-y-la-semana.mp3",
+    "segundos": 3390.9,
+    "minutos": 56.5,
+    "bytes": 27128220,
+    "titulo": "Caminata 3 — El súper y la semana",
+    "clase": "caminata",
+    "generado": "2026-08-18"
   }
 }

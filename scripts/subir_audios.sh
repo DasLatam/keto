@@ -36,6 +36,17 @@ SOLO_NUEVOS="--only-newer"
 echo "→ Subiendo audios a $BASE_REMOTA …"
 du -sh "$ORIGEN" | sed 's/^/  /'
 
+# Dos cosas sobre el mirror, aprendidas rompiéndolo:
+#
+#   --include-glob solo. Agregarle --exclude-glob=* detrás no acota, mata todo:
+#   la primera versión de este script subió el .htaccess y ni un MP3.
+#
+#   --no-recursion porque los mp3 están todos en la raíz de storage/audios/, y
+#   ahí abajo también viven guiones/ y los .log, que no van a un servidor público.
+#
+# Y los comentarios van acá afuera y no dentro del bloque de lftp: ese bloque es
+# una string entre comillas dobles, así que bash ejecuta lo que haya entre
+# backticks antes de que lftp llegue a verlo.
 lftp -c "
 set ftp:ssl-force true
 set ftp:ssl-protect-data true
@@ -45,7 +56,7 @@ set net:max-retries 3
 open -u \"$FTP_USER\",\"$FTP_PASS\" \"$FTP_HOST\"
 mkdir -p \"$BASE_REMOTA\"
 cd \"$BASE_REMOTA\"
-mirror -R $SOLO_NUEVOS --parallel=2 --include-glob=*.mp3 --exclude-glob=* \"$ORIGEN\" .
+mirror -R $SOLO_NUEVOS --no-recursion --parallel=2 --include-glob=*.mp3 \"$ORIGEN\" .
 put \"$RAIZ/scripts/audios/htaccess-audios\" -o .htaccess
 bye
 "
