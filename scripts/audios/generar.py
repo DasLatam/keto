@@ -34,13 +34,15 @@ sys.path.insert(0, str(AQUI))
 
 import caminatas                                   # noqa: E402
 import voz                                         # noqa: E402
-from rutinas import Habla, Silencio, estimar, guion as guion_rutina   # noqa: E402
+from rutinas import (Habla, Silencio, a_json, de_json, estimar,   # noqa: E402
+                     guion as guion_rutina)
 
 RAIZ = AQUI.parent.parent
 CONTENIDO = RAIZ / "storage" / "contenido.json"
 DESTINO = RAIZ / "storage" / "audios"
 CACHE = RAIZ / "storage" / "cache_voz"
 MANIFIESTO = DESTINO / "audios.json"
+GUIONES = DESTINO / "guiones"
 
 
 def cargar() -> dict:
@@ -66,6 +68,8 @@ def main() -> int:
     ap.add_argument("--minutos", type=float, default=45.0)
     ap.add_argument("--series", type=int, default=2)
     ap.add_argument("--motor", default="gemini")
+    ap.add_argument("--rehacer-guiones", action="store_true",
+                    help="ignora los guiones guardados y vuelve a pedírselos al motor")
     a = ap.parse_args()
 
     if not (a.plan or a.rutinas or a.caminatas or a.todo or a.solo):
@@ -89,17 +93,39 @@ def main() -> int:
     # ── Las tres caminatas ──────────────────────────────────────────────────
     progs = caminatas.programas(datos)
     if hacer_caminatas and not a.plan:
-        motor = caminatas.llm.Motor(a.motor)
-        print(f"Motor: {motor} (cadena: {', '.join(motor.cadena)})\n")
+        GUIONES.mkdir(parents=True, exist_ok=True)
+        motor = None
         cam = rutina_por_slug(datos, "caminata-40")
         for p in progs:
             if a.solo and a.solo != p["slug"]:
                 continue
-            print(f"  {p['titulo']}")
-            t0 = time.time()
-            piezas = caminatas.guion(p, a.minutos, motor, cam)
-            print(f"    guion listo en {(time.time() - t0) / 60:.1f} min\n", flush=True)
+            guardado = GUIONES / f"{p['slug']}.json"
+
+            if guardado.exists() and not a.rehacer_guiones:
+                piezas = de_json(json.loads(guardado.read_text(encoding="utf-8")))
+                print(f"  {p['titulo']}: guion guardado "
+                      f"({estimar(piezas) / 60:.0f} min)", flush=True)
+            else:
+                if motor is None:
+                    motor = caminatas.llm.Motor(a.motor)
+                    print(f"Motor: {motor} (cadena: {', '.join(motor.cadena)})\n")
+                print(f"  {p['titulo']}")
+                t0 = time.time()
+                piezas = caminatas.guion(p, a.minutos, motor, cam)
+                # Se guarda apenas está, antes de sintetizar: si el motor se
+                # queda sin cuota en la caminata siguiente, ésta ya está a salvo.
+                guardado.write_text(
+                    json.dumps(a_json(piezas), ensure_ascii=False, indent=1),
+                    encoding="utf-8")
+                print(f"    guion listo en {(time.time() - t0) / 60:.1f} min "
+                      f"→ {guardado.relative_to(RAIZ)}\n", flush=True)
+
             trabajos.append((p["slug"], p["titulo"], "caminata", piezas))
+        if motor and motor.avisos:
+            print("Avisos del motor:")
+            for av in motor.avisos:
+                print(f"  · {av}")
+            print()
 
     # ── Plan: lo que saldría, sin gastar un token ni un minuto de CPU ───────
     if a.plan:

@@ -1,0 +1,21 @@
+# Carpeta de audios de guía de Keto Argentina.
+# La sube scripts/subir_audios.sh; no editar acá a mano.
+
+# Sin listado de directorio: los archivos se llegan por la página, no fisgoneando.
+Options -Indexes
+
+<IfModule mod_mime.c>
+  AddType audio/mpeg .mp3
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Un mes de cache. Los audios cambian sólo cuando se regeneran, y en ese caso
+  # el nombre es el mismo — por eso el mes y no un año: un cambio tarda a lo
+  # sumo eso en llegarle a quien ya lo escuchó.
+  <FilesMatch "\.mp3$">
+    Header set Cache-Control "public, max-age=2592000"
+    # Sin esto, saltar al minuto 20 de un audio de 45 obliga a bajar los 20
+    # primeros: el navegador necesita Range para buscar dentro del archivo.
+    Header set Accept-Ranges "bytes"
+  </FilesMatch>
+</IfModule>

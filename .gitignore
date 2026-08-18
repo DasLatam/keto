@@ -34,3 +34,7 @@ logs/
 storage/contenido.json
 storage/audios/
 storage/cache_voz/
+
+# Bytecode de los scripts de Python
+__pycache__/
+*.pyc

@@ -322,7 +322,10 @@ def guion(programa: dict, minutos: float, motor: llm.Motor,
     # ── Vuelta a la calma y repaso ──────────────────────────────────────────
     calma = tramos.get("Vuelta a la calma")
     if calma:
-        piezas.append(Habla("Últimos cinco minutos: bajá el ritmo de a poco. "
+        # La entrada nombra el tramo y nada más: el `como` de este ejercicio ya
+        # arranca con "Bajá el ritmo de a poco", y adelantarlo acá hacía que la
+        # voz dijera la misma frase dos veces seguidas.
+        piezas.append(Habla("Últimos cinco minutos, vuelta a la calma. "
                             + _sin_marcas(calma["como"])))
         piezas.append(Silencio(1.2))
 

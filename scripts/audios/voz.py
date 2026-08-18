@@ -124,9 +124,14 @@ def armar(piezas: list[Pieza], info: dict[str, dict], salida: Path) -> float:
 
             # ── Silencio con avisos encajados adentro ───────────────────────
             anterior_hablada = False
-            fin = escritos + int(round(p.segundos * rate))
+            # `inicio` se fija antes del bucle: los cortes se ubican respecto del
+            # arranque del tramo, no de lo último escrito. Calculándolos contra
+            # `escritos` —que avanza al escribir cada aviso— el segundo corte de
+            # un mismo tramo se correría por lo que duró el primero.
+            inicio = escritos
+            fin = inicio + int(round(p.segundos * rate))
             for en, texto in sorted(p.cortes):
-                arranque = escritos + int(round(en * rate))
+                arranque = inicio + int(round(en * rate))
                 datos = _leer(info[texto]["ruta"])
                 dur = len(datos) // (canales * ancho)
                 # Si el aviso no entra antes del final, se saltea: estirar el

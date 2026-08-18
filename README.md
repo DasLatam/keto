@@ -165,11 +165,14 @@ para siempre.
 
 | Audio | Dura | Qué es |
 |---|---|---|
-| `elongacion-manana` | ~16 min | La rutina de la mañana, en tiempo real |
-| `fuerza-en-casa` | ~41 min | La rutina de fuerza, en tiempo real |
-| `caminata-1-por-que-funciona` | ~45 min | La evidencia + 6 desayunos |
-| `caminata-2-lo-que-te-van-a-decir` | ~45 min | Las comparativas + 6 almuerzos |
-| `caminata-3-el-super-y-la-semana` | ~45 min | Productos, plan semanal + 6 cenas |
+| `elongacion-manana` | 16,1 min | La rutina de la mañana, en tiempo real |
+| `fuerza-en-casa` | 41,4 min | La rutina de fuerza, en tiempo real |
+| `caminata-1-por-que-funciona` | 40,1 min | La evidencia + 6 desayunos |
+| `caminata-2-lo-que-te-van-a-decir` | 42,3 min | Las comparativas + 6 almuerzos |
+| `caminata-3-el-super-y-la-semana` | ~40 min | Productos, plan semanal + 6 cenas |
+
+Son 176 minutos y 80 MB en total. Generarlos completos: ~35 min de modelo (gemini)
+y ~30 min de piper.
 
 ```bash
 node scripts/audios/exportar.mjs                        # volcar el contenido del sitio
@@ -220,7 +223,18 @@ por `numeros.inventados()`, que compara los números del guion contra los de la
 fuente —en dígitos y en palabras, porque un modelo al que se le pide lenguaje
 hablado escribe «doscientas sesenta», no «260»—. Si aparece uno que no estaba, el
 bloque se rechaza y se vuelve a pedir diciendo cuál sobró; a los tres intentos se
-usa el texto del sitio sin reescribir. También tiene autoprueba:
+usa el texto del sitio sin reescribir.
+
+**Medido en la primera corrida completa (2026-08-18): 18 reintentos y 2 respaldos
+sobre 39 bloques**, o sea 5 % de bloques que quedaron sin reescribir. En los dos
+casos el modelo insistía con un número que la fuente no tenía —probablemente
+cuántas veces más dulce es la sucralosa, y una cuenta de ítems de la góndola de
+lácteos—. Vale aflojar el criterio sólo si ese 5 % sube mucho: permitir «cinco»
+como número libre dejaría pasar también un «cinco gramos de carbohidratos»
+inventado, que en un audio sobre alimentación es peor que un bloque sin
+reescribir.
+
+También tiene autoprueba:
 
 ```bash
 /usr/bin/python3 scripts/audios/numeros.py

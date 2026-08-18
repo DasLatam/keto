@@ -46,6 +46,7 @@ open -u \"$FTP_USER\",\"$FTP_PASS\" \"$FTP_HOST\"
 mkdir -p \"$BASE_REMOTA\"
 cd \"$BASE_REMOTA\"
 mirror -R $SOLO_NUEVOS --parallel=2 --include-glob=*.mp3 --exclude-glob=* \"$ORIGEN\" .
+put \"$RAIZ/scripts/audios/htaccess-audios\" -o .htaccess
 bye
 "
 

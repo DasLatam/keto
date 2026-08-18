@@ -90,6 +90,7 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
         {/* Sin `lazy`: es la imagen principal, arriba de todo. Cargarla en
             diferido empeora el LCP en vez de mejorarlo. */}
         <img
+          id="foto-receta"
           src={`/img/recetas/${slug}.webp`}
           alt={credito.materia
             ? `${credito.materia}, el ingrediente principal de ${nombre.toLowerCase()}`
@@ -108,7 +109,7 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
             desde el panel y traída al repo por `scripts/traer_medios.py`), la
             aclaración desaparece sola: `credito.propia` marca ese caso y
             `materia` queda vacía. Dejarla puesta pasaría de honesta a falsa. */}
-        <figcaption class="mt-1.5 text-xs text-hoja-900/45 leading-relaxed">
+        <figcaption id="pie-foto" class="mt-1.5 text-xs text-hoja-900/45 leading-relaxed">
           {credito.materia && (
             <>
               En la foto, <strong class="font-medium text-hoja-900/65">{credito.materia}</strong>:

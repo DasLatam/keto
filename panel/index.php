@@ -135,6 +135,9 @@ $entro = autenticado();
     font-size:.8rem; padding:.4rem .7rem; border-radius:.5rem;
     border:1px solid var(--borde); background:#0000; color:var(--texto); cursor:pointer;
   }
+  .formYt { display:flex; gap:.4rem; margin-top:.6rem; flex-wrap:wrap; }
+  .formYt input { flex:1 1 12rem; padding:.45rem .6rem; font-size:.9rem; }
+  .formYt button { font-size:.8rem; padding:.45rem .8rem; }
   .aviso { font-size:.78rem; color:var(--suave); margin-top:.5rem; }
   .aviso.mal { color:var(--rojo); }
   .barraProgreso { height:3px; background:var(--borde); border-radius:2px; overflow:hidden; margin-top:.5rem; }
@@ -301,8 +304,17 @@ $entro = autenticado();
           <label class="boton">📷 Foto o video
             <input type="file" hidden accept="image/*,video/*" data-subir="${esc(r.slug)}">
           </label>
-          <button type="button" data-yt="${esc(r.slug)}">▶️ Enlace de YouTube</button>
+          <button type="button" data-abrir-yt="${esc(r.slug)}">▶️ Enlace de YouTube</button>
         </div>
+
+        <!-- Campo de verdad y no prompt(): los navegadores de celular bloquean
+             prompt() sin avisar, así que el botón no hacía nada. -->
+        <form class="formYt" data-form-yt="${esc(r.slug)}" hidden>
+          <input type="url" inputmode="url" autocomplete="off" spellcheck="false"
+                 placeholder="https://youtu.be/…" aria-label="Enlace de YouTube">
+          <button type="submit" class="primario">Agregar</button>
+          <button type="button" data-cerrar-yt>Cancelar</button>
+        </form>
         <div class="barraProgreso" hidden><i></i></div>
         <p class="aviso" data-aviso hidden></p>
       </section>`;
@@ -360,15 +372,48 @@ $entro = autenticado();
         actualizar(slug, r.receta);
         decir(slug, "Esa foto pasa a ser la portada.");
       } else if (btn.dataset.quitar !== undefined) {
-        if (!confirm("¿Quitar esto?")) return;
+        // Dos toques en vez de confirm(): el diálogo del navegador tampoco es
+        // confiable en el celular, y acá además tapa la foto que se va a borrar.
+        if (btn.dataset.confirmando !== "si") {
+          btn.dataset.confirmando = "si";
+          btn.textContent = "✓";
+          btn.title = "Tocá de nuevo para borrar";
+          setTimeout(() => {
+            if (!btn.isConnected) return;
+            btn.dataset.confirmando = "";
+            btn.textContent = "×";
+          }, 4000);
+          decir(slug, "Tocá el tilde otra vez para borrarlo.");
+          return;
+        }
         const r = await api("quitar", { slug, id: btn.dataset.quitar });
         actualizar(slug, r.receta);
-      } else if (btn.dataset.yt !== undefined) {
-        const url = prompt("Pegá el enlace de YouTube:");
-        if (!url) return;
-        const r = await api("youtube", { slug, url });
-        actualizar(slug, r.receta);
+        decir(slug, "Borrado.");
+      } else if (btn.dataset.abrirYt !== undefined) {
+        const form = document.querySelector(`[data-form-yt="${CSS.escape(slug)}"]`);
+        form.hidden = !form.hidden;
+        if (!form.hidden) form.querySelector("input").focus();
+      } else if (btn.dataset.cerrarYt !== undefined) {
+        btn.closest("form").hidden = true;
       }
+    } catch (err) {
+      decir(slug, err.message, true);
+    }
+  });
+
+  document.addEventListener("submit", async (e) => {
+    const form = e.target.closest("[data-form-yt]");
+    if (!form) return;
+    e.preventDefault();
+    const slug = form.dataset.formYt;
+    const campo = form.querySelector("input");
+    const url = campo.value.trim();
+    if (!url) return;
+    try {
+      const r = await api("youtube", { slug, url });
+      campo.value = "";
+      actualizar(slug, r.receta);
+      decir(slug, "Video agregado.");
     } catch (err) {
       decir(slug, err.message, true);
     }

@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import AdSlot from "../../components/AdSlot.astro";
+import { AUDIOS_POR_RUTINA } from "../../data/audios.js";
 import { RUTINAS, caloriasPorSesion, sesionesSemanales, caloriasSemana, minutosModerados } from "../../data/ejercicios.js";
 
 // El peso de referencia para las calorías de la tabla. 80 kg no es un promedio
@@ -107,6 +108,17 @@ const jsonld = {
             </div>
 
             <p class="mt-2 text-hoja-900/70 leading-relaxed">{r.resumen}</p>
+
+            {/* Que la rutina tiene audio se ve desde el índice: si hay que
+                entrar a cada una para descubrirlo, la mitad no se entera. */}
+            {(AUDIOS_POR_RUTINA[r.slug] ?? []).length > 0 && (
+              <p class="mt-2 text-sm text-naranja-600">
+                <span aria-hidden="true">🎧</span>{" "}
+                {AUDIOS_POR_RUTINA[r.slug].length === 1
+                  ? `Con audio guía de ${Math.round(AUDIOS_POR_RUTINA[r.slug][0].minutos)} min`
+                  : `Con ${AUDIOS_POR_RUTINA[r.slug].length} audios para escuchar caminando`}
+              </p>
+            )}
 
             <dl class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
               {[

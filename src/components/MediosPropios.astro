@@ -49,9 +49,36 @@ const URL_MEDIOS =
       const reg = d?.recetas?.[slug];
       if (!reg) return;
 
+      // ── La foto grande, si Ariel subió una del plato hecho ────────────────
+      // El build estático la reemplaza de verdad (`scripts/traer_medios.py`),
+      // pero eso pide un push y un deploy. Sin este cambio en el navegador, la
+      // foto que se acaba de sacar en la cocina no se ve hasta entonces, y lo
+      // primero que uno hace después de subirla es justamente ir a mirarla.
+      let yaPuesta = null;
+      if (reg.portada?.origen === "propia") {
+        const foto = (reg.medios ?? []).find(
+          (m) => m.id === reg.portada.ref && m.tipo === "imagen",
+        );
+        const img = document.getElementById("foto-receta");
+        if (foto && img) {
+          // `vista` y no `url`: la miniatura de 800 px alcanza para el ancho al
+          // que se muestra, y el original puede ser una foto de iPhone de 4 MB.
+          img.src = foto.vista;
+          img.alt = `${nombre}, hecho en casa`;
+          yaPuesta = foto.id;
+
+          // El pie tiene que dejar de decir "el ingrediente principal, no el
+          // plato terminado": sobre la foto del plato ya cocinado es falso.
+          const pie = document.getElementById("pie-foto");
+          if (pie) pie.textContent = "Foto propia, del plato hecho en casa.";
+        }
+      }
+
       const partes = [];
 
       for (const m of reg.medios ?? []) {
+        // La que quedó de portada no se repite abajo.
+        if (m.id === yaPuesta) continue;
         if (m.tipo === "video") {
           partes.push(
             `<video controls preload="metadata" playsinline

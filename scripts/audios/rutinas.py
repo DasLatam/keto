@@ -103,7 +103,13 @@ def guion(rutina: dict, tope_series: int = TOPE_SERIES) -> list[Pieza]:
     # ── Entrada ─────────────────────────────────────────────────────────────
     piezas.append(Habla(f"{rutina['nombre']}. {_sin_marcas(rutina['veredicto'])}"))
     if rutina.get("elementos"):
-        piezas.append(Habla("Vas a necesitar: " + ", ".join(rutina["elementos"]) + "."))
+        # En minúscula: la lista viene capitalizada porque en la página son ítems
+        # de una lista, y encadenada en una sola frase queda "Vas a necesitar:
+        # Una silla firme, Una pared libre", que leído en voz alta suena a que
+        # cada ítem empieza una oración nueva.
+        cosas = [e[0].lower() + e[1:] if e else e for e in rutina["elementos"]]
+        piezas.append(Habla("Vas a necesitar: " + ", ".join(cosas[:-1])
+                            + (" y " if len(cosas) > 1 else "") + cosas[-1] + "."))
     piezas.append(Habla(
         "Este audio va en tiempo real: cuando yo me calle, hacé el ejercicio, "
         "y cuando vuelva a hablar es que se terminó. No hace falta que mires el reloj."
@@ -117,8 +123,9 @@ def guion(rutina: dict, tope_series: int = TOPE_SERIES) -> list[Pieza]:
         # Que la rutina escrita tenga tres series y el audio haga dos no se
         # disimula: se dice. Un audio que se calla esto está mintiendo sobre
         # cuánto entrenó quien lo siguió.
+        nombres = {1: "una serie", 2: "dos series", 3: "tres series"}
         piezas.append(Habla(
-            f"Vamos a hacer {tope_series} series de cada ejercicio, para que la sesión "
+            f"Vamos a hacer {nombres.get(tope_series, f'{tope_series} series')} de cada ejercicio, para que la sesión "
             "entre en unos cuarenta minutos. La rutina de la página tiene tres: "
             "si te sobra tiempo, sumá la tercera al final de cada ejercicio."
         ))
@@ -171,3 +178,29 @@ def estimar(piezas: list[Pieza], ppm: float = 172.0) -> float:
         else:
             total += p.segundos
     return total
+
+
+# ── Persistencia de la partitura ────────────────────────────────────────────
+# Un guion de caminata cuesta media hora de modelo. Guardarlo apenas está hecho
+# es lo que permite reintentar la síntesis, ajustar una pausa o regenerar un solo
+# audio sin volver a pagar esa media hora — y sobre todo, que si el motor se
+# queda sin cuota en la tercera caminata no se pierdan las dos primeras.
+
+def a_json(piezas: list[Pieza]) -> list[dict]:
+    salida = []
+    for p in piezas:
+        if isinstance(p, Habla):
+            salida.append({"t": "habla", "texto": p.texto})
+        else:
+            salida.append({"t": "silencio", "seg": p.segundos, "cortes": p.cortes})
+    return salida
+
+
+def de_json(datos: list[dict]) -> list[Pieza]:
+    piezas: list[Pieza] = []
+    for d in datos:
+        if d["t"] == "habla":
+            piezas.append(Habla(d["texto"]))
+        else:
+            piezas.append(Silencio(d["seg"], [tuple(c) for c in d.get("cortes", [])]))
+    return piezas
