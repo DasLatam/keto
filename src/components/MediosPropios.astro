@@ -31,20 +31,20 @@ const URL_MEDIOS =
 <section id="medios-propios" class="mt-10 hidden" aria-labelledby="medios-titulo">
   <h2 id="medios-titulo" class="text-xl font-bold text-hoja-700 mb-1">De la cocina</h2>
   <p class="text-sm text-hoja-900/50 mb-4">
-    Fotos y videos del plato de verdad, hecho en casa.
+    Más fotos del plato de verdad, hecho en casa.
   </p>
 
-  {/* Los videos van en su propia fila y en vertical: son Shorts, 9:16. Meterlos
-      en la grilla cuadrada de las fotos los recortaría por arriba y por abajo,
-      que en un plano de cocina es justo donde está la olla. */}
-  <div id="medios-videos" class="flex flex-wrap gap-4 mb-4"></div>
   <div id="medios-grilla" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
 </section>
 
 <script define:vars={{ slug, nombre, URL_MEDIOS }}>
   const seccion = document.getElementById("medios-propios");
   const grilla = document.getElementById("medios-grilla");
+  // El contenedor de los videos no está acá sino arriba, al lado de la foto:
+  // ver el comentario en `pages/recetas/[slug].astro`. Este componente sólo lo
+  // rellena, y por eso puede no existir.
   const fila = document.getElementById("medios-videos");
+  const cajaVideo = document.getElementById("video-receta");
 
   const esc = (s) =>
     String(s ?? "").replace(/[&<>"']/g, (c) =>
@@ -163,17 +163,21 @@ const URL_MEDIOS =
           </a>`);
       }
 
-      if (!videos.length && !fotos.length) return;
-      fila.innerHTML = videos.join("");
-      grilla.innerHTML = fotos.join("");
-      seccion.classList.remove("hidden");
+      if (videos.length && fila) {
+        fila.innerHTML = videos.join("");
+        cajaVideo?.classList.remove("hidden");
+      }
+      if (fotos.length) {
+        grilla.innerHTML = fotos.join("");
+        seccion.classList.remove("hidden");
+      }
     })
     .catch(() => {
       /* Sin conexión con el panel no hay bloque, y la receta se lee igual. */
     });
 
   // El iframe se inserta al tocar la tarjeta, no antes.
-  fila.addEventListener("click", (e) => {
+  fila?.addEventListener("click", (e) => {
     const caja = e.target.closest("[data-short]");
     if (!caja) return;
     const id = caja.dataset.short;

@@ -24,9 +24,11 @@ if (in_array($origen, ORIGENES, true)) {
     header('Vary: Origin');
 }
 header('Content-Type: application/json; charset=utf-8');
-// Cinco minutos: el sitio no necesita el segundo exacto, y sin cache cada visita
-// a una receta golpea el hosting compartido.
-header('Cache-Control: public, max-age=300');
+// Un minuto. Empezó en cinco, pero el ciclo real es "subo algo desde el panel y
+// voy a mirarlo al sitio": cinco minutos de cache ahí se sienten como que no
+// funcionó. Un minuto sigue evitando que cada visita a una receta golpee el
+// hosting compartido.
+header('Cache-Control: public, max-age=60');
 header('X-Robots-Tag: noindex');
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {

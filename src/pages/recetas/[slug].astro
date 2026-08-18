@@ -130,6 +130,18 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
       </figure>
     )}
 
+    {/* El video va acá arriba, pegado a la foto, y no al pie con el resto de los
+        medios. Si alguien se tomó el trabajo de filmar el plato, esconderlo
+        debajo de los pasos y del recuadro del tip —varias pantallas de scroll en
+        un teléfono— es tirar a la basura lo mejor que tiene la página.
+        Lo rellena MediosPropios.astro; sin video, esta sección no aparece. */}
+    <section id="video-receta" class="mt-5 hidden" aria-labelledby="video-titulo">
+      <h2 id="video-titulo" class="text-sm font-semibold text-hoja-700 mb-2">
+        El video de esta receta
+      </h2>
+      <div id="medios-videos" class="flex flex-wrap gap-4"></div>
+    </section>
+
     <dl class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[
         ["Grasas", `${macros.grasas} g`],
