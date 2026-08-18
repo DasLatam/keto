@@ -1,7 +1,7 @@
 ---
 /**
- * Bloque «De la cocina de Ariel»: las fotos y videos que se suben desde el panel
- * (https://www.baudry.com.ar/keto-panel/), más los enlaces de YouTube.
+ * Bloque «De la cocina»: las fotos y videos que se suben desde el panel
+ * (https://www.baudry.com.ar/keto-panel/), más los Shorts de YouTube.
  *
  * Se llena **en el navegador**, no en el build, y ésa es la decisión de fondo:
  * el sitio es estático y se despliega desde git, así que una foto sacada en la
@@ -10,7 +10,9 @@
  *
  * Lo que NO se resuelve así es la foto grande de arriba: ésa entra al repo con
  * `scripts/traer_medios.py` y se sirve estática, porque es el LCP de la página y
- * cargarla por JavaScript la volvería lo último en aparecer.
+ * cargarla por JavaScript la volvería lo último en aparecer. (El navegador la
+ * reemplaza igual apenas contesta el panel, para no hacer esperar un build a
+ * quien acaba de sacar la foto.)
  *
  * Si el endpoint no responde, el bloque simplemente no aparece. Una receta sin
  * video sigue siendo una receta completa.
@@ -31,16 +33,49 @@ const URL_MEDIOS =
   <p class="text-sm text-hoja-900/50 mb-4">
     Fotos y videos del plato de verdad, hecho en casa.
   </p>
+
+  {/* Los videos van en su propia fila y en vertical: son Shorts, 9:16. Meterlos
+      en la grilla cuadrada de las fotos los recortaría por arriba y por abajo,
+      que en un plano de cocina es justo donde está la olla. */}
+  <div id="medios-videos" class="flex flex-wrap gap-4 mb-4"></div>
   <div id="medios-grilla" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
 </section>
 
 <script define:vars={{ slug, nombre, URL_MEDIOS }}>
   const seccion = document.getElementById("medios-propios");
   const grilla = document.getElementById("medios-grilla");
+  const fila = document.getElementById("medios-videos");
 
   const esc = (s) =>
     String(s ?? "").replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+  /**
+   * Parámetros del reproductor incrustado.
+   *
+   * Lo que se puede y lo que no, verificado contra la documentación de YouTube:
+   *
+   * - `rel=0` **no elimina** los videos relacionados. Desde el 25/9/2018 sólo
+   *   los limita al mismo canal. No hay forma de que no aparezca ninguno.
+   * - `modestbranding` está **discontinuado** desde el 15/8/2023 y no hace nada,
+   *   así que no se manda: sería ruido que aparenta hacer algo.
+   * - Tampoco existe parámetro para apagar las pantallas finales.
+   *
+   * `loop=1` es lo que sí resuelve el problema de raíz: el short se reencima en
+   * vez de terminar, así que la pantalla final y la grilla de relacionados nunca
+   * llegan a aparecer. Es además como se comportan los Shorts nativamente.
+   * `loop` sobre un video suelto exige repetir el id en `playlist`.
+   */
+  const parametros = (id) =>
+    new URLSearchParams({
+      autoplay: "1",        // el iframe se inserta al tocar: se espera que arranque
+      loop: "1",
+      playlist: id,         // sin esto, `loop` no hace nada en un video solo
+      rel: "0",             // relacionados sólo del mismo canal (lo máximo posible)
+      playsinline: "1",     // en iPhone, que no se vaya a pantalla completa solo
+      iv_load_policy: "3",  // sin anotaciones
+      disablekb: "1",
+    }).toString();
 
   // Se pide sólo esta receta: el manifiesto completo son las 49 y acá interesa una.
   fetch(`${URL_MEDIOS}?slug=${encodeURIComponent(slug)}`, { mode: "cors" })
@@ -74,52 +109,87 @@ const URL_MEDIOS =
         }
       }
 
-      const partes = [];
-
-      for (const m of reg.medios ?? []) {
-        // La que quedó de portada no se repite abajo.
-        if (m.id === yaPuesta) continue;
-        if (m.tipo === "video") {
-          partes.push(
-            `<video controls preload="metadata" playsinline
-                    class="w-full rounded-xl bg-black aspect-square object-cover"
-                    src="${esc(m.url)}"></video>`,
-          );
-        } else {
-          // `vista` es la miniatura de 800 px; el original va en el enlace, para
-          // quien quiera verla grande. Sin esto, una foto de iPhone son 4 MB.
-          partes.push(
-            `<a href="${esc(m.url)}" target="_blank" rel="noopener">
-               <img src="${esc(m.vista)}" alt="${esc(nombre)}, hecho en casa"
-                    loading="lazy" decoding="async"
-                    class="w-full rounded-xl aspect-square object-cover bg-crema-200">
-             </a>`,
-          );
-        }
-      }
+      // ── Videos, en vertical ───────────────────────────────────────────────
+      const videos = [];
 
       for (const v of reg.youtube ?? []) {
-        // Ni iframe ni miniatura. El iframe trae las cookies y el rastreo de
-        // YouTube, pero `i.ytimg.com/vi/…` es igual de tercero: cargarla le
-        // cuenta a Google que alguien abrió esta receta, sin que nadie haya
-        // apretado nada. El sitio declara no tener terceros fuera de la
-        // publicidad, así que la tarjeta se dibuja acá y sólo el clic sale.
-        partes.push(
-          `<a href="https://youtu.be/${esc(v)}" target="_blank" rel="noopener"
-              class="grid place-items-center gap-2 aspect-square rounded-xl
-                     bg-hoja-700 text-crema-50 hover:bg-hoja-600 transition p-4 text-center">
-             <span class="w-14 h-14 rounded-full bg-crema-50/15 grid place-items-center text-2xl"
-                   aria-hidden="true">▶</span>
-             <span class="text-sm leading-snug">Ver el video en YouTube</span>
-           </a>`,
-        );
+        // Tarjeta primero, iframe recién al tocarla. El reproductor de YouTube
+        // pesa cientos de kilobytes y contacta a Google apenas se dibuja: si se
+        // incrustara de entrada, abrir una receta le contaría la visita a Google
+        // sin que nadie haya pedido ver nada. Así, hasta el toque no sale nada
+        // de acá — y una vez tocado, el short se reproduce dentro del sitio.
+        //
+        // Sin miniatura de i.ytimg.com por lo mismo: esa imagen también es de
+        // Google y cargarla delataría la visita igual que el iframe.
+        videos.push(`
+          <div class="shorts relative rounded-xl overflow-hidden bg-hoja-900"
+               data-short="${esc(v)}">
+            <button type="button" class="absolute inset-0 w-full h-full grid place-items-center
+                                         gap-3 text-crema-50 group cursor-pointer"
+                    aria-label="Reproducir el video de ${esc(nombre)}">
+              <span class="w-16 h-16 rounded-full bg-crema-50/15 grid place-items-center text-3xl
+                           group-hover:bg-crema-50/25 transition" aria-hidden="true">▶</span>
+              <span class="text-sm px-4 text-center leading-snug">
+                Ver el video<br><span class="text-crema-50/60 text-xs">se carga al tocarlo</span>
+              </span>
+            </button>
+          </div>`);
       }
 
-      if (!partes.length) return;
-      grilla.innerHTML = partes.join("");
+      for (const m of reg.medios ?? []) {
+        if (m.tipo !== "video") continue;
+        // `object-contain` y no `cover`: un video propio puede venir apaisado del
+        // celular, y recortarlo para que llene un marco vertical se come medio
+        // plano. Que sobre negro a los costados es preferible.
+        videos.push(`
+          <div class="shorts rounded-xl overflow-hidden bg-hoja-900">
+            <video controls preload="metadata" playsinline
+                   class="w-full h-full object-contain"
+                   src="${esc(m.url)}"></video>
+          </div>`);
+      }
+
+      // ── Fotos ─────────────────────────────────────────────────────────────
+      const fotos = [];
+      for (const m of reg.medios ?? []) {
+        if (m.tipo !== "imagen" || m.id === yaPuesta) continue;
+        // `vista` es la miniatura de 800 px; el original va en el enlace, para
+        // quien quiera verla grande. Sin esto, una foto de iPhone son 4 MB.
+        fotos.push(`
+          <a href="${esc(m.url)}" target="_blank" rel="noopener">
+            <img src="${esc(m.vista)}" alt="${esc(nombre)}, hecho en casa"
+                 loading="lazy" decoding="async"
+                 class="w-full rounded-xl aspect-square object-cover bg-crema-200">
+          </a>`);
+      }
+
+      if (!videos.length && !fotos.length) return;
+      fila.innerHTML = videos.join("");
+      grilla.innerHTML = fotos.join("");
       seccion.classList.remove("hidden");
     })
     .catch(() => {
       /* Sin conexión con el panel no hay bloque, y la receta se lee igual. */
     });
+
+  // El iframe se inserta al tocar la tarjeta, no antes.
+  fila.addEventListener("click", (e) => {
+    const caja = e.target.closest("[data-short]");
+    if (!caja) return;
+    const id = caja.dataset.short;
+    caja.innerHTML =
+      `<iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/${esc(id)}?${parametros(id)}"` +
+      ` title="Video de ${esc(nombre)}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"` +
+      ` referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+    delete caja.dataset.short;
+  });
 </script>
+
+<style>
+  /* 9:16 con un ancho que no desborde en un teléfono angosto. Los Shorts son
+     1080×1920, así que este marco los muestra sin recortar ni una banda. */
+  .shorts {
+    width: min(17rem, 100%);
+    aspect-ratio: 9 / 16;
+  }
+</style>
