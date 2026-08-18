@@ -1,0 +1,296 @@
+[
+ {
+  "slug": "huevos-fritos-en-grasa-de-panceta",
+  "nombre": "Huevos fritos en grasa de panceta",
+  "comida": "desayuno",
+  "materia": "panceta"
+ },
+ {
+  "slug": "huevos-revueltos-con-palta",
+  "nombre": "Huevos revueltos con palta",
+  "comida": "desayuno",
+  "materia": "palta"
+ },
+ {
+  "slug": "omelette-de-jamon-crudo-y-provolone",
+  "nombre": "Omelette de jamón crudo y provolone",
+  "comida": "desayuno",
+  "materia": "jamón crudo"
+ },
+ {
+  "slug": "panqueques-de-almendras",
+  "nombre": "Panqueques de harina de almendras",
+  "comida": "desayuno",
+  "materia": "harina de almendras"
+ },
+ {
+  "slug": "revuelto-de-espinaca-y-queso-de-cabra",
+  "nombre": "Revuelto de espinaca y queso de cabra",
+  "comida": "desayuno",
+  "materia": "queso de cabra"
+ },
+ {
+  "slug": "tortilla-de-jamon-y-queso-al-microondas",
+  "nombre": "Tortilla de jamón y queso al microondas",
+  "comida": "desayuno",
+  "materia": "queso de máquina"
+ },
+ {
+  "slug": "tortilla-espanola-de-nabo",
+  "nombre": "Tortilla española de nabo",
+  "comida": "desayuno",
+  "materia": "nabo"
+ },
+ {
+  "slug": "yogur-con-nueces-y-frutos-rojos",
+  "nombre": "Yogur natural con nueces y frutos rojos",
+  "comida": "desayuno",
+  "materia": "nueces con cáscara"
+ },
+ {
+  "slug": "ensalada-caprese-con-palta",
+  "nombre": "Caprese con palta",
+  "comida": "almuerzo",
+  "materia": "tomate y albahaca"
+ },
+ {
+  "slug": "ensalada-de-atun-y-huevo",
+  "nombre": "Ensalada de atún y huevo",
+  "comida": "almuerzo",
+  "materia": "atún"
+ },
+ {
+  "slug": "ensalada-de-repollo-y-zanahoria",
+  "nombre": "Ensalada de repollo con mayonesa casera",
+  "comida": "almuerzo",
+  "materia": "zanahorias"
+ },
+ {
+  "slug": "lomo-al-champignon",
+  "nombre": "Lomo al champiñón",
+  "comida": "almuerzo",
+  "materia": "champiñones"
+ },
+ {
+  "slug": "matambrito-de-cerdo-con-rucula",
+  "nombre": "Matambrito de cerdo con ensalada de rúcula",
+  "comida": "almuerzo",
+  "materia": "rúcula"
+ },
+ {
+  "slug": "milanesas-de-pollo-con-almendras",
+  "nombre": "Milanesas de pollo rebozadas en almendras",
+  "comida": "almuerzo",
+  "materia": "pechuga de pollo"
+ },
+ {
+  "slug": "pechuga-rellena-con-espinaca-y-queso",
+  "nombre": "Pechuga rellena con espinaca y queso",
+  "comida": "almuerzo",
+  "materia": "muzzarella"
+ },
+ {
+  "slug": "pollo-al-curry-con-coco",
+  "nombre": "Pollo al curry con leche de coco",
+  "comida": "almuerzo",
+  "materia": "cúrcuma"
+ },
+ {
+  "slug": "pollo-al-verdeo-sin-harina",
+  "nombre": "Pollo al verdeo sin harina",
+  "comida": "almuerzo",
+  "materia": "cebolla de verdeo"
+ },
+ {
+  "slug": "revuelto-de-zapallitos-con-carne-picada",
+  "nombre": "Revuelto de zapallitos con carne picada",
+  "comida": "almuerzo",
+  "materia": "carne picada"
+ },
+ {
+  "slug": "tarta-de-jamon-y-queso-con-masa-de-almendras",
+  "nombre": "Tarta de jamón y queso con masa de almendras",
+  "comida": "almuerzo",
+  "materia": "frutos secos"
+ },
+ {
+  "slug": "vacio-al-horno-con-chimichurri",
+  "nombre": "Vacío al horno con chimichurri",
+  "comida": "almuerzo",
+  "materia": "vacío"
+ },
+ {
+  "slug": "almendras-tostadas-al-pimenton",
+  "nombre": "Almendras tostadas al pimentón",
+  "comida": "merienda",
+  "materia": "pimentón"
+ },
+ {
+  "slug": "bocaditos-de-queso-y-nuez",
+  "nombre": "Bocaditos de queso y nuez",
+  "comida": "merienda",
+  "materia": "nueces peladas"
+ },
+ {
+  "slug": "budin-de-limon-keto",
+  "nombre": "Budín de limón con harina de almendras",
+  "comida": "merienda",
+  "materia": "manteca"
+ },
+ {
+  "slug": "cheesecake-keto-sin-horno",
+  "nombre": "Cheesecake keto sin horno",
+  "comida": "merienda",
+  "materia": "mascarpone"
+ },
+ {
+  "slug": "flan-de-coco-sin-azucar",
+  "nombre": "Flan de coco sin azúcar",
+  "comida": "merienda",
+  "materia": "coco"
+ },
+ {
+  "slug": "licuado-de-frutilla-y-coco",
+  "nombre": "Licuado de frutilla y coco",
+  "comida": "merienda",
+  "materia": "frutillas"
+ },
+ {
+  "slug": "mousse-de-chocolate-keto",
+  "nombre": "Mousse de chocolate en 5 minutos",
+  "comida": "merienda",
+  "materia": "cacao amargo"
+ },
+ {
+  "slug": "pan-keto-de-taza",
+  "nombre": "Pan keto de taza (2 minutos)",
+  "comida": "merienda",
+  "materia": "semillas de lino"
+ },
+ {
+  "slug": "torta-de-chocolate-en-taza",
+  "nombre": "Torta de chocolate en taza",
+  "comida": "merienda",
+  "materia": "cacao en grano"
+ },
+ {
+  "slug": "berenjenas-a-la-parmesana",
+  "nombre": "Berenjenas a la parmesana sin rebozar",
+  "comida": "cena",
+  "materia": "berenjena"
+ },
+ {
+  "slug": "brochetas-de-pollo-y-morron",
+  "nombre": "Brochetas de pollo y morrón",
+  "comida": "cena",
+  "materia": "morrón"
+ },
+ {
+  "slug": "coliflor-gratinado-con-queso",
+  "nombre": "Coliflor gratinado con queso",
+  "comida": "cena",
+  "materia": "queso para gratinar"
+ },
+ {
+  "slug": "crema-de-brocoli",
+  "nombre": "Crema de brócoli",
+  "comida": "cena",
+  "materia": "brócoli"
+ },
+ {
+  "slug": "sopa-de-zapallo-y-jengibre",
+  "nombre": "Crema de zapallo y jengibre",
+  "comida": "cena",
+  "materia": "jengibre"
+ },
+ {
+  "slug": "fideos-de-zucchini-con-crema-y-panceta",
+  "nombre": "Fideos de zucchini con crema y panceta",
+  "comida": "cena",
+  "materia": "zucchini"
+ },
+ {
+  "slug": "huevos-a-la-cazuela-con-espinaca",
+  "nombre": "Huevos a la cazuela con espinaca y crema",
+  "comida": "cena",
+  "materia": "espinaca"
+ },
+ {
+  "slug": "merluza-al-horno-con-manteca-y-limon",
+  "nombre": "Merluza al horno con manteca y limón",
+  "comida": "cena",
+  "materia": "pescado blanco"
+ },
+ {
+  "slug": "pizza-con-masa-de-coliflor",
+  "nombre": "Pizza con masa de coliflor",
+  "comida": "cena",
+  "materia": "coliflor"
+ },
+ {
+  "slug": "revuelto-gramajo-keto",
+  "nombre": "Revuelto gramajo keto",
+  "comida": "cena",
+  "materia": "jamón cocido"
+ },
+ {
+  "slug": "salmon-rosado-con-manteca-de-hierbas",
+  "nombre": "Salmón con manteca de hierbas",
+  "comida": "cena",
+  "materia": "salmón"
+ },
+ {
+  "slug": "sopa-crema-de-champignones",
+  "nombre": "Sopa crema de champiñones",
+  "comida": "cena",
+  "materia": "champiñones"
+ },
+ {
+  "slug": "tortilla-de-acelga-y-queso",
+  "nombre": "Tortilla de acelga y queso",
+  "comida": "cena",
+  "materia": "acelga"
+ },
+ {
+  "slug": "zapallitos-rellenos-con-carne",
+  "nombre": "Zapallitos rellenos con carne",
+  "comida": "cena",
+  "materia": "zapallitos"
+ },
+ {
+  "slug": "aceitunas-y-queso-en-cubos",
+  "nombre": "Aceitunas y queso en cubos",
+  "comida": "colacion",
+  "materia": "aceitunas"
+ },
+ {
+  "slug": "chicharron-de-cerdo-casero",
+  "nombre": "Chicharrón de cerdo casero",
+  "comida": "colacion",
+  "materia": "panceta de cerdo"
+ },
+ {
+  "slug": "chips-de-queso-al-horno",
+  "nombre": "Chips de queso al horno",
+  "comida": "colacion",
+  "materia": "queso parmesano"
+ },
+ {
+  "slug": "huevos-duros-con-sal-y-oliva",
+  "nombre": "Huevos duros con sal y aceite de oliva",
+  "comida": "colacion",
+  "materia": "huevos"
+ },
+ {
+  "slug": "palta-con-limon-y-sal",
+  "nombre": "Palta con limón y sal",
+  "comida": "colacion",
+  "materia": "limón"
+ },
+ {
+  "slug": "provoleta-a-la-parrilla",
+  "nombre": "Provoleta a la parrilla",
+  "comida": "colacion",
+  "materia": "queso de horma"
+ }
+]

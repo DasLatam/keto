@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import { RECETAS } from "../../data/recetas.js";
 import creditos from "../../data/creditos.json";
+import MediosPropios from "../../components/MediosPropios.astro";
 import Relacionados from "../../components/Relacionados.astro";
 import { paraReceta } from "../../lib/relacionar.js";
 
@@ -99,9 +100,14 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
           decoding="async"
           class="w-full rounded-xl aspect-[3/2] object-cover bg-crema-200"
         />
-        {/* La foto es del ingrediente, no del plato terminado, y la página lo
-            dice. Callárselo sería vender una foto por otra: quien mira espera
-            ver cómo le va a quedar, y esta foto no se lo promete. */}
+        {/* Mientras la foto sea del ingrediente y no del plato terminado, la
+            página lo dice. Callárselo sería vender una foto por otra: quien mira
+            espera ver cómo le va a quedar, y esa foto no se lo promete.
+
+            Cuando la reemplaza una foto propia del plato ya cocinado (subida
+            desde el panel y traída al repo por `scripts/traer_medios.py`), la
+            aclaración desaparece sola: `credito.propia` marca ese caso y
+            `materia` queda vacía. Dejarla puesta pasaría de honesta a falsa. */}
         <figcaption class="mt-1.5 text-xs text-hoja-900/45 leading-relaxed">
           {credito.materia && (
             <>
@@ -109,10 +115,16 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
               el ingrediente principal, no el plato terminado. ·{" "}
             </>
           )}
-          Foto: {credito.autor} ·{" "}
-          <a href={credito.fuente} target="_blank" rel="noopener nofollow" class="hover:underline">
-            {credito.licencia}
-          </a>
+          {credito.propia ? (
+            <>Foto propia, del plato hecho en casa.</>
+          ) : (
+            <>
+              Foto: {credito.autor} ·{" "}
+              <a href={credito.fuente} target="_blank" rel="noopener nofollow" class="hover:underline">
+                {credito.licencia}
+              </a>
+            </>
+          )}
         </figcaption>
       </figure>
     )}
@@ -167,6 +179,8 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
         <p class="text-hoja-900/80 leading-relaxed">{tip}</p>
       </aside>
     )}
+
+    <MediosPropios slug={slug} nombre={nombre} />
   </article>
 
   <AdSlot formato="rectangulo" />

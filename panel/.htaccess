@@ -1,0 +1,9 @@
+# El panel no se indexa ni se archiva: es una herramienta privada, no una página.
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+</IfModule>
+
+# El manifiesto de recetas y el registro de intentos no se sirven por web.
+<FilesMatch "^(recetas\.json|publicadas\.json|lib\.php)$">
+  Require all denied
+</FilesMatch>

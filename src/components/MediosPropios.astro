@@ -1,0 +1,99 @@
+---
+/**
+ * Bloque «De la cocina de Ariel»: las fotos y videos que se suben desde el panel
+ * (https://www.baudry.com.ar/keto-panel/), más los enlaces de YouTube.
+ *
+ * Se llena **en el navegador**, no en el build, y ésa es la decisión de fondo:
+ * el sitio es estático y se despliega desde git, así que una foto sacada en la
+ * cocina tardaría un build y un push en verse. Pidiéndolo por fetch aparece en
+ * cuanto se sube. Es el mismo trato que el contador.
+ *
+ * Lo que NO se resuelve así es la foto grande de arriba: ésa entra al repo con
+ * `scripts/traer_medios.py` y se sirve estática, porque es el LCP de la página y
+ * cargarla por JavaScript la volvería lo último en aparecer.
+ *
+ * Si el endpoint no responde, el bloque simplemente no aparece. Una receta sin
+ * video sigue siendo una receta completa.
+ */
+interface Props {
+  slug: string;
+  nombre: string;
+}
+const { slug, nombre } = Astro.props;
+
+const URL_MEDIOS =
+  import.meta.env.PUBLIC_MEDIOS_URL ??
+  "https://www.baudry.com.ar/keto-panel/medios.php";
+---
+
+<section id="medios-propios" class="mt-10 hidden" aria-labelledby="medios-titulo">
+  <h2 id="medios-titulo" class="text-xl font-bold text-hoja-700 mb-1">De la cocina</h2>
+  <p class="text-sm text-hoja-900/50 mb-4">
+    Fotos y videos del plato de verdad, hecho en casa.
+  </p>
+  <div id="medios-grilla" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+</section>
+
+<script define:vars={{ slug, nombre, URL_MEDIOS }}>
+  const seccion = document.getElementById("medios-propios");
+  const grilla = document.getElementById("medios-grilla");
+
+  const esc = (s) =>
+    String(s ?? "").replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+  // Se pide sólo esta receta: el manifiesto completo son las 49 y acá interesa una.
+  fetch(`${URL_MEDIOS}?slug=${encodeURIComponent(slug)}`, { mode: "cors" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      const reg = d?.recetas?.[slug];
+      if (!reg) return;
+
+      const partes = [];
+
+      for (const m of reg.medios ?? []) {
+        if (m.tipo === "video") {
+          partes.push(
+            `<video controls preload="metadata" playsinline
+                    class="w-full rounded-xl bg-black aspect-square object-cover"
+                    src="${esc(m.url)}"></video>`,
+          );
+        } else {
+          // `vista` es la miniatura de 800 px; el original va en el enlace, para
+          // quien quiera verla grande. Sin esto, una foto de iPhone son 4 MB.
+          partes.push(
+            `<a href="${esc(m.url)}" target="_blank" rel="noopener">
+               <img src="${esc(m.vista)}" alt="${esc(nombre)}, hecho en casa"
+                    loading="lazy" decoding="async"
+                    class="w-full rounded-xl aspect-square object-cover bg-crema-200">
+             </a>`,
+          );
+        }
+      }
+
+      for (const v of reg.youtube ?? []) {
+        // Sin iframe: incrustar YouTube trae sus cookies y su rastreo a un sitio
+        // que declara no tener ninguna de las dos cosas. La miniatura enlaza al
+        // video y quien quiera verlo lo abre allá.
+        partes.push(
+          `<a href="https://youtu.be/${esc(v)}" target="_blank" rel="noopener"
+              class="relative block group" aria-label="Ver el video en YouTube">
+             <img src="https://i.ytimg.com/vi/${esc(v)}/hqdefault.jpg" alt=""
+                  loading="lazy" decoding="async"
+                  class="w-full rounded-xl aspect-square object-cover bg-crema-200">
+             <span class="absolute inset-0 grid place-items-center">
+               <span class="w-14 h-14 rounded-full bg-black/60 text-white grid place-items-center
+                            text-2xl group-hover:bg-black/75 transition">▶</span>
+             </span>
+           </a>`,
+        );
+      }
+
+      if (!partes.length) return;
+      grilla.innerHTML = partes.join("");
+      seccion.classList.remove("hidden");
+    })
+    .catch(() => {
+      /* Sin conexión con el panel no hay bloque, y la receta se lee igual. */
+    });
+</script>
