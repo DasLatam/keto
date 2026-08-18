@@ -85,10 +85,22 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
     <p id="escala-porciones" class="mt-2 text-sm text-hoja-700 bg-hoja-100 rounded-lg px-3 py-2 hidden">
     </p>
 
+    {/* Foto y video en la misma fila a partir de `md`: la foto se achica y el
+        Short se para al lado, que es como se mira una receta —ver de qué está
+        hecha y ver cómo se hace, de un vistazo—. En pantalla angosta se apilan,
+        porque un Short de 260 px al lado de una foto no entra en un teléfono.
+
+        Si no hay video, la sección queda en `display:none` y la foto se lleva
+        todo el ancho sola, sin que haya que hacer nada. */}
+    <div class="mt-5 flex flex-col md:flex-row md:items-start gap-4">
     {credito && (
-      <figure class="mt-5">
+      <figure class="m-0 md:flex-1 md:min-w-0">
         {/* Sin `lazy`: es la imagen principal, arriba de todo. Cargarla en
-            diferido empeora el LCP en vez de mejorarlo. */}
+            diferido empeora el LCP en vez de mejorarlo.
+
+            La altura fija que la empareja con el video **no** va acá: se la pone
+            MediosPropios.astro sólo si hay video. Puesta siempre, las 48 recetas
+            sin video mostraban la foto como una franja de 992×464. */}
         <img
           id="foto-receta"
           src={`/img/recetas/${slug}.webp`}
@@ -130,17 +142,14 @@ const jsonld = { "@context": "https://schema.org", "@graph": [receta_ld, miga] }
       </figure>
     )}
 
-    {/* El video va acá arriba, pegado a la foto, y no al pie con el resto de los
-        medios. Si alguien se tomó el trabajo de filmar el plato, esconderlo
-        debajo de los pasos y del recuadro del tip —varias pantallas de scroll en
-        un teléfono— es tirar a la basura lo mejor que tiene la página.
-        Lo rellena MediosPropios.astro; sin video, esta sección no aparece. */}
-    <section id="video-receta" class="mt-5 hidden" aria-labelledby="video-titulo">
-      <h2 id="video-titulo" class="text-sm font-semibold text-hoja-700 mb-2">
-        El video de esta receta
-      </h2>
-      <div id="medios-videos" class="flex flex-wrap gap-4"></div>
-    </section>
+      {/* Lo rellena MediosPropios.astro; sin video no aparece. El título va
+          oculto a la vista: al lado de la foto del plato, un video no necesita
+          que le pongan un cartel que diga que es un video. */}
+      <section id="video-receta" class="hidden md:shrink-0" aria-labelledby="video-titulo">
+        <h2 id="video-titulo" class="sr-only">El video de esta receta</h2>
+        <div id="medios-videos" class="flex flex-wrap gap-4"></div>
+      </section>
+    </div>
 
     <dl class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[

@@ -89,7 +89,12 @@ const NAV_EXTRA = [
                 {i.texto}
               </a>
             ))}
-            <div class="ml-2"><Buscador /></div>
+            {/* El buscador aparece recién en `lg`. Entre 768 y 1023 px —un iPad
+                vertical— el logo, los cinco enlaces del nav y una caja de 224 px
+                no entran en los 1024 px del contenedor, y la barra se salía del
+                ancho de la página: el sitio entero scrolleaba de costado. En esa
+                franja se llega a la búsqueda desde el menú, como en el teléfono. */}
+            <div class="ml-2 hidden lg:block"><Buscador /></div>
           </nav>
 
           <button

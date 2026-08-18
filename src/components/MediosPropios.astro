@@ -77,7 +77,18 @@ const URL_MEDIOS =
    *
    * Los Shorts son 1080×1920, así que 9:16 los muestra sin recortar una banda.
    */
-  const ESTILO_MARCO = "aspect-ratio:9/16;width:min(17rem,100%);border:0";
+  const ESTILO_MARCO = "aspect-ratio:9/16;border:0";
+  // El tamaño va en clases de Tailwind, que son globales y sí aplican a lo que
+  // crea el JS. En pantalla angosta manda el ancho y la altura sale del 9:16;
+  // desde `md` manda la altura, para que el Short quede parejo con la foto de
+  // al lado, y el ancho lo deduce el mismo 9:16. La proporción va inline porque
+  // es lo único que no puede fallar: es lo que le da tamaño al elemento.
+  // La altura de la fila crece con la pantalla. Con una sola altura, en un iPad
+  // vertical la foto quedaba de 444x464 —casi cuadrada— y un 3:2 recortado así
+  // pierde media fuente. Con estos dos valores la foto conserva su proporción
+  // en los dos tamaños, y el ancho del Short lo deduce el 9:16.
+  const CLASES_MARCO =
+    "rounded-xl bg-hoja-900 w-[min(17rem,100%)] md:w-auto md:h-[22rem] lg:h-[29rem]";
 
   const parametros = (id) =>
     new URLSearchParams({
@@ -134,7 +145,7 @@ const URL_MEDIOS =
         // evita que Google sepa de la visita, pero es lo mejor disponible sin
         // renunciar a incrustar. `loading="lazy"` para que no frene la página.
         videos.push(`
-          <iframe style="${ESTILO_MARCO}" class="rounded-xl bg-hoja-900"
+          <iframe style="${ESTILO_MARCO}" class="${CLASES_MARCO}"
                   src="https://www.youtube-nocookie.com/embed/${esc(v)}?${parametros(v)}"
                   title="Video de ${esc(nombre)}" loading="lazy" frameborder="0"
                   referrerpolicy="strict-origin-when-cross-origin"
@@ -149,7 +160,7 @@ const URL_MEDIOS =
         // plano. Que sobre negro a los costados es preferible.
         videos.push(`
           <video controls preload="metadata" playsinline
-                 style="${ESTILO_MARCO}" class="rounded-xl bg-hoja-900 object-contain"
+                 style="${ESTILO_MARCO}" class="${CLASES_MARCO} object-contain"
                  src="${esc(m.url)}"></video>`);
       }
 
@@ -170,6 +181,12 @@ const URL_MEDIOS =
       if (videos.length && fila) {
         fila.innerHTML = videos.join("");
         cajaVideo?.classList.remove("hidden");
+        // La foto se empareja en altura con el video **sólo cuando hay video**.
+        // Si estas clases estuvieran en el HTML, las 48 recetas sin video
+        // mostrarían la foto achatada a una franja de 992×464 en vez de su 3:2.
+        document.getElementById("foto-receta")?.classList.add(
+          "md:aspect-auto", "md:h-[22rem]", "lg:h-[29rem]",
+        );
       }
       if (fotos.length) {
         grilla.innerHTML = fotos.join("");
