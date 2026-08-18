@@ -1,0 +1,83 @@
+---
+/**
+ * Reproductor de los audios de guía de una rutina.
+ *
+ * Los MP3 no viven en el repo: viven en Ferozo, junto al contador y al panel.
+ * Son 90 MB entre los cinco, y meterlos en git haría que cada clon del sitio se
+ * baje noventa megas de voz sintetizada para poder compilar tres páginas HTML.
+ * La URL se puede cambiar con `PUBLIC_AUDIOS_URL` sin tocar código.
+ *
+ * `preload="none"` es deliberado: son archivos de hasta 22 MB y la mayoría de
+ * quien abre la página viene a leer la rutina, no a escucharla. Se baja cuando
+ * se aprieta play y no antes.
+ */
+import { AUDIOS_POR_RUTINA } from "../data/audios.js";
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+
+const BASE =
+  import.meta.env.PUBLIC_AUDIOS_URL ?? "https://www.baudry.com.ar/keto-audios";
+
+const audios = AUDIOS_POR_RUTINA[slug] ?? [];
+const enTiempoReal = audios.some((a) => a.clase === "rutina");
+---
+
+{audios.length > 0 && (
+  <section class="mt-6 rounded-xl border border-naranja-500/30 bg-naranja-400/5 p-5">
+    <h2 class="font-semibold text-hoja-700 flex items-center gap-2">
+      <span aria-hidden="true">🎧</span>
+      {audios.length === 1 ? "Audio guía" : `Audios guía (${audios.length})`}
+    </h2>
+
+    <p class="mt-1 text-sm text-hoja-900/60 leading-relaxed">
+      {enTiempoReal ? (
+        <>
+          Va <strong class="font-medium text-hoja-900/80">en tiempo real</strong>: cuando
+          la voz se calla, hacé el ejercicio, y cuando vuelve a hablar es que se terminó.
+          No hace falta que mires el reloj.
+        </>
+      ) : (
+        <>
+          Para escuchar caminando. Repasan lo que hay en el sitio y seis recetas cada uno,
+          y marcan los tramos de la caminata: entrada en calor, ritmo sostenido y vuelta
+          a la calma.
+        </>
+      )}
+    </p>
+
+    <ul class="mt-4 space-y-4">
+      {audios.map((a) => (
+        <li>
+          <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <span class="font-medium text-hoja-900/85">{a.titulo}</span>
+            <span class="text-xs text-hoja-900/45">
+              {a.minutos} min · {(a.bytes / 1048576).toFixed(0)} MB
+            </span>
+          </div>
+          {a.bajada && (
+            <p class="text-sm text-hoja-900/55 leading-relaxed">{a.bajada}</p>
+          )}
+          <audio
+            controls
+            preload="none"
+            class="mt-1.5 w-full"
+            src={`${BASE}/${a.archivo}`}
+          >
+            Tu navegador no reproduce audio.{" "}
+            <a href={`${BASE}/${a.archivo}`}>Bajá el archivo</a>.
+          </audio>
+        </li>
+      ))}
+    </ul>
+
+    {/* La voz es sintética y conviene decirlo: quien escucha una instrucción de
+        ejercicio tiene derecho a saber que no la dictó un profesor. */}
+    <p class="mt-3 text-xs text-hoja-900/40 leading-relaxed">
+      Voz sintética. El texto es el mismo de esta página
+      {enTiempoReal ? "" : ", reescrito para escuchar"}.
+    </p>
+  </section>
+)}

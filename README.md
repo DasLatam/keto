@@ -104,6 +104,142 @@ Requisitos que el script hace cumplir solo:
   pie de cada foto con enlace a la licencia.
 - **El término tiene que estar en el título** de Commons. Es el filtro que faltaba.
 
+## Panel de medios (`panel/` → `baudry.com.ar/keto-panel/`)
+
+Donde Ariel revisa las fotos y sube las suyas, desde el celular. Es PHP en
+Ferozo, igual que el contador y por el mismo motivo: acá ya corre PHP y así no
+entra ningún tercero.
+
+- **URL:** <https://www.baudry.com.ar/keto-panel/> — usuario `ariel`.
+- **No va en `/ariel/`**: esa carpeta es la landing pública de baudry.com.ar, y
+  el panel de Ferozo redirige el dominio raíz ahí.
+- **Deploy:** `scripts/subir_panel.sh` (código) o `--imagenes` (además las 49×4
+  candidatas, 27 MB, que van a `candidatas/`).
+
+Qué muestra: las 4 candidatas de Commons de cada receta con su licencia, marcando
+con un punto naranja **la que sirve el sitio ahora** y con borde verde **la
+elegida**. Si son distintas, la ficha dice «falta publicar». Abajo, las fotos y
+videos propios y los enlaces de YouTube.
+
+### El reparto entre lo estático y lo vivo
+
+No es arbitrario y conviene no invertirlo:
+
+| Qué | Dónde | Por qué |
+|---|---|---|
+| Foto grande de la receta | repo, `public/img/recetas/` | Es el LCP de la página. Cargarla por JavaScript la volvería lo último en aparecer. |
+| Fotos secundarias, videos, YouTube | Ferozo, vía `medios.php` | Aparecen **sin esperar un build**. Es lo que hace que el panel se use en vez de abandonarse. |
+
+`scripts/traer_medios.py` es el puente del primer caso: baja `datos/medios.json`
+por FTP (por FTP y no por HTTP porque `datos/` está detrás de un
+`Require all denied`), copia la candidata elegida o baja la foto propia, la
+encuadra a 1200×800 y reescribe `creditos.json`. Sin `--aplicar` sólo dice qué
+cambiaría.
+
+Cuando la portada pasa a ser una foto propia, `materia` se vacía y queda
+`propia`. Eso hace que el pie deje de decir «el ingrediente principal, no el
+plato terminado»: sobre una foto de una palta esa aclaración es honesta, sobre
+una del plato ya cocinado es falsa.
+
+### Lo que el panel hace cumplir solo
+
+- La contraseña va como `password_hash`, no en claro: el archivo viaja por FTP a
+  un hosting compartido.
+- Freno por IP: a los 5 fallos cada intento espera, a los 10 quedan 15 minutos
+  afuera.
+- El tipo de cada archivo sale de sus bytes con `finfo`, **nunca** del nombre ni
+  del `Content-Type`, y la extensión la pone el servidor.
+- `subidas/` tiene un `.htaccess` que apaga la ejecución de PHP. Sin eso un
+  formulario de subida es una shell remota, que es el error clásico.
+- `datos/` tiene `Require all denied`, porque `/public_html/` es raíz web.
+- Las miniaturas de 800 px no son cosméticas: una foto de iPhone son 4 MB, y el
+  panel se abre desde el celular.
+
+Credenciales FTP en `~/.config/keto/ferozo.env`, fuera del repo.
+
+## Audios de guía (`scripts/audios/`)
+
+Cinco MP3 con la voz de **Daniela** (`es_AR-daniela-high`, la misma de videosyt).
+Se sirven desde Ferozo, no desde el repo: son ~90 MB y git guarda cada versión
+para siempre.
+
+| Audio | Dura | Qué es |
+|---|---|---|
+| `elongacion-manana` | ~16 min | La rutina de la mañana, en tiempo real |
+| `fuerza-en-casa` | ~41 min | La rutina de fuerza, en tiempo real |
+| `caminata-1-por-que-funciona` | ~45 min | La evidencia + 6 desayunos |
+| `caminata-2-lo-que-te-van-a-decir` | ~45 min | Las comparativas + 6 almuerzos |
+| `caminata-3-el-super-y-la-semana` | ~45 min | Productos, plan semanal + 6 cenas |
+
+```bash
+node scripts/audios/exportar.mjs                        # volcar el contenido del sitio
+/usr/bin/python3 scripts/audios/generar.py --plan       # ver qué saldría, sin generar
+MAX=8G /home/hpp/agente/scripts/pesado.sh \
+    /usr/bin/python3 scripts/audios/generar.py --todo   # generar
+scripts/subir_audios.sh                                 # subir a Ferozo
+```
+
+### Los silencios son el punto
+
+Lo que separa estos audios de un podcast sobre ejercicios es que **respetan el
+reloj**: cuando la voz dice «sostené treinta segundos», el audio se calla treinta
+segundos de verdad. `dosis.py` traduce las 26 formas de `dosis` que usa
+`ejercicios.js` («3 series de 12», «25 segundos por pierna», «10 atrás, 10
+adelante») a tramos de silencio, y tiene autoprueba:
+
+```bash
+/usr/bin/python3 scripts/audios/dosis.py
+```
+
+Los avisos que caen **dentro** de un tramo («Diez segundos») se encajan sin
+estirarlo. Si se sumaran, dieciséis ejercicios con dos avisos cada uno correrían
+el audio varios minutos y a mitad de sesión la voz iría atrasada respecto del
+cuerpo. Verificable:
+
+```bash
+/usr/bin/ffmpeg -hide_banner -nostats -i storage/audios/elongacion-manana.mp3 \
+  -af silencedetect=noise=-50dB:d=6 -f null - 2>&1 | grep silence_
+```
+
+### La rutina de fuerza no entra en 40 minutos
+
+Con las 3 series que pide la página son 58 minutos. El audio hace **2 series** y
+queda en 41, **y lo dice en voz alta** en la introducción. Un audio que se callara
+eso mentiría sobre cuánto entrenó quien lo siguió. Con `--series 3` sale completo.
+
+### Las caminatas y el límite del material
+
+Tres audios de 45 minutos son ~23.000 palabras habladas; todo el contenido
+aprovechable del sitio son ~11.000. La salida no es inventar sino **reescribir en
+forma hablada**, que ocupa casi el doble: un texto escrito se puede releer, uno
+hablado no, así que repite, anticipa y recapitula. Como el objetivo es fijar
+conceptos, esa repetición es el punto y no relleno.
+
+El permiso termina ahí, y no se pide por favor: **se verifica**. Cada bloque pasa
+por `numeros.inventados()`, que compara los números del guion contra los de la
+fuente —en dígitos y en palabras, porque un modelo al que se le pide lenguaje
+hablado escribe «doscientas sesenta», no «260»—. Si aparece uno que no estaba, el
+bloque se rechaza y se vuelve a pedir diciendo cuál sobró; a los tres intentos se
+usa el texto del sitio sin reescribir. También tiene autoprueba:
+
+```bash
+/usr/bin/python3 scripts/audios/numeros.py
+```
+
+Dos detalles que costaron y que la autoprueba fija: «por ciento» lleva adentro la
+palabra «ciento», que vale 100 y ensuciaba todo texto con un porcentaje; y «cuatro
+coma tres» tiene que unirse en 4,3, porque en la fuente está en dígitos y si no el
+verificador denuncia como inventado un dato que se copió bien.
+
+El presupuesto de palabras por bloque **se autocorrige**: los modelos no aciertan
+el largo pedido (gemini se pasa un 30 %) y con nueve bloques ese sesgo convierte
+una caminata de 45 minutos en una de 58. Después de cada bloque se reparte lo que
+queda entre los que faltan, así no hace falta calibrar un factor por motor que
+envejecería con cada versión del modelo.
+
+El motor por defecto es **gemini**, con la cadena de respaldo de videosyt
+(`gemini → mistral → ollama`). Se reusa `videosyt/pipeline/llm.py` entero.
+
 ## Calendario y recordatorios (`/calendario`)
 
 `src/lib/ics.js` genera archivos iCalendar (RFC 5545) que se importan en Google

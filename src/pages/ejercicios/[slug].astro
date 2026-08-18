@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import AdSlot from "../../components/AdSlot.astro";
+import AudioGuia from "../../components/AudioGuia.astro";
 import { RUTINAS, caloriasPorSesion, sesionesSemanales } from "../../data/ejercicios.js";
 
 export function getStaticPaths() {
@@ -104,6 +105,8 @@ const jsonld = {
     <p class="mt-5 text-lg text-hoja-900/80 leading-relaxed border-l-4 border-hoja-500 pl-4">
       {veredicto}
     </p>
+
+    <AudioGuia slug={slug} />
 
     <div class="mt-6 grid sm:grid-cols-2 gap-4">
       <section class="rounded-xl border border-hoja-100 bg-white p-5">

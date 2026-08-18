@@ -27,3 +27,10 @@ logs/
 # Material de trabajo de scripts/bajar_imagenes.py: candidatas a revisar antes
 # de publicar. No va al repo, se regenera cuando haga falta.
 .revision-imagenes/
+
+# Volcado del contenido para el pipeline de audio, y los MP3 generados.
+# Los audios pesan ~90 MB y git guarda cada version para siempre: viven en
+# Ferozo. Ver scripts/subir_audios.sh.
+storage/contenido.json
+storage/audios/
+storage/cache_voz/

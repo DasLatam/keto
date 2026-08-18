@@ -72,19 +72,18 @@ const URL_MEDIOS =
       }
 
       for (const v of reg.youtube ?? []) {
-        // Sin iframe: incrustar YouTube trae sus cookies y su rastreo a un sitio
-        // que declara no tener ninguna de las dos cosas. La miniatura enlaza al
-        // video y quien quiera verlo lo abre allá.
+        // Ni iframe ni miniatura. El iframe trae las cookies y el rastreo de
+        // YouTube, pero `i.ytimg.com/vi/…` es igual de tercero: cargarla le
+        // cuenta a Google que alguien abrió esta receta, sin que nadie haya
+        // apretado nada. El sitio declara no tener terceros fuera de la
+        // publicidad, así que la tarjeta se dibuja acá y sólo el clic sale.
         partes.push(
           `<a href="https://youtu.be/${esc(v)}" target="_blank" rel="noopener"
-              class="relative block group" aria-label="Ver el video en YouTube">
-             <img src="https://i.ytimg.com/vi/${esc(v)}/hqdefault.jpg" alt=""
-                  loading="lazy" decoding="async"
-                  class="w-full rounded-xl aspect-square object-cover bg-crema-200">
-             <span class="absolute inset-0 grid place-items-center">
-               <span class="w-14 h-14 rounded-full bg-black/60 text-white grid place-items-center
-                            text-2xl group-hover:bg-black/75 transition">▶</span>
-             </span>
+              class="grid place-items-center gap-2 aspect-square rounded-xl
+                     bg-hoja-700 text-crema-50 hover:bg-hoja-600 transition p-4 text-center">
+             <span class="w-14 h-14 rounded-full bg-crema-50/15 grid place-items-center text-2xl"
+                   aria-hidden="true">▶</span>
+             <span class="text-sm leading-snug">Ver el video en YouTube</span>
            </a>`,
         );
       }

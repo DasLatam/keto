@@ -1,0 +1,20 @@
+{
+  "elongacion-manana": {
+    "archivo": "elongacion-manana.mp3",
+    "segundos": 968.1,
+    "minutos": 16.1,
+    "bytes": 7745770,
+    "titulo": "Elongación de la mañana",
+    "clase": "rutina",
+    "generado": "2026-08-18"
+  },
+  "fuerza-en-casa": {
+    "archivo": "fuerza-en-casa.mp3",
+    "segundos": 2484.9,
+    "minutos": 41.4,
+    "bytes": 19880159,
+    "titulo": "Fuerza en casa",
+    "clase": "rutina",
+    "generado": "2026-08-18"
+  }
+}
