@@ -1,7 +1,7 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import AdSlot from "../components/AdSlot.astro";
-import { PRODUCTOS, CATEGORIAS } from "../data/productos.js";
+import Layout from "../../layouts/Layout.astro";
+import AdSlot from "../../components/AdSlot.astro";
+import { PRODUCTOS, CATEGORIAS } from "../../data/productos.js";
 ---
 
 <Layout
@@ -51,7 +51,9 @@ import { PRODUCTOS, CATEGORIAS } from "../data/productos.js";
                     p.apto ? "bg-hoja-100 text-hoja-700" : "bg-red-100 text-red-700"]}>
                     {p.apto ? "Sí" : "No"}
                   </span>
-                  {p.nombre}
+                  <a href={`/productos/${p.slug}`} class="hover:text-naranja-600 hover:underline">
+                    {p.nombre}
+                  </a>
                 </h3>
                 {p.marcas && (
                   <p class="mt-1.5 text-sm text-hoja-900/50">
@@ -59,6 +61,11 @@ import { PRODUCTOS, CATEGORIAS } from "../data/productos.js";
                   </p>
                 )}
                 <p class="mt-1.5 text-sm text-hoja-900/70 leading-relaxed">{p.nota}</p>
+                <p class="mt-2">
+                  <a href={`/productos/${p.slug}`} class="text-sm text-naranja-600 hover:underline">
+                    Cómo elegirlo y cómo guardarlo →
+                  </a>
+                </p>
               </div>
               <div class="text-right shrink-0">
                 <div class:list={["text-lg font-bold", p.apto ? "text-hoja-700" : "text-red-600"]}>

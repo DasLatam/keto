@@ -1,0 +1,215 @@
+---
+/**
+ * Página de un ingrediente.
+ *
+ * Junta dos cosas que hasta ahora estaban sueltas: la ficha de góndola de
+ * `productos.js` —si entra, cuántos carbohidratos, qué marcas— y la ficha larga
+ * de `ingredientes.js`, escrita a mano.
+ *
+ * La sección «dónde se usa» **no está escrita**: sale de buscar el ingrediente en
+ * los ingredientes de las 49 recetas. Escrita a mano se desactualizaría con la
+ * primera receta nueva; derivada, no puede mentir.
+ */
+import Layout from "../../layouts/Layout.astro";
+import AdSlot from "../../components/AdSlot.astro";
+import Relacionados from "../../components/Relacionados.astro";
+import { PRODUCTOS, CATEGORIAS } from "../../data/productos.js";
+import { RECETAS } from "../../data/recetas.js";
+import { detalle } from "../../data/ingredientes.js";
+import { recetasCon, terminos } from "../../lib/ingredientes.js";
+
+export function getStaticPaths() {
+  return PRODUCTOS.map((p) => ({ params: { slug: p.slug }, props: { p } }));
+}
+
+const { p } = Astro.props;
+const d = detalle(p.slug);
+const categoria = CATEGORIAS.find((c) => c.id === p.categoria);
+const usadoEn = recetasCon(p, RECETAS);
+const hermanos = PRODUCTOS.filter((x) => x.categoria === p.categoria && x.slug !== p.slug);
+
+// `nutrition` con los carbohidratos por 100 g: es el dato por el que la gente
+// busca («cuántos carbos tiene el queso cremoso») y el que un modelo de IA
+// necesita para contestarlo sin inventarlo.
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      headline: `${p.nombre} en keto`,
+      description: p.nota,
+      inLanguage: "es-AR",
+      about: { "@type": "Diet", name: "Dieta cetogénica" },
+      articleBody: [d?.porque, d?.elegir, d?.guardar, d?.error].filter(Boolean).join(" "),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: new URL("/", Astro.site).href },
+        { "@type": "ListItem", position: 2, name: "Qué comprar", item: new URL("/productos", Astro.site).href },
+        { "@type": "ListItem", position: 3, name: p.nombre },
+      ],
+    },
+  ],
+};
+
+const SECCIONES = [
+  ["porque", p.apto ? "Por qué entra en keto" : "Por qué queda afuera"],
+  ["elegir", "Cómo elegirlo"],
+  ["guardar", "Cómo se guarda y se congela"],
+  ["rinde", "Cuánto rinde y por qué se reemplaza"],
+];
+---
+
+<Layout
+  titulo={`${p.nombre} en keto`}
+  descripcion={`${p.nombre}: ${p.apto ? "entra" : "no entra"} en la dieta keto, ${p.carbos} g de carbohidratos cada 100. ${p.nota}`}
+  jsonld={jsonld}
+>
+  <nav class="text-sm text-hoja-900/50 mb-4" aria-label="Miga de pan">
+    <a href="/" class="hover:underline">Inicio</a> ·{" "}
+    <a href="/productos" class="hover:underline">Qué comprar</a>
+  </nav>
+
+  <article class="prosa">
+    <div class="flex items-start gap-4">
+      {categoria && <div class="text-4xl shrink-0" aria-hidden="true">{categoria.emoji}</div>}
+      <div class="min-w-0">
+        <h1 class="text-3xl md:text-4xl font-bold text-hoja-700 leading-tight">{p.nombre}</h1>
+        <p class="mt-2 text-hoja-900/60">
+          {categoria?.nombre}
+          {" · "}
+          <span class:list={["font-semibold", p.apto ? "text-hoja-700" : "text-naranja-600"]}>
+            {p.apto ? "Entra en keto" : "No entra"}
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div class="rounded-xl bg-white border border-hoja-100 py-3 text-center">
+        <div class="text-xs uppercase tracking-wide text-hoja-900/50">Carbos netos</div>
+        <div class:list={["text-2xl font-bold", p.carbos <= 5 ? "text-hoja-700" : "text-naranja-600"]}>
+          {p.carbos} g
+        </div>
+        <div class="text-[11px] text-hoja-900/40">cada 100 g</div>
+      </div>
+      <div class="rounded-xl bg-white border border-hoja-100 py-3 text-center">
+        <div class="text-xs uppercase tracking-wide text-hoja-900/50">Veredicto</div>
+        <div class="text-2xl font-bold" aria-hidden="true">{p.apto ? "✅" : "🚫"}</div>
+        <div class="text-[11px] text-hoja-900/40">{p.apto ? "adentro" : "afuera"}</div>
+      </div>
+      <div class="rounded-xl bg-white border border-hoja-100 py-3 text-center col-span-2 sm:col-span-1">
+        <div class="text-xs uppercase tracking-wide text-hoja-900/50">En recetas</div>
+        <div class="text-2xl font-bold text-hoja-700">{usadoEn.length}</div>
+        <div class="text-[11px] text-hoja-900/40">del sitio</div>
+      </div>
+    </div>
+
+    <p class="mt-5 text-lg text-hoja-900/80 leading-relaxed border-l-4 border-hoja-500 pl-4">
+      {p.nota}
+    </p>
+
+    {p.marcas && (
+      <p class="mt-4 text-sm text-hoja-900/60 leading-relaxed">
+        <strong class="text-hoja-700 font-semibold">Se consigue como:</strong> {p.marcas}.
+      </p>
+    )}
+
+    {d ? (
+      <>
+        {SECCIONES.map(([campo, titulo]) =>
+          d[campo] && d[campo] !== "—" ? (
+            <>
+              <h2 class="mt-8 text-2xl font-bold text-hoja-700">{titulo}</h2>
+              <p class="mt-3 text-hoja-900/80 leading-relaxed" set:html={
+                d[campo].replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-hoja-900">$1</strong>')
+              } />
+            </>
+          ) : null,
+        )}
+
+        {d.error && (
+          <aside class="mt-8 rounded-xl border-l-4 border-naranja-500 bg-naranja-400/10 p-5">
+            <p class="font-semibold text-naranja-600 mb-1">El error típico</p>
+            <p class="text-hoja-900/80 leading-relaxed" set:html={
+              d.error.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-hoja-900">$1</strong>')
+            } />
+          </aside>
+        )}
+      </>
+    ) : (
+      <p class="mt-8 text-hoja-900/55">La ficha larga de este producto todavía no está escrita.</p>
+    )}
+
+    <AdSlot formato="horizontal" />
+
+    {usadoEn.length > 0 && (
+      <>
+        <h2 class="mt-8 text-2xl font-bold text-hoja-700">
+          Dónde se usa en el sitio
+        </h2>
+        <p class="mt-2 text-sm text-hoja-900/55 leading-relaxed">
+          {usadoEn.length === 1
+            ? "Aparece en una receta."
+            : `Aparece en ${usadoEn.length} recetas.`}{" "}
+          Esta lista sale de los ingredientes de cada receta, así que no puede quedar
+          desactualizada.
+        </p>
+        <ul class="mt-4 grid sm:grid-cols-2 gap-2">
+          {usadoEn.map((r) => (
+            <li>
+              <a
+                href={`/recetas/${r.slug}`}
+                class="flex items-baseline justify-between gap-3 rounded-lg border border-hoja-100 bg-white px-4 py-2.5 hover:border-hoja-500 transition-colors"
+              >
+                <span class="text-hoja-900/85">{r.nombre}</span>
+                <span class="text-xs text-hoja-900/45 whitespace-nowrap">
+                  {r.macros.carbos} g carbos
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {hermanos.length > 0 && (
+      <>
+        <h2 class="mt-10 text-2xl font-bold text-hoja-700">
+          El resto de la góndola de {categoria?.nombre.toLowerCase()}
+        </h2>
+        <ul class="mt-4 flex flex-wrap gap-2">
+          {hermanos.map((h) => (
+            <li>
+              <a
+                href={`/productos/${h.slug}`}
+                class:list={[
+                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                  h.apto
+                    ? "border-hoja-200 text-hoja-900/75 hover:border-hoja-500"
+                    : "border-naranja-400/40 text-naranja-700 hover:border-naranja-500",
+                ]}
+              >
+                <span aria-hidden="true">{h.apto ? "✅" : "🚫"}</span>
+                {h.nombre}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    <p class="mt-8 text-sm text-hoja-900/55 leading-relaxed">
+      Para tenerlo en la compra de la semana, está en la{" "}
+      <a href="/lista-compras" class="text-naranja-600 hover:underline">lista del súper</a>,
+      que calcula las cantidades para los que sean en tu casa.
+    </p>
+  </article>
+
+  <AdSlot formato="rectangulo" />
+
+  <a href="/productos" class="inline-block mt-8 text-naranja-600 hover:underline">
+    ← Todo lo que se compra
+  </a>
+</Layout>
