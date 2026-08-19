@@ -1,0 +1,91 @@
+---
+/**
+ * Trucos de cocina.
+ *
+ * Agrupados por lo que resuelven y no por técnica: nadie busca «reacción de
+ * Maillard», busca «por qué la carne me queda gris».
+ */
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { TRUCOS } from "../data/cocina.js";
+
+const total = TRUCOS.reduce((n, g) => n + g.items.length, 0);
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      headline: "Trucos de cocina para keto",
+      inLanguage: "es-AR",
+      description: `${total} trucos agrupados por lo que resuelven: el dorado, el huevo, las masas sin harina, la verdura aguada, el sabor sin carbohidratos y cocinar de a doble.`,
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: new URL("/", Astro.site).href },
+        { "@type": "ListItem", position: 2, name: "Trucos de cocina" },
+      ],
+    },
+  ],
+};
+---
+
+<Layout
+  titulo="Trucos de cocina"
+  descripcion={`${total} trucos de cocina para keto: por qué la carne no se dora, cómo no arruinar el huevo, por qué la masa de almendras se desarma y cómo sacarle el agua a la verdura.`}
+  jsonld={jsonld}
+>
+  <nav class="text-sm text-hoja-900/50 mb-4" aria-label="Miga de pan">
+    <a href="/" class="hover:underline">Inicio</a>
+  </nav>
+
+  <article class="prosa">
+    <h1 class="text-3xl md:text-4xl font-bold text-hoja-700 leading-tight">Trucos de cocina</h1>
+    <p class="mt-4 text-lg text-hoja-900/80 leading-relaxed border-l-4 border-hoja-500 pl-4">
+      {total} cosas que ninguna receta aclara y que son la diferencia entre un plato que sale
+      y uno que se abandona. Están agrupadas por lo que resuelven, porque nadie busca
+      «reacción de Maillard»: busca por qué la carne le queda gris.
+    </p>
+
+    <nav class="mt-6 flex flex-wrap gap-2" aria-label="Secciones">
+      {TRUCOS.map((g) => (
+        <a
+          href={`#${g.grupo.toLowerCase().replace(/[^a-záéíóúñ0-9]+/g, "-")}`}
+          class="inline-flex items-center gap-1.5 rounded-full border border-hoja-200 px-3 py-1.5 text-sm text-hoja-900/75 hover:border-hoja-500 transition-colors"
+        >
+          <span aria-hidden="true">{g.emoji}</span> {g.grupo}
+        </a>
+      ))}
+    </nav>
+
+    {TRUCOS.map((g, gi) => (
+      <>
+        <section id={g.grupo.toLowerCase().replace(/[^a-záéíóúñ0-9]+/g, "-")} class="mt-10 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-hoja-700 flex items-center gap-2">
+            <span aria-hidden="true">{g.emoji}</span> {g.grupo}
+          </h2>
+          <p class="mt-2 text-hoja-900/70 leading-relaxed">{g.intro}</p>
+          <div class="mt-4 space-y-3">
+            {g.items.map((it) => (
+              <div class="rounded-xl border border-hoja-100 bg-white p-5">
+                <h3 class="font-semibold text-hoja-700">{it.t}</h3>
+                <p class="mt-1.5 text-hoja-900/75 leading-relaxed">{it.d}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+        {gi === 1 && <AdSlot formato="horizontal" />}
+      </>
+    ))}
+
+    <p class="mt-10 text-sm text-hoja-900/60 leading-relaxed">
+      Para guardar lo que sobra está{" "}
+      <a href="/congelar" class="text-naranja-600 hover:underline">congelar y descongelar</a>,
+      y cada ingrediente tiene su ficha con cómo elegirlo en{" "}
+      <a href="/productos" class="text-naranja-600 hover:underline">qué comprar</a>.
+    </p>
+  </article>
+
+  <AdSlot formato="rectangulo" />
+</Layout>
