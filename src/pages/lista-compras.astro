@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
 import ListaCompras from "../components/ListaCompras.astro";
+import SelectorAyuno from "../components/SelectorAyuno.astro";
 import { LISTA_COMPRAS, PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
 import { textoItem } from "../lib/porciones.js";
 
@@ -76,6 +77,10 @@ const jsonld = {
   </p>
 
   <div class="mt-8">
+    <div class="mb-6 no-print">
+      <SelectorAyuno nota="Las cantidades bajan en proporción a las comidas que dejás de hacer, y lo que sólo servía para esas comidas sale de la lista. La despensa —aceite, condimentos, edulcorante— no se toca: rinde varias semanas igual." />
+    </div>
+
     <ListaCompras />
   </div>
 

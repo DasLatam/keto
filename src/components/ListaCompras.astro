@@ -7,15 +7,31 @@
 // para una persona y el JavaScript lo reescribe con el número guardado. Así la
 // página sigue siendo estática y cacheable, y quien tenga el JS bloqueado ve la
 // lista para una persona en lugar de no ver nada.
-import { LISTA_COMPRAS } from "../data/recetas.js";
+import { LISTA_COMPRAS, PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
 import { textoItem, claveItem, cuentaEscalables } from "../lib/porciones.js";
+import { COMIDAS_PLAN } from "../data/ayuno.js";
+
+// Calorías promedio de cada comida en el plan. Van al HTML como dato para que el
+// navegador pueda calcular cuánto hay que agrandar las comidas que quedan cuando
+// se saltea alguna: el ayuno mueve cuándo se come, no cuánto, así que la lista
+// del súper **no** baja en proporción a las comidas salteadas.
+const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
+const CAL_COMIDA = Object.fromEntries(
+  COMIDAS_PLAN.map((c) => [
+    c,
+    Math.round(
+      PLAN_SEMANAL.reduce((a, d) => a + (porSlug[d[c]]?.macros.calorias ?? 0), 0) /
+        PLAN_SEMANAL.length,
+    ),
+  ]),
+);
 
 const { titulo = null, compacto = false } = Astro.props;
 
 const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
 ---
 
-<div class="lista-compras" data-lista>
+<div class="lista-compras" data-lista data-cal-comida={JSON.stringify(CAL_COMIDA)}>
   <div class="flex flex-wrap items-center gap-3 gap-y-4">
     {/* El selector es lo primero: si aparece debajo de la lista, la gente copia
         las cantidades para una persona sin enterarse de que se podían escalar. */}
@@ -52,6 +68,10 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
     </span>
   </p>
 
+  {/* Aviso de lo que el ayuno saca de la lista. Sale vacío del build y lo llena
+      el JavaScript: sin ayuno no sobra nada y el aviso no aparece. */}
+  <p data-aviso-ayuno class="mt-2 text-sm text-naranja-600 leading-relaxed hidden"></p>
+
   {titulo && <h2 class="mt-6 text-2xl font-bold text-hoja-700">{titulo}</h2>}
 
   <div class="mt-6 grid gap-4 sm:grid-cols-2">
@@ -63,7 +83,7 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
         </h3>
         <ul class="space-y-2.5">
           {s.items.map((item) => (
-            <li>
+            <li data-fila>
               <label class="flex items-start gap-3 cursor-pointer group">
                 {/* La clave del tilde no lleva la cantidad: si la llevara, mover
                     el selector de personas cambiaría la clave y se destildaría
@@ -79,6 +99,7 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
                   data-unidad={item.unidad ?? ""}
                   data-nombre={item.nombre ?? ""}
                   data-escala={item.escala === false ? "no" : "si"}
+                  data-usos={JSON.stringify(item.usos ?? null)}
                 >
                   {textoItem(item, 1)}
                 </span>
@@ -98,6 +119,7 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
 
 <script>
   import { textoItem } from "../lib/porciones.js";
+  import { factorLista, factorPorcion, porId } from "../data/ayuno.js";
 
   // Misma clave en las dos páginas que muestran la lista: si alguien tilda en
   // /plan-semanal y abre /lista-compras, ve lo mismo. Dos listas con estados
@@ -118,6 +140,17 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
     let personas = Number(localStorage.getItem(CLAVE_PERSONAS)) || 1;
     personas = Math.min(MAX_PERSONAS, Math.max(1, personas));
 
+    // Arranca en lo guardado y no en "sin ayuno": si no, al entrar a la lista se
+    // vería un instante la cantidad completa antes de corregirse.
+    let saltea = porId(localStorage.getItem("keto-ayuno")).saltea;
+    const avisoAyuno = raiz.querySelector("[data-aviso-ayuno]");
+    let calComida = {};
+    try {
+      calComida = JSON.parse(raiz.dataset.calComida || "{}");
+    } catch {
+      calComida = {};
+    }
+
     let guardado = {};
     try {
       guardado = JSON.parse(localStorage.getItem(CLAVE_TILDES) ?? "{}");
@@ -125,19 +158,60 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
       guardado = {};
     }
 
-    /** Reescribe las cantidades de todos los ítems para `personas` personas. */
+    /**
+     * Reescribe las cantidades para `personas` personas y el ayuno elegido.
+     *
+     * El ayuno entra como una fracción sobre `cant` antes de multiplicar por las
+     * personas: salteando el desayuno no desaparecen los huevos, quedan los que
+     * van en las otras comidas. Ver `factorLista` en `data/ayuno.js`.
+     */
     function escalar() {
+      let fuera = 0;
+
       for (const el of textos) {
         const cant = el.dataset.cant === "" ? null : Number(el.dataset.cant);
-        el.textContent = textoItem(
-          {
-            cant,
-            unidad: el.dataset.unidad || null,
-            nombre: el.dataset.nombre || null,
-            escala: el.dataset.escala === "no" ? false : true,
-          },
-          personas
-        );
+        let usos = null;
+        try {
+          usos = JSON.parse(el.dataset.usos || "null");
+        } catch {
+          usos = null;
+        }
+        const item = {
+          cant,
+          unidad: el.dataset.unidad || null,
+          nombre: el.dataset.nombre || null,
+          escala: el.dataset.escala === "no" ? false : true,
+          usos,
+        };
+
+        // El multiplicador es lo que evita que la lista pida comida para 671
+        // calorías por día: si se saltean dos comidas, las otras dos se cocinan
+        // el doble de grandes y sus ingredientes rinden la mitad.
+        const factor = factorLista(item, saltea, factorPorcion(calComida, saltea));
+        const fila = el.closest("[data-fila]");
+
+        if (factor === 0) {
+          // Este ítem sólo servía para comidas que se saltean. Se oculta en vez
+          // de mostrarlo en cero: "0 paltas" en una lista del súper no es un
+          // dato, es ruido.
+          fila?.classList.add("hidden");
+          fuera++;
+          continue;
+        }
+        fila?.classList.remove("hidden");
+        el.textContent = textoItem({ ...item, cant: cant == null ? null : cant * factor }, personas);
+      }
+
+      if (avisoAyuno) {
+        avisoAyuno.classList.toggle("hidden", fuera === 0);
+        const mult = factorPorcion(calComida, saltea);
+        const cola = mult > 1.05
+          ? ` Las comidas que quedan van con porciones × ${mult.toFixed(1)}, así que del resto se compra casi lo mismo: el ayuno mueve cuándo comés, no cuánto.`
+          : "";
+        avisoAyuno.textContent = fuera === 0 ? "" :
+          (fuera === 1
+            ? "Con este ayuno, 1 ítem sale de la lista."
+            : `Con este ayuno, ${fuera} ítems salen de la lista.`) + cola;
       }
 
       salida.textContent = String(personas);
@@ -168,6 +242,11 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
       }
       pintarProgreso();
     }
+
+    document.addEventListener("keto:ayuno", (e) => {
+      saltea = porId(e.detail.id).saltea;
+      escalar();
+    });
 
     for (const c of cajas) {
       c.checked = Boolean(guardado[c.dataset.item]);

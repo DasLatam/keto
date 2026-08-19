@@ -1,0 +1,97 @@
+---
+/**
+ * Selector de ayuno intermitente, compartido por el plan, la lista del súper y
+ * el calendario.
+ *
+ * Guarda la elección en `localStorage` bajo `keto-ayuno` y avisa al resto de la
+ * página con un evento `keto:ayuno`. Cada página decide qué hacer con eso: el
+ * plan tacha las comidas, la lista recalcula las cantidades y el calendario
+ * cambia los horarios. El selector no sabe nada de eso.
+ *
+ * Sale del build en «sin ayuno» y el JavaScript corrige al cargar. Así el HTML
+ * estático sigue mostrando el plan completo, que es el caso general y el que le
+ * queda a quien tenga el JS bloqueado.
+ */
+import { AYUNOS } from "../data/ayuno.js";
+
+interface Props {
+  /** Texto de ayuda debajo de los botones. Cada página explica lo suyo. */
+  nota?: string;
+}
+const { nota } = Astro.props;
+---
+
+<section class="rounded-xl border border-hoja-100 bg-white p-5" data-selector-ayuno>
+  <div class="flex items-baseline justify-between gap-3 flex-wrap">
+    <h2 class="font-semibold text-hoja-700">Ayuno intermitente</h2>
+    <a href="/ayuno-intermitente" class="text-sm text-naranja-600 hover:underline">
+      Cómo funciona →
+    </a>
+  </div>
+
+  <div class="mt-3 flex flex-wrap gap-2" role="group" aria-label="Esquema de ayuno">
+    {AYUNOS.map((a) => (
+      <button
+        type="button"
+        data-ayuno={a.id}
+        aria-pressed={a.id === "no"}
+        class="px-3 py-2 rounded-lg border border-hoja-200 text-sm text-hoja-900/75
+               hover:border-hoja-500 transition-colors
+               aria-pressed:bg-hoja-600 aria-pressed:border-hoja-600 aria-pressed:text-crema-50
+               aria-pressed:font-semibold"
+      >
+        {a.corto}
+        {a.etiqueta !== "4 comidas" && (
+          <span class="ml-1 text-xs opacity-70">{a.etiqueta}</span>
+        )}
+      </button>
+    ))}
+  </div>
+
+  <p id="ayuno-resumen" class="mt-3 text-sm text-hoja-900/70 leading-relaxed"></p>
+  {nota && <p class="mt-2 text-xs text-hoja-900/45 leading-relaxed">{nota}</p>}
+</section>
+
+<script>
+  import { AYUNOS, porId } from "../data/ayuno.js";
+
+  const CLAVE = "keto-ayuno";
+  const caja = document.querySelector("[data-selector-ayuno]");
+  const resumen = document.getElementById("ayuno-resumen");
+
+  /** Lo guardado, validado contra los esquemas que existen. Un `localStorage`
+   *  con basura no tiene que romper la página. */
+  function elegido() {
+    const id = localStorage.getItem(CLAVE);
+    return AYUNOS.some((a) => a.id === id) ? id : "no";
+  }
+
+  function pintar(id) {
+    const a = porId(id);
+    caja?.querySelectorAll("[data-ayuno]").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.ayuno === id));
+    });
+    if (resumen) {
+      resumen.textContent = a.ventana
+        ? `${a.resumen} Ventana de comida: de ${a.ventana.desde} a ${a.ventana.hasta}.`
+        : a.resumen;
+    }
+  }
+
+  function aplicar(id) {
+    localStorage.setItem(CLAVE, id);
+    pintar(id);
+    // El evento va en `document` y no en el botón: las páginas que reaccionan
+    // (el plan, la lista, el calendario) no tienen por qué saber dónde está el
+    // selector ni si existe.
+    document.dispatchEvent(new CustomEvent("keto:ayuno", { detail: { id } }));
+  }
+
+  caja?.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ayuno]");
+    if (b) aplicar(b.dataset.ayuno);
+  });
+
+  // Al cargar se dispara igual, para que las páginas se pinten con lo guardado.
+  aplicar(elegido());
+</script>

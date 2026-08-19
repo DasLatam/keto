@@ -223,6 +223,46 @@ export function armarEventos(cfg) {
     });
   }
 
+  // ── La ventana de comida del ayuno intermitente ─────────────────────
+  // Un solo evento diario que va de la primera comida a la última. Es lo que
+  // convierte "hago ayuno" en algo que se ve en la pantalla del teléfono: fuera
+  // de ese bloque, no se come.
+  //
+  // La ventana se calcula con los horarios que haya puestos en la página, no con
+  // los del esquema: si alguien cena a las diez, su ventana termina a las diez y
+  // el evento tiene que decir eso.
+  if (cfg.ayuno?.saltea?.length && cfg.horasComida) {
+    const quedan = ["desayuno", "almuerzo", "merienda", "cena"]
+      .filter((c) => !cfg.saltea?.includes(c))
+      .map((c) => cfg.horasComida[c])
+      .filter(Boolean)
+      .sort();
+
+    if (quedan.length) {
+      const desde = quedan[0];
+      const hasta = quedan[quedan.length - 1];
+      const minutos = (h) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3));
+      const dur = Math.max(30, minutos(hasta) - minutos(desde));
+      const horas = Math.round(dur / 60);
+
+      eventos.push({
+        uid: `ayuno-ventana@${DOMINIO}`,
+        titulo: `⏳ Ventana de comida (${24 - horas}:${horas})`,
+        detalle:
+          `Entre ${desde} y ${hasta} se come; el resto del día, no.\n\n` +
+          `${cfg.ayuno.nombre}: ${cfg.ayuno.resumen}\n\n` +
+          `Agua, café solo, té y mate amargo no cortan el ayuno.\n\n` +
+          `Cómo funciona: ${sitio}/ayuno-intermitente`,
+        url: `${sitio}/ayuno-intermitente`,
+        hora: desde,
+        duracion: dur,
+        dias: ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+        aviso: 0,
+        desde: cfg.desde,
+      });
+    }
+  }
+
   // ── Las comidas del plan semanal ────────────────────────────────────
   // Un evento por comida y por día, repitiendo todas las semanas: el lunes
   // siempre cae el mismo desayuno. Son 28 eventos, y por eso van detrás de una
@@ -241,6 +281,10 @@ export function armarEventos(cfg) {
       if (!diaICS) continue;
 
       for (const [clave, etiqueta] of CLAVES) {
+        // Las comidas que saltea el ayuno no se agendan: un recordatorio de
+        // desayuno para alguien que decidió no desayunar es exactamente el tipo
+        // de aviso que hace que se desactiven todos los avisos.
+        if (cfg.saltea?.includes(clave)) continue;
         const receta = cfg.recetas?.[dia[clave]];
         if (!receta) continue;
         const hora = cfg.horasComida?.[clave];
