@@ -1,0 +1,45 @@
+---
+/**
+ * Reemplaza las miniaturas del índice por las fotos propias, en vivo.
+ *
+ * Sin esto pasa lo que le pasó a Ariel: sube la foto del plato, entra a la
+ * receta y la ve —porque `MediosPropios.astro` cambia la de arriba—, vuelve al
+ * listado y ahí sigue la vieja. La foto estática recién cambia cuando se corre
+ * `scripts/traer_medios.py --aplicar` y se publica un build.
+ *
+ * Acá se pide el manifiesto **completo** y no receta por receta: el índice tiene
+ * 49 tarjetas y hacer 49 pedidos sería peor que traer los pocos kilobytes de
+ * todo el manifiesto de una vez.
+ *
+ * Va sólo en las páginas con listados. La página de una receta usa
+ * `MediosPropios.astro`, que además maneja el video y el pie de foto.
+ */
+const URL_MEDIOS =
+  import.meta.env.PUBLIC_MEDIOS_URL ??
+  "https://www.baudry.com.ar/keto-panel/medios.php";
+---
+
+<script define:vars={{ URL_MEDIOS }}>
+  const fotos = document.querySelectorAll("[data-foto-receta]");
+  if (fotos.length) {
+    fetch(URL_MEDIOS, { mode: "cors" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const recetas = d?.recetas;
+        if (!recetas) return;
+        for (const img of fotos) {
+          const reg = recetas[img.dataset.fotoReceta];
+          if (reg?.portada?.origen !== "propia") continue;
+          const foto = (reg.medios ?? []).find(
+            (m) => m.id === reg.portada.ref && m.tipo === "imagen",
+          );
+          // `vista` es la miniatura de 800 px: en una grilla de 49 tarjetas,
+          // traer los originales de 4 MB sería peor que no cambiar nada.
+          if (foto) img.src = foto.vista;
+        }
+      })
+      .catch(() => {
+        /* Sin panel, quedan las fotos del build. */
+      });
+  }
+</script>

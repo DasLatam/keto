@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
 import RecetaCard from "../components/RecetaCard.astro";
+import MediosIndice from "../components/MediosIndice.astro";
 import { RECETAS } from "../data/recetas.js";
 
 const destacadas = RECETAS.filter((r) => r.etiquetas.includes("15min")).slice(0, 3);
@@ -134,4 +135,5 @@ const jsonld = {
       ))}
     </div>
   </section>
+  <MediosIndice />
 </Layout>
