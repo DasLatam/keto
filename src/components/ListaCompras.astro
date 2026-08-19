@@ -262,6 +262,12 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
           /* ídem */
         }
         escalar();
+        // El resto de la página necesita enterarse: la sección "qué se cocina
+        // con todo esto" muestra lo que rinde cada receta, y con tres personas
+        // "rinde 1" contradice a la lista que acaba de triplicar las cantidades.
+        document.dispatchEvent(
+          new CustomEvent("keto:personas", { detail: { personas } }),
+        );
       });
     }
 
@@ -273,5 +279,6 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
 
     escalar();
     pintarProgreso();
+    document.dispatchEvent(new CustomEvent("keto:personas", { detail: { personas } }));
   }
 </script>

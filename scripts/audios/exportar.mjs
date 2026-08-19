@@ -20,6 +20,10 @@ const { RUTINAS } = await import(`${RAIZ}/src/data/ejercicios.js`);
 const { ARTICULOS } = await import(`${RAIZ}/src/data/evidencia.js`);
 const { NEGOCIACIONES, CATEGORIAS_NEG } = await import(`${RAIZ}/src/data/negociemos.js`);
 const { PRODUCTOS, CATEGORIAS } = await import(`${RAIZ}/src/data/productos.js`);
+const { INGREDIENTES } = await import(`${RAIZ}/src/data/ingredientes.js`);
+const { PRINCIPIOS_FREEZER, COMO_CONGELAR, NO_SE_CONGELA, TRUCOS } =
+  await import(`${RAIZ}/src/data/cocina.js`);
+const { AYUNOS } = await import(`${RAIZ}/src/data/ayuno.js`);
 
 const salida = {
   generado: new Date().toISOString(),
@@ -32,6 +36,10 @@ const salida = {
   categoriasNeg: CATEGORIAS_NEG,
   productos: PRODUCTOS,
   categorias: CATEGORIAS,
+  ingredientes: INGREDIENTES,
+  freezer: { principios: PRINCIPIOS_FREEZER, fichas: COMO_CONGELAR, nunca: NO_SE_CONGELA },
+  trucos: TRUCOS,
+  ayunos: AYUNOS,
 };
 
 const destino = `${RAIZ}/storage/contenido.json`;
@@ -41,5 +49,6 @@ fs.writeFileSync(destino, JSON.stringify(salida, null, 1));
 const n = (x) => (Array.isArray(x) ? x.length : 0);
 console.log(
   `contenido.json: ${n(RECETAS)} recetas · ${n(RUTINAS)} rutinas · ` +
-    `${n(ARTICULOS)} artículos · ${n(NEGOCIACIONES)} comparativas · ${n(PRODUCTOS)} productos`,
+    `${n(ARTICULOS)} artículos · ${n(NEGOCIACIONES)} comparativas · ${n(PRODUCTOS)} productos · ` +
+    `${Object.keys(INGREDIENTES).length} fichas · ${n(TRUCOS)} grupos de trucos`,
 );

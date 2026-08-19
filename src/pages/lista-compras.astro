@@ -91,6 +91,7 @@ const jsonld = {
     <p class="mt-1 text-sm text-hoja-900/60">
       Las 28 recetas que cubre esta compra, con lo que rinde cada una y sus calorías por
       porción. Si vas a saltear alguna comida, mirá acá qué podés no llevar.
+      <span data-aviso-veces class="hidden"></span>
     </p>
 
     <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -110,7 +111,10 @@ const jsonld = {
                   <a href={`/recetas/${r.slug}`} class="text-hoja-900/70 hover:text-naranja-600">
                     {r.nombre}
                   </a>
-                  <span class="text-xs text-hoja-900/40 whitespace-nowrap shrink-0">
+                  <span
+                    data-rinde={r.porciones}
+                    class="text-xs text-hoja-900/40 whitespace-nowrap shrink-0"
+                  >
                     {r.macros.calorias} cal · rinde {r.porciones}
                   </span>
                 </li>
@@ -137,6 +141,43 @@ const jsonld = {
       nadie fue al súper.
     </p>
   </aside>
+
+<script>
+  import { vecesQueRinde } from "../lib/porciones.js";
+
+  /**
+   * Cuántas veces hay que hacer cada receta para los que son en la casa.
+   *
+   * Sin esto, con tres personas la lista del súper triplicaba las cantidades y
+   * esta sección seguía diciendo "rinde 1": dos números de la misma página que
+   * se contradicen, y el que queda mal es el de la lista, que es el que se usa
+   * para comprar.
+   */
+  const celdas = document.querySelectorAll("[data-rinde]");
+  const aviso = document.querySelector("[data-aviso-veces]");
+
+  function pintar(personas) {
+    for (const el of celdas) {
+      const rinde = Number(el.dataset.rinde);
+      const veces = vecesQueRinde(rinde, personas);
+      const cal = el.textContent.trim().split(" cal")[0];
+      el.textContent =
+        veces > 1
+          ? `${cal} cal · rinde ${rinde} · hacela ${veces} veces`
+          : `${cal} cal · rinde ${rinde}`;
+      el.classList.toggle("text-naranja-600", veces > 1);
+      el.classList.toggle("text-hoja-900/40", veces <= 1);
+    }
+    if (aviso) {
+      aviso.classList.toggle("hidden", personas <= 1);
+      aviso.textContent = personas <= 1 ? "" :
+        ` Son ${personas} en tu casa: las que rinden menos que eso hay que hacerlas ` +
+        `más de una vez, y por eso la lista pide más cantidad.`;
+    }
+  }
+
+  document.addEventListener("keto:personas", (e) => pintar(e.detail.personas));
+</script>
 </Layout>
 
 <style>

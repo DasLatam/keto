@@ -107,6 +107,65 @@ def _gondola(cat: dict, productos: list[dict]) -> tuple[str, str]:
     return cat["nombre"], "\n\n".join(partes)
 
 
+def _ficha(slug: str, prod: dict, ficha: dict) -> tuple[str, str]:
+    """Un ingrediente con su ficha larga, listo para narrar."""
+    partes = [
+        f"{prod['nombre']}. {'Entra en keto' if prod['apto'] else 'No entra en keto'}, "
+        f"{prod['carbos']} gramos de carbohidratos cada cien.",
+        prod.get("nota", ""),
+    ]
+    for campo in ("porque", "elegir", "guardar", "error", "rinde"):
+        v = ficha.get(campo)
+        if v and v != "—":
+            partes.append(v)
+    return prod["nombre"], "\n\n".join(p for p in partes if p)
+
+
+def _gondola_fichas(cat: dict, prods: list[dict], fichas: dict) -> tuple[str, str]:
+    """Una góndola entera con las fichas de sus productos.
+
+    Se agrupa por góndola y no producto por producto: treinta y siete bloques de
+    cien palabras salen picados, y quien camina escucha mejor un recorrido por la
+    heladera que treinta y siete fichas sueltas.
+    """
+    partes = [f"La góndola de {cat['nombre'].lower()}."]
+    for p in prods:
+        f = fichas.get(p["slug"], {})
+        partes.append(_ficha(p["slug"], p, f)[1])
+    return cat["nombre"], "\n\n".join(partes)
+
+
+def _freezer(fz: dict) -> tuple[str, str]:
+    partes = ["Congelar y descongelar."]
+    for pr in fz["principios"]:
+        partes.append(f"{pr['titulo']}. {pr['texto']}")
+    for f in fz["fichas"]:
+        partes.append(
+            f"{f['que']}: se conserva {f['tiempo']}. {f['como']} "
+            f"Para descongelar: {f['descongelar']} Ojo: {f['ojo']}")
+    partes.append("Lo que directamente no se congela: "
+                  + "; ".join(f"{q}, porque {p}" for q, p in fz["nunca"]) + ".")
+    return "Congelar y descongelar", "\n\n".join(partes)
+
+
+def _trucos(g: dict) -> tuple[str, str]:
+    partes = [f"{g['grupo']}. {g['intro']}"]
+    for it in g["items"]:
+        partes.append(f"{it['t']}. {it['d']}")
+    return g["grupo"], "\n\n".join(partes)
+
+
+def _ayuno(ayunos: list[dict]) -> tuple[str, str]:
+    partes = ["Ayuno intermitente: mueve cuándo comés, no cuánto."]
+    for a in ayunos:
+        v = a.get("ventana")
+        partes.append(
+            f"{a['nombre']}, {a['etiqueta']}. {a['resumen']}"
+            + (f" Se come de {v['desde']} a {v['hasta']}: {v['comida']} horas de ventana "
+               f"y {v['ayuno']} de ayuno." if v else ""))
+    return "Ayuno intermitente", "\n\n".join(partes)
+
+
 def _plan(plan: list[dict], recetas: dict) -> tuple[str, str]:
     partes = ["La semana completa, día por día, sin repetir ninguna receta."]
     for d in plan:
@@ -176,6 +235,20 @@ def programas(datos: dict) -> list[dict]:
                 + [_plan(datos["planSemanal"], porslug)]
                 + [_negociacion(n) for n in negs(*usadas_3)]
                 + [_receta(r) for r in por_comida.get("cena", [])[:6]]
+            ),
+        },
+        {
+            "n": 4,
+            "slug": "caminata-4-la-cocina",
+            "titulo": "Caminata 4 — La cocina",
+            "bajada": "Ingrediente por ingrediente, cómo congelar, los trucos y el ayuno. Con seis meriendas.",
+            "fuentes": (
+                [_gondola_fichas(cats[c], ps, datos.get("ingredientes", {}))
+                 for c, ps in prods.items() if c in cats]
+                + [_freezer(datos["freezer"])]
+                + [_trucos(g) for g in datos["trucos"]]
+                + [_ayuno(datos["ayunos"])]
+                + [_receta(r) for r in por_comida.get("merienda", [])[:6]]
             ),
         },
     ]

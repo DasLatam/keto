@@ -2,6 +2,9 @@
 import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
 import RecetaCard from "../components/RecetaCard.astro";
+import { PRODUCTOS } from "../data/productos.js";
+import { TRUCOS } from "../data/cocina.js";
+import { AUDIOS } from "../data/audios.js";
 import MediosIndice from "../components/MediosIndice.astro";
 import { RECETAS } from "../data/recetas.js";
 
@@ -33,6 +36,9 @@ const FAQ = [
   },
 ];
 
+const totalTrucos = TRUCOS.reduce((n, g) => n + g.items.length, 0);
+const minutosAudio = Math.round(AUDIOS.reduce((n, a) => n + a.minutos, 0));
+
 const jsonld = {
   "@context": "https://schema.org",
   "@graph": [
@@ -61,12 +67,12 @@ const jsonld = {
 >
   <section class="text-center py-8 md:py-14">
     <h1 class="text-3xl md:text-5xl font-bold text-hoja-700 leading-tight">
-      Dieta keto, con lo que hay en el súper de acá
+      Dieta keto, sin adivinar nada
     </h1>
     <p class="mt-4 text-lg text-hoja-900/70 max-w-2xl mx-auto">
-      Recetas, plan semanal y listas de compras pensadas para Argentina: cortes de
-      carne de la carnicería, marcas de góndola y productos de dietética de barrio.
-      Sin ingredientes importados que nadie consigue.
+      Las recetas con sus macros, la semana ya armada, la lista del súper calculada
+      para los que sean en tu casa y los audios para hacer los ejercicios sin mirar el
+      reloj. Todo verificado: los números cierran o no se publican.
     </p>
     <div class="mt-8 flex flex-wrap gap-3 justify-center">
       <a
@@ -90,6 +96,24 @@ const jsonld = {
     </div>
   </section>
 
+  {/* Las cifras salen de los datos, no están escritas: si mañana hay 60 recetas
+      el número cambia solo. Un "más de 40 recetas" escrito a mano envejece mal y
+      queda mintiendo por lo bajo. */}
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {[
+      [RECETAS.length, "recetas", "con sus macros", "/recetas"],
+      [PRODUCTOS.length, "ingredientes", "cómo elegirlos y guardarlos", "/productos"],
+      [totalTrucos, "trucos de cocina", "por qué falla lo que falla", "/trucos"],
+      [minutosAudio, "minutos de audio", "para caminar y entrenar", "/ejercicios"],
+    ].map(([n, t, d, href]) => (
+      <a href={href} class="rounded-xl border border-hoja-100 bg-white p-4 text-center hover:border-hoja-500 transition-colors">
+        <div class="text-3xl font-bold text-hoja-700">{n}</div>
+        <div class="text-sm font-medium text-hoja-900/75">{t}</div>
+        <div class="text-xs text-hoja-900/45 leading-snug mt-0.5">{d}</div>
+      </a>
+    ))}
+  </section>
+
   <AdSlot formato="horizontal" />
 
   <section class="py-6">
@@ -109,7 +133,11 @@ const jsonld = {
       { icono: "🧮", titulo: "Calculadora", texto: "Tus gramos de grasa, proteína y carbos según peso, altura y objetivo.", href: "/calculadora" },
       { icono: "💪", titulo: "Ejercicios", texto: "Elongación cada mañana, caminata de 40 minutos y fuerza con una silla, la pared y una banda elástica. Sin gimnasio.", href: "/ejercicios" },
       { icono: "📅", titulo: "Calendario", texto: "Agendá las rutinas, las comidas y la compra semanal, con los avisos puestos, en Google Calendar o en el iPhone.", href: "/calendario" },
-      { icono: "🏷", titulo: "Qué comprar", texto: "Lista de productos permitidos y prohibidos, con marcas que están en la góndola.", href: "/productos" },
+      { icono: "🏷", titulo: "Qué comprar", texto: "Los 37 ingredientes uno por uno: por qué entra o no, cómo elegirlo en la góndola, cómo se guarda y cuál es el error típico.", href: "/productos" },
+      { icono: "⏳", titulo: "Ayuno intermitente", texto: "Dos esquemas sobre el mismo plan: sin desayuno, o sin desayuno ni almuerzo. Con lo que dice la evidencia y lo que no dice.", href: "/ayuno-intermitente" },
+      { icono: "🔥", titulo: "Trucos de cocina", texto: "Por qué la carne queda gris, por qué el revuelto sale seco y por qué la masa de almendras se desarma.", href: "/trucos" },
+      { icono: "❄️", titulo: "Congelar", texto: "Qué aguanta el freezer y qué no, cuánto dura cada cosa y cómo descongelarla sin que suelte todo el líquido.", href: "/congelar" },
+      { icono: "🎧", titulo: "Audios guía", texto: "Las rutinas en tiempo real —cuando la voz se calla, hacés el ejercicio— y cuatro caminatas que repasan el sitio entero.", href: "/ejercicios" },
     ].map((c) => (
       <a href={c.href} class="rounded-xl border border-hoja-100 bg-white p-6 hover:border-hoja-500 hover:shadow-lg transition-all">
         <div class="text-3xl">{c.icono}</div>

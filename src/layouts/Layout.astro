@@ -18,23 +18,48 @@ const url = new URL(Astro.url.pathname, Astro.site ?? "https://ketofacil.vercel.
 // dos: los cinco que resuelven el recorrido principal van arriba, el resto vive
 // en el pie. **El menú del celular muestra los dos grupos**, porque ahí el
 // espacio es vertical y no hay razón para esconder nada.
-const NAV = [
-  { href: "/como-empezar", texto: "Cómo empezar" },
-  { href: "/plan-semanal", texto: "Plan semanal" },
-  { href: "/recetas", texto: "Recetas" },
-  { href: "/ejercicios", texto: "Ejercicios" },
-  { href: "/calculadora", texto: "Calculadora" },
+const GRUPOS = [
+  {
+    texto: "Comer",
+    items: [
+      { href: "/recetas", texto: "Recetas", pista: "49 con sus macros" },
+      { href: "/plan-semanal", texto: "Plan semanal", pista: "7 días armados" },
+      { href: "/lista-compras", texto: "Lista del súper", pista: "calculada para los que sean" },
+      { href: "/productos", texto: "Qué comprar", pista: "góndola por góndola" },
+    ],
+  },
+  {
+    texto: "Cocinar",
+    items: [
+      { href: "/trucos", texto: "Trucos de cocina", pista: "por qué la carne queda gris" },
+      { href: "/congelar", texto: "Congelar", pista: "qué se congela y qué no" },
+    ],
+  },
+  {
+    texto: "Entender",
+    items: [
+      { href: "/como-empezar", texto: "Cómo empezar", pista: "los 7 primeros días" },
+      { href: "/evidencia", texto: "Evidencia", pista: "con las fuentes citadas" },
+      { href: "/negociemos", texto: "Negociemos", pista: "el alcohol, la fruta, la Coca Zero" },
+      { href: "/ayuno-intermitente", texto: "Ayuno intermitente", pista: "16:8 y 20:4" },
+    ],
+  },
+  {
+    texto: "Hacer",
+    items: [
+      { href: "/ejercicios", texto: "Ejercicios", pista: "con audio guía" },
+      { href: "/calculadora", texto: "Calculadora", pista: "tus macros y tu peso" },
+      { href: "/calendario", texto: "Calendario", pista: "todo agendado" },
+    ],
+  },
 ];
 
-const NAV_EXTRA = [
-  { href: "/lista-compras", texto: "Lista del súper" },
-  { href: "/calendario", texto: "Calendario" },
-  { href: "/ayuno-intermitente", texto: "Ayuno intermitente" },
-  { href: "/productos", texto: "Qué comprar" },
-  { href: "/trucos", texto: "Trucos de cocina" },
-  { href: "/congelar", texto: "Congelar" },
-  { href: "/negociemos", texto: "Negociemos" },
-  { href: "/evidencia", texto: "Evidencia" },
+// El pie va **plano**, con todo a la vista y sin submenús. Un pie de página es
+// donde se busca lo que no se encontró arriba: esconder ahí las cosas detrás de
+// un despliegue es esconderlas dos veces. Se deriva de los grupos para que no
+// puedan quedar desincronizados.
+const NAV_PIE = [
+  ...GRUPOS.flatMap((g) => g.items),
   { href: "/quienes-somos", texto: "Quiénes somos" },
 ];
 ---
@@ -84,13 +109,32 @@ const NAV_EXTRA = [
           </a>
 
           <nav class="hidden md:flex gap-1 items-center" aria-label="Principal">
-            {NAV.map((i) => (
-              <a
-                href={i.href}
-                class="px-2.5 py-2 rounded-md text-sm hover:bg-hoja-600 transition-colors whitespace-nowrap"
-              >
-                {i.texto}
-              </a>
+            {GRUPOS.map((g) => (
+              <div class="relative" data-menu>
+                <button
+                  type="button"
+                  class="px-2.5 py-2 rounded-md text-sm hover:bg-hoja-600 transition-colors whitespace-nowrap flex items-center gap-1"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  {g.texto}
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                       stroke-width="2" class="opacity-60 transition-transform" data-flecha aria-hidden="true">
+                    <path d="M2 4l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <div
+                  data-panel
+                  class="hidden absolute left-0 top-full mt-1 min-w-[15rem] rounded-xl bg-crema-50 text-hoja-900 shadow-xl ring-1 ring-hoja-900/10 py-1.5 z-50"
+                >
+                  {g.items.map((i) => (
+                    <a href={i.href} class="block px-4 py-2 hover:bg-hoja-100 transition-colors">
+                      <span class="block text-sm font-medium text-hoja-800">{i.texto}</span>
+                      {i.pista && <span class="block text-xs text-hoja-900/50">{i.pista}</span>}
+                    </a>
+                  ))}
+                </div>
+              </div>
             ))}
             {/* El buscador aparece recién en `lg`. Entre 768 y 1023 px —un iPad
                 vertical— el logo, los cinco enlaces del nav y una caja de 224 px
@@ -115,11 +159,23 @@ const NAV_EXTRA = [
 
         <nav id="menu-movil" class="md:hidden hidden pb-3" aria-label="Principal móvil">
           <div class="px-1 pb-2"><Buscador /></div>
-          {[...NAV, ...NAV_EXTRA].map((i) => (
-            <a href={i.href} class="block px-3 py-2 rounded-md text-sm hover:bg-hoja-600">
-              {i.texto}
-            </a>
+          {/* En el celular no hay desplegables: el espacio es vertical y no hay
+              ninguna razón para hacer tocar dos veces. Los grupos son títulos. */}
+          {GRUPOS.map((g) => (
+            <>
+              <p class="px-3 pt-3 pb-1 text-[11px] uppercase tracking-wide text-crema-100/50">
+                {g.texto}
+              </p>
+              {g.items.map((i) => (
+                <a href={i.href} class="block px-3 py-2 rounded-md text-sm hover:bg-hoja-600">
+                  {i.texto}
+                </a>
+              ))}
+            </>
           ))}
+          <a href="/quienes-somos" class="block px-3 py-2 rounded-md text-sm hover:bg-hoja-600">
+            Quiénes somos
+          </a>
         </nav>
       </div>
     </header>
@@ -131,7 +187,7 @@ const NAV_EXTRA = [
     <footer class="bg-hoja-900 text-crema-100 mt-12">
       <div class="mx-auto max-w-5xl px-4 py-8 text-sm space-y-4">
         <div class="flex flex-wrap gap-x-6 gap-y-2">
-          {[...NAV, ...NAV_EXTRA].map((i) => (
+          {NAV_PIE.map((i) => (
             <a href={i.href} class="hover:text-naranja-400 transition-colors">{i.texto}</a>
           ))}
         </div>
@@ -169,6 +225,52 @@ const NAV_EXTRA = [
       btn?.addEventListener("click", () => {
         const abierto = menu.classList.toggle("hidden") === false;
         btn.setAttribute("aria-expanded", String(abierto));
+      });
+
+      // Desplegables del menú de escritorio.
+      //
+      // Se abren con clic y no sólo con `:hover`: con hover puro no hay forma de
+      // llegar con el teclado ni de usarlos en una pantalla táctil, que es
+      // exactamente la mitad de las visitas. El hover se suma encima para el que
+      // usa mouse.
+      const desplegables = [...document.querySelectorAll("[data-menu]")];
+
+      function cerrarTodos(salvo) {
+        for (const d of desplegables) {
+          if (d === salvo) continue;
+          d.querySelector("[data-panel]").classList.add("hidden");
+          d.querySelector("button").setAttribute("aria-expanded", "false");
+          d.querySelector("[data-flecha]").classList.remove("rotate-180");
+        }
+      }
+
+      for (const d of desplegables) {
+        const boton = d.querySelector("button");
+        const panel = d.querySelector("[data-panel]");
+        const flecha = d.querySelector("[data-flecha]");
+
+        const mostrar = (v) => {
+          panel.classList.toggle("hidden", !v);
+          boton.setAttribute("aria-expanded", String(v));
+          flecha.classList.toggle("rotate-180", v);
+          if (v) cerrarTodos(d);
+        };
+
+        boton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          mostrar(panel.classList.contains("hidden"));
+        });
+        d.addEventListener("mouseenter", () => mostrar(true));
+        d.addEventListener("mouseleave", () => mostrar(false));
+        // Al salir del último enlace con Tab, el panel se cierra solo.
+        d.addEventListener("focusout", (e) => {
+          if (!d.contains(e.relatedTarget)) mostrar(false);
+        });
+      }
+
+      document.addEventListener("click", () => cerrarTodos(null));
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") cerrarTodos(null);
       });
     </script>
   </body>

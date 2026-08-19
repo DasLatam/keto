@@ -16,6 +16,8 @@ const BAJADAS = {
     "El alcohol, la fruta, las gaseosas: qué se negocia y qué no. Con seis almuerzos.",
   "caminata-3-el-super-y-la-semana":
     "Góndola por góndola, la semana armada y seis cenas.",
+  "caminata-4-la-cocina":
+    "Ingrediente por ingrediente, cómo congelar, los trucos de cocina y el ayuno intermitente. Con seis meriendas.",
 };
 
 /** Qué audios van en la página de cada rutina. */
@@ -26,6 +28,7 @@ const REPARTO = {
     "caminata-1-por-que-funciona",
     "caminata-2-lo-que-te-van-a-decir",
     "caminata-3-el-super-y-la-semana",
+    "caminata-4-la-cocina",
   ],
 };
 
