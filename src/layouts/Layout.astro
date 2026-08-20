@@ -71,6 +71,20 @@ const NAV_PIE = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="canonical" href={url.href} />
 
+    {/* Verificación de Google Search Console.
+
+        Va en el Layout y no sólo en la home: Google verifica contra la raíz,
+        pero puesta acá queda en las 122 páginas y no se pierde el día que la
+        portada cambie de forma. No es un secreto —viaja en el HTML de un sitio
+        público— así que va al repo como cualquier otra etiqueta.
+
+        **No se borra nunca**, ni después de que la verificación salga bien: si
+        la etiqueta desaparece, Google desverifica la propiedad y con ella se van
+        los informes de cobertura y el envío del sitemap. Es el reemplazo del
+        registro DNS, que con un dominio `vercel.app` no se puede usar porque la
+        zona no es nuestra. Ver SEO.md. */}
+    <meta name="google-site-verification" content="oY0iAP-IvpOXfXBB36EyUGGjAAWBoFKMc_bBBQJ_aDA" />
+
     <title>{titulo} · {SITIO}</title>
     <meta name="description" content={descripcion} />
 

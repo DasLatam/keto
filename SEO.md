@@ -19,7 +19,27 @@ un archivo siga existiendo después de un redeploy.
    el dominio es de Vercel y no controlamos su zona DNS. Sirve recién cuando se
    conecte un dominio propio.
 
-### Opción B — archivo HTML (la que aplica hoy)
+### Opción B — etiqueta meta (la que se usó, 2026-08-19)
+
+Es la que aplica mientras el dominio sea `ketofacil.vercel.app`. La etiqueta ya
+está publicada, en `src/layouts/Layout.astro` dentro del `<head>`:
+
+```html
+<meta name="google-site-verification" content="oY0iAP-IvpOXfXBB36EyUGGjAAWBoFKMc_bBBQJ_aDA" />
+```
+
+Va en el Layout y no sólo en la home a propósito: Google verifica contra la raíz,
+pero puesta ahí queda en las 122 páginas y no se pierde el día que la portada
+cambie de forma.
+
+**No se borra nunca.** Ni después de que la verificación salga bien: si la
+etiqueta desaparece, Google desverifica la propiedad y con ella se van los
+informes de cobertura y el sitemap enviado.
+
+Falta apretar *Verificar* en Search Console —el paso es de Ariel, con su cuenta—
+y después enviar el sitemap.
+
+### Opción C — archivo HTML
 
 1. En Search Console → *Agregar propiedad* → **Prefijo de URL** →
    `https://ketofacil.vercel.app`.
@@ -130,7 +150,9 @@ No es lo mismo que SEO clásico y se optimiza distinto.
 
 ## Pendiente
 
-- [ ] Verificar en Search Console y enviar el sitemap.
+- [x] Publicar la etiqueta de verificación (2026-08-19).
+- [ ] Apretar *Verificar* en Search Console y enviar
+      `https://ketofacil.vercel.app/sitemap.xml`.
 - [ ] Dominio propio (habilita la verificación por DNS y suma autoridad frente a
       un subdominio de `vercel.app`).
 - [ ] Página "Quiénes somos" con autoría real y firmada — hoy existe, pero pesa en
