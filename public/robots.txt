@@ -1,15 +1,89 @@
+# https://ketofacil.vercel.app/robots.txt
+#
+# Todo el sitio es público y está para que lo lean, lo indexen y lo citen. No hay
+# panel, no hay sesión, no hay nada que esconder detrás de un Disallow.
+
 User-agent: *
 Allow: /
 
-# Los rastreadores de modelos de IA entran a propósito: parte del objetivo del
-# sitio es que ChatGPT, Perplexity, Gemini y Claude puedan citar el contenido.
+# El índice de búsqueda es un JSON que consume el buscador del sitio. Que lo
+# rastreen no molesta, pero no aporta nada: es el mismo contenido de las páginas,
+# sin formato y sin contexto. En resultados sólo sería ruido.
+Disallow: /buscar.json
+
+# ── Rastreadores de modelos de IA ──────────────────────────────────────────
+#
+# Entran a propósito, y no es una concesión: parte del objetivo del sitio es que
+# ChatGPT, Claude, Perplexity y Gemini puedan citar contenido sobre keto que esté
+# escrito para Argentina, con las marcas y los cortes de carne que se consiguen
+# acá, en vez de traducir uno estadounidense.
+#
+# Van uno por uno y no alcanzados por el `*` de arriba porque varios de estos
+# agentes tratan la ausencia de una regla propia como "no me quieren".
+
 User-agent: GPTBot
 Allow: /
-User-agent: PerplexityBot
+
+User-agent: OAI-SearchBot
 Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
 User-agent: ClaudeBot
 Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
 User-agent: Google-Extended
 Allow: /
 
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+# ── Mapas del sitio ────────────────────────────────────────────────────────
+#
+# `sitemap.xml` es un índice de seis líneas que apunta al que genera
+# `@astrojs/sitemap`. Existe porque es el nombre que todo el mundo prueba
+# primero; el otro se declara igual por si alguna herramienta lo prefiere.
+
+Sitemap: https://ketofacil.vercel.app/sitemap.xml
 Sitemap: https://ketofacil.vercel.app/sitemap-index.xml
+
+# Mapa del sitio para modelos de lenguaje (convención de llmstxt.org): el mismo
+# contenido que el sitemap, pero en Markdown y diciendo qué contesta cada página.
+# https://ketofacil.vercel.app/llms.txt
