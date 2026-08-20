@@ -7,8 +7,32 @@ import { TRUCOS } from "../data/cocina.js";
 import { AUDIOS } from "../data/audios.js";
 import MediosIndice from "../components/MediosIndice.astro";
 import { RECETAS } from "../data/recetas.js";
+import CREDITOS from "../data/creditos.json";
 
-const destacadas = RECETAS.filter((r) => r.etiquetas.includes("15min")).slice(0, 3);
+// Lo destacado de la home son las recetas **cocinadas de verdad**: foto del plato
+// que salió de esta cocina y su video, no la foto del ingrediente que ilustra a
+// las otras 46.
+//
+// La lista no se escribe a mano. `creditos.json` es el registro de las fotos, y
+// `scripts/traer_medios.py` le deja el campo `propia` con el id del medio cuando
+// baja una foto propia al repo. Así que alcanza con filtrar por ese campo: Ariel
+// cocina, sube la foto desde el panel, corre el script, y la home se actualiza
+// sola. Una lista escrita a mano acá se olvidaría en la segunda receta.
+//
+// El orden es por id del medio, que arranca con la fecha (`20260818-131907-…`),
+// así que la última que cocinó queda primera.
+const propias = RECETAS
+  .filter((r) => CREDITOS[r.slug]?.propia)
+  .sort((a, b) => String(CREDITOS[b.slug].propia).localeCompare(String(CREDITOS[a.slug].propia)))
+  .slice(0, 6);
+
+// Con menos de tres, la fila queda coja y el bloque se ve a medio hacer. En ese
+// caso la home vuelve a lo que mostraba antes —las rápidas—, que es un criterio
+// que funciona con cualquier cantidad de recetas.
+const hayPropias = propias.length >= 3;
+const destacadas = hayPropias
+  ? propias
+  : RECETAS.filter((r) => r.etiquetas.includes("15min")).slice(0, 3);
 
 // Las preguntas frecuentes cumplen doble función: le sirven al que llega, y son
 // lo que Google y los modelos de IA citan como respuesta directa. Por eso van
@@ -117,10 +141,17 @@ const jsonld = {
   <AdSlot formato="horizontal" />
 
   <section class="py-6">
-    <div class="flex items-baseline justify-between mb-5">
-      <h2 class="text-2xl font-bold text-hoja-700">Rápidas, en 15 minutos</h2>
+    <div class="flex items-baseline justify-between mb-1 gap-4 flex-wrap">
+      <h2 class="text-2xl font-bold text-hoja-700">
+        {hayPropias ? "Cocinadas en casa" : "Rápidas, en 15 minutos"}
+      </h2>
       <a href="/recetas" class="text-sm text-naranja-600 hover:underline">Ver todas →</a>
     </div>
+    <p class="text-sm text-hoja-900/55 mb-5 max-w-2xl">
+      {hayPropias
+        ? "En éstas la foto es del plato que salió de esta cocina, no del ingrediente, y adentro está el video de cómo se hace."
+        : "Las que se resuelven mientras se calienta la sartén."}
+    </p>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {destacadas.map((r) => <RecetaCard receta={r} />)}
     </div>
@@ -131,13 +162,14 @@ const jsonld = {
       { icono: "🛒", titulo: "Lista del súper", texto: "La compra de la semana entera, agrupada por sector y con las cantidades calculadas para los que sean en tu casa.", href: "/lista-compras" },
       { icono: "📋", titulo: "Plan semanal", texto: "Siete días armados con 28 recetas distintas, con las calorías y los carbos de cada comida y el total de cada día.", href: "/plan-semanal" },
       { icono: "🧮", titulo: "Calculadora", texto: "Tus gramos de grasa, proteína y carbos según peso, altura y objetivo.", href: "/calculadora" },
+      { icono: "🩺", titulo: "Controles médicos", texto: "Qué estudios pedir antes de empezar, qué repetir a los 3 y a los 6 meses, qué anotar en casa y con qué especialistas consultar.", href: "/controles-medicos" },
       { icono: "💪", titulo: "Ejercicios", texto: "Elongación cada mañana, caminata de 40 minutos y fuerza con una silla, la pared y una banda elástica. Sin gimnasio.", href: "/ejercicios" },
       { icono: "📅", titulo: "Calendario", texto: "Agendá las rutinas, las comidas y la compra semanal, con los avisos puestos, en Google Calendar o en el iPhone.", href: "/calendario" },
       { icono: "🏷", titulo: "Qué comprar", texto: "Los 37 ingredientes uno por uno: por qué entra o no, cómo elegirlo en la góndola, cómo se guarda y cuál es el error típico.", href: "/productos" },
       { icono: "⏳", titulo: "Ayuno intermitente", texto: "Dos esquemas sobre el mismo plan: sin desayuno, o sin desayuno ni almuerzo. Con lo que dice la evidencia y lo que no dice.", href: "/ayuno-intermitente" },
       { icono: "🔥", titulo: "Trucos de cocina", texto: "Por qué la carne queda gris, por qué el revuelto sale seco y por qué la masa de almendras se desarma.", href: "/trucos" },
       { icono: "❄️", titulo: "Congelar", texto: "Qué aguanta el freezer y qué no, cuánto dura cada cosa y cómo descongelarla sin que suelte todo el líquido.", href: "/congelar" },
-      { icono: "🎧", titulo: "Audios guía", texto: "Las rutinas en tiempo real —cuando la voz se calla, hacés el ejercicio— y cuatro caminatas que repasan el sitio entero.", href: "/ejercicios" },
+      { icono: "🎧", titulo: "Audios guía", texto: "Las rutinas en tiempo real —cuando la voz se calla, hacés el ejercicio— y cinco caminatas que repasan el sitio entero.", href: "/ejercicios" },
     ].map((c) => (
       <a href={c.href} class="rounded-xl border border-hoja-100 bg-white p-6 hover:border-hoja-500 hover:shadow-lg transition-all">
         <div class="text-3xl">{c.icono}</div>
