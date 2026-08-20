@@ -37,11 +37,55 @@ las páginas los importan y calculan totales en el build.
 Cada receta lleva `macros` (con `calorias`), `porciones` y un `tip` con el error
 típico. Cada ejercicio lleva su `tip` por la misma razón.
 
-## Las cantidades de la lista del súper
+## El plan del mes y las cuatro compras
 
-`LISTA_COMPRAS` **no** guarda las cantidades como texto (`"1 kg de vacío"`) sino
-partidas en `{ cant, unidad, nombre }`, para poder multiplicarlas por la cantidad
-de personas de la casa. El armado del texto está en `src/lib/porciones.js`.
+`SEMANAS` (en `data/recetas.js`) son cuatro semanas de 28 comidas: 112 en total,
+con las 49 recetas del sitio. Ninguna receta se repite dentro de la misma semana;
+entre semanas sí, porque 49 recetas no llenan un mes de otra forma.
+
+El reparto lo hizo `scripts/armar_mes.mjs`, y no es alfabético ni al azar:
+
+- Las **seis colaciones entran como merienda** —es lo que son—, y suben la
+  merienda de nueve opciones a quince. Sin eso era lo más repetido del mes.
+- Se optimizó que las recetas de una misma semana **compartan verdura y carne**,
+  para que la compra sea más corta y sobre menos en la heladera: los artículos
+  frescos distintos del mes bajaron de 120 a 111.
+- Dentro de la semana, **lo que lleva más tiempo cae sábado y domingo**.
+- **La semana 1 no se tocó.** Es la que ya existía y la que narra el audio de la
+  caminata 3: cambiarla habría dejado el audio mintiendo.
+
+El script es reproducible (semilla fija) y vuelve a correr con `node
+scripts/armar_mes.mjs`, que además informa calorías y carbos promedio de cada
+semana.
+
+### La lista del súper se deriva, ya no se escribe
+
+Hasta el 2026-08-19 `LISTA_COMPRAS` era una tabla escrita a mano con las
+cantidades de la única semana que había, y tenía escrito arriba su propia
+sentencia de muerte: «si se cambia el plan semanal, hay que rehacerlo». Con
+cuatro semanas eso era garantizar que la lista y el plan se contradijeran.
+
+Ahora sale de las recetas, con dos piezas:
+
+- **`data/despensa.js`** — qué se compra cuando una receta pide «1 cucharada de
+  manteca». Tiene los `ARTICULOS` (sector del súper, unidad de compra, las
+  conversiones propias de cada uno: una taza de harina de almendras son 100 g y
+  una de aceite son 240 cc) y las `REGLAS` de texto a artículo, que se prueban
+  **en orden**.
+- **`lib/compras.js`** — parte el ingrediente («Relleno: 200 g de jamón cocido,
+  3 huevos»), lo mide (incluidas las fracciones tipográficas y los números en el
+  medio, como «jugo de ½ limón») y lo traduce.
+
+Lo que no matchea ninguna regla **no se descarta en silencio**: sale en
+`sinReconocer` y `scripts/verificar.mjs` lo marca como error, sobre las 49
+recetas y no sólo sobre las del plan. Una lista a la que le falta un ingrediente
+no se nota hasta que se está cocinando.
+
+### Las cantidades
+
+Las cantidades no son texto (`"1 kg de vacío"`) sino `{ cant, unidad, nombre }`,
+para poder multiplicarlas por la cantidad de personas de la casa. El armado del
+texto está en `src/lib/porciones.js`.
 
 Dos cosas que ese módulo resuelve y que no son obvias:
 
@@ -159,26 +203,70 @@ Credenciales FTP en `~/.config/keto/ferozo.env`, fuera del repo.
 
 ## Audios de guía (`scripts/audios/`)
 
-Cinco MP3 con la voz de **Daniela** (`es_AR-daniela-high`, la misma de videosyt).
-Se sirven desde Ferozo, no desde el repo: son ~90 MB y git guarda cada versión
+Siete MP3 con la voz de **Daniela** (`es_AR-daniela-high`, la misma de videosyt).
+Se sirven desde Ferozo, no desde el repo: son ~134 MB y git guarda cada versión
 para siempre.
 
 | Audio | Dura | Qué es |
 |---|---|---|
-| `elongacion-manana` | 16,1 min | La rutina de la mañana, en tiempo real |
-| `fuerza-en-casa` | 41,4 min | La rutina de fuerza, en tiempo real |
+| `elongacion-manana` | 16,9 min | La rutina de la mañana, en tiempo real y contando |
+| `fuerza-en-casa` | 42,6 min | La rutina de fuerza, en tiempo real y contando |
 | `caminata-1-por-que-funciona` | 40,1 min | La evidencia + 6 desayunos |
 | `caminata-2-lo-que-te-van-a-decir` | 42,3 min | Las comparativas + 6 almuerzos |
 | `caminata-3-el-super-y-la-semana` | 56,5 min | Productos, plan semanal + 6 cenas |
+| `caminata-4-la-cocina` | 47,8 min | Freezer, trucos, ayuno + 6 meriendas |
+| `caminata-5-la-despensa` | 45,1 min | Las fichas de los 37 ingredientes |
 
-Son 196 minutos y 90 MB en total. Generarlos completos: ~35 min de modelo (gemini)
-y ~30 min de piper.
+Son 291 minutos y 134 MB en total. Generarlos completos: ~50 min de modelo
+(gemini) y ~45 min de piper.
 
 **La duración pedida es orientativa, no un contrato.** `--minutos 45` dio 40, 42 y
 36; rehacer la tercera con `--minutos 52` dio 56,5. La dispersión no la produce el
 objetivo sino cuánto se pasa el modelo del largo pedido en cada bloque y cuántos
 bloques caen al respaldo, y eso cambia en cada corrida. Si un audio tiene que caer
 en una ventana estrecha, hay que generar y medir, no calcular.
+
+**Y cuando el material sobra, el presupuesto no alcanza a frenarlo.** La cuarta
+caminata tiene 9.300 palabras de fuente contra 8.200 de objetivo, o sea que hay
+que *comprimir*. El reparto autocorregible baja el objetivo de cada bloque, pero
+tiene un piso de 120 palabras, y **14 de los 20 bloques terminaron en ese piso**:
+a partir de ahí el reparto ya no regula nada. Pedidas 5.673 palabras, salieron
+12.290 — los modelos entregan más del doble cuando el pedido es corto, porque un
+resumen de 120 palabras de una fuente de 250 es algo que hacen mal.
+
+Conclusión práctica: para un programa con más material que duración, o se acepta
+el largo natural o se parte en dos audios. Estirar funciona; comprimir no.
+
+**Y eso fue lo que se hizo al día siguiente.** La cuarta caminata se partió en
+dos: la 4 se quedó con la cocina (freezer, trucos, ayuno y las seis meriendas) y
+la 5 se llevó las fichas de los treinta y siete ingredientes, góndola por
+góndola. Con el material repartido, las dos caen dentro del techo de expansión
+—×2,6 y ×1,1— y ninguna necesita comprimir. La 4 pasó de **66,4 a 47,8 minutos**
+y la 5 salió en 45,1: el mismo contenido, en dos audios que se escuchan.
+
+### Un motor caído no puede condenar la corrida entera
+
+`llm.Motor` de videosyt descarta un motor **para toda la corrida** en cuanto falla
+una vez. Para un video de diez secciones está bien: una cuota agotada no se
+recupera a mitad de camino y reintentarla cuesta un timeout por llamada.
+
+Acá no. El 2026-08-18 gemini falló **una sola vez**, por un timeout de 90 segundos
+—diez minutos después contestaba perfecto—, y esa única caída mandó los catorce
+bloques siguientes a ollama. El audio pasaba de prosa hablada a esto, leído en voz
+alta: «Menos edulcorante del que se espera. 4. Preparación rápida: Pan keto: 2
+minutos en microondas».
+
+Dos arreglos, y hacían falta los dos:
+
+- **`MotorConReintento`** (en `caminatas.py`) rearma el motor cada tres bloques y
+  le da otra oportunidad al preferido. Si la cuota está agotada de verdad, cuesta
+  un timeout cada tres bloques y sigue cayendo al respaldo; si fue un hipo, se
+  recupera. En la corrida siguiente reintentó seis veces.
+- **`_parece_lista()`** rechaza el bloque si contestó con enumeraciones o
+  renglones cortos terminados en dos puntos, y lo vuelve a pedir. Sin esto el
+  pipeline podía volver a producir un audio malo en silencio, que es exactamente
+  lo que había pasado. El verificador de números no lo veía: una lista no tiene
+  números inventados, tiene forma equivocada.
 
 ```bash
 node scripts/audios/exportar.mjs                        # volcar el contenido del sitio
@@ -209,6 +297,35 @@ cuerpo. Verificable:
 /usr/bin/ffmpeg -hide_banner -nostats -i storage/audios/elongacion-manana.mp3 \
   -af silencedetect=noise=-50dB:d=6 -f null - 2>&1 | grep silence_
 ```
+
+### Contar en voz alta, y decir dónde ponerse
+
+Ariel hizo la elongación el 2026-08-19 y el diagnóstico fue que el audio se
+callaba demasiado: «cuando dice nos preparamos para el ejercicio, aclaremos si
+nos paramos, nos acostamos o nos arrodillamos; si hay que mantener 15 segundos,
+contar hasta 15». Dos arreglos, los dos sobre la misma maquinaria de cortes:
+
+- **La posición.** Cada ejercicio de `ejercicios.js` tiene ahora `posicion`, una
+  frase que dice dónde ponerse («Acostate boca arriba, con los brazos en cruz»).
+  El orden cambió: antes la voz decía «acomodate para el que sigue», se callaba,
+  y **recién después** nombraba el ejercicio — con los ojos cerrados eso es
+  quedarse parado esperando. Ahora primero se dice dónde y el silencio de
+  acomodarse llega cuando ya se sabe hacia dónde moverse. Si la postura no
+  cambia, la voz lo dice y el silencio se acorta a la mitad.
+- **La cuenta.** Los tramos traen sus propios cortes desde `dosis.py`. Hasta 20
+  segundos se cuenta de uno en uno; de ahí para arriba van la mitad, el aviso de
+  los diez y la regresiva de los últimos cinco, que es como cuenta un entrenador
+  de verdad. Las repeticiones se cuentan al terminarlas, y las respiraciones
+  guían el «inhalá contando cuatro, exhalá contando seis» que el texto de la
+  página ya pedía y el audio no acompañaba.
+
+El límite de 20 no es estético sino de física del habla: «veinte» dura 0,85 s y
+entra cómodo en su segundo, «veintisiete» se pasa y se pisaría con el siguiente.
+Por la misma razón cada número se dice 0,2 s antes de su segundo: sin ese
+adelanto, «diecinueve» no termina antes del final de un tramo de veinte y
+`voz.armar()` —que nunca estira un tramo— lo descarta, dejando la cuenta cortada
+justo en el último número. La elongación quedó con **196 cortes de cuenta, todos
+encajados y ninguno salteado**.
 
 ### La rutina de fuerza no entra en 40 minutos
 

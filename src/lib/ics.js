@@ -117,9 +117,15 @@ function primeraFecha(desde, dias) {
  * @param {number} ev.aviso      minutos antes del recordatorio (0 = sin alarma)
  * @param {Date}   ev.desde      fecha de inicio de la serie
  * @param {number} [ev.semanas]  si se indica, la serie termina a las N semanas
+ * @param {number} [ev.cada]     cada cuántas semanas se repite (1 = todas)
+ * @param {number} [ev.correr]   cuántas semanas se corre el arranque de la serie
  */
-function evento({ uid, titulo, detalle, url, hora, duracion, dias, aviso, desde, semanas }) {
+function evento({ uid, titulo, detalle, url, hora, duracion, dias, aviso, desde,
+                  semanas, cada = 1, correr = 0 }) {
   const inicio = primeraFecha(desde, dias);
+  // El plan del mes son cuatro semanas distintas: la comida de la semana 3 se
+  // repite cada cuatro semanas y arranca dos semanas después que la de la 1.
+  if (correr) inicio.setDate(inicio.getDate() + 7 * correr);
   const fin = new Date(inicio);
   const [h, m] = hora.split(":").map(Number);
   fin.setHours(h, m + duracion, 0, 0);
@@ -130,7 +136,8 @@ function evento({ uid, titulo, detalle, url, hora, duracion, dias, aviso, desde,
     `DTSTAMP:${ahoraUTC()}`,
     `DTSTART:${fechaHora(inicio, hora)}`,
     `DTEND:${fechaHora(fin, `${String(fin.getHours()).padStart(2, "0")}:${String(fin.getMinutes()).padStart(2, "0")}`)}`,
-    `RRULE:FREQ=WEEKLY;BYDAY=${dias.join(",")}` + (semanas ? `;COUNT=${semanas * dias.length}` : ""),
+    `RRULE:FREQ=WEEKLY${cada > 1 ? `;INTERVAL=${cada}` : ""};BYDAY=${dias.join(",")}` +
+      (semanas ? `;COUNT=${Math.ceil(semanas / cada) * dias.length}` : ""),
     `SUMMARY:${esc(titulo)}`,
     `DESCRIPTION:${esc(detalle)}`,
     "TRANSP:OPAQUE",
@@ -183,7 +190,7 @@ const DOMINIO = "ketoargentina";
  * @param {object[]} cfg.RUTINAS     datos de `src/data/ejercicios.js`
  * @param {boolean} cfg.comidas      agendar las 28 comidas del plan
  * @param {object}  cfg.horasComida  { desayuno: "08:00", ... }
- * @param {object[]} [cfg.plan]      PLAN_SEMANAL
+ * @param {object[]} [cfg.semanas]   las cuatro semanas del plan del mes
  * @param {object}  [cfg.recetas]    recetas por slug, para el nombre y las calorías
  * @param {boolean} cfg.compra       agendar el recordatorio de la compra semanal
  * @param {string}  cfg.diaCompra    "SA"
@@ -263,18 +270,25 @@ export function armarEventos(cfg) {
     }
   }
 
-  // ── Las comidas del plan semanal ────────────────────────────────────
-  // Un evento por comida y por día, repitiendo todas las semanas: el lunes
-  // siempre cae el mismo desayuno. Son 28 eventos, y por eso van detrás de una
-  // casilla: quien ya tiene el calendario del trabajo cargado no los quiere.
-  if (cfg.comidas && cfg.plan) {
+  // ── Las comidas del plan del mes ────────────────────────────────────
+  //
+  // Un evento por comida, por día y por semana del mes, repitiendo **cada cuatro
+  // semanas**: el lunes de la primera semana cae un desayuno y el de la tercera
+  // cae otro. Son 112 eventos, y por eso van detrás de una casilla: quien ya
+  // tiene el calendario del trabajo cargado no los quiere.
+  //
+  // Con `FREQ=WEEKLY;INTERVAL=4` y el arranque corrido, el calendario rota solo
+  // y para siempre. La alternativa —112 eventos sueltos con fecha fija— se queda
+  // sin comidas al mes y medio.
+  if (cfg.comidas && cfg.semanas) {
     const CLAVES = [
       ["desayuno", "Desayuno"],
       ["almuerzo", "Almuerzo"],
       ["merienda", "Merienda"],
       ["cena", "Cena"],
     ];
-    for (const dia of cfg.plan) {
+    for (const [si, sem] of cfg.semanas.entries()) {
+    for (const dia of sem.dias) {
       const diaICS = DIAS_ICS[
         ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"].indexOf(dia.dia)
       ];
@@ -296,7 +310,7 @@ export function armarEventos(cfg) {
             : "";
 
         eventos.push({
-          uid: `comida-${dia.dia.toLowerCase()}-${clave}@${DOMINIO}`,
+          uid: `comida-s${si + 1}-${dia.dia.toLowerCase()}-${clave}@${DOMINIO}`,
           titulo: `🍽 ${etiqueta}: ${receta.nombre}`,
           detalle:
             `${receta.macros.calorias} cal · ${receta.macros.carbos} g de carbos netos · ${receta.minutos} min` +
@@ -308,8 +322,11 @@ export function armarEventos(cfg) {
           dias: [diaICS],
           aviso: 15,
           desde: cfg.desde,
+          cada: cfg.semanas.length,
+          correr: si,
         });
       }
+    }
     }
   }
 

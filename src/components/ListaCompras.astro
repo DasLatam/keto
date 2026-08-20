@@ -7,28 +7,39 @@
 // para una persona y el JavaScript lo reescribe con el número guardado. Así la
 // página sigue siendo estática y cacheable, y quien tenga el JS bloqueado ve la
 // lista para una persona en lugar de no ver nada.
-import { LISTA_COMPRAS, PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
+import { SEMANAS, RECETAS } from "../data/recetas.js";
 import { textoItem, claveItem, cuentaEscalables } from "../lib/porciones.js";
+import { listaDe } from "../lib/compras.js";
 import { COMIDAS_PLAN } from "../data/ayuno.js";
+
+// `semana` es el número de semana del mes (1 a 4). Cada una tiene su propia
+// lista porque tiene sus propias 28 comidas.
+const { titulo = null, compacto = false, semana = 1 } = Astro.props;
+const dias = SEMANAS[semana - 1].dias;
+
+// La lista **se calcula acá**, a partir de las recetas de la semana. Antes era
+// una tabla escrita a mano en `recetas.js` que sólo valía para la semana 1: con
+// cuatro semanas, mantenerla a mano era garantizar que se desincronizara. Ver
+// `lib/compras.js` y `data/despensa.js`.
+const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
+const { sectores } = listaDe(
+  dias.flatMap((d) => COMIDAS_PLAN.map((c) => ({ receta: porSlug[d[c]], comida: c }))),
+);
 
 // Calorías promedio de cada comida en el plan. Van al HTML como dato para que el
 // navegador pueda calcular cuánto hay que agrandar las comidas que quedan cuando
 // se saltea alguna: el ayuno mueve cuándo se come, no cuánto, así que la lista
 // del súper **no** baja en proporción a las comidas salteadas.
-const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
 const CAL_COMIDA = Object.fromEntries(
   COMIDAS_PLAN.map((c) => [
     c,
     Math.round(
-      PLAN_SEMANAL.reduce((a, d) => a + (porSlug[d[c]]?.macros.calorias ?? 0), 0) /
-        PLAN_SEMANAL.length,
+      dias.reduce((a, d) => a + (porSlug[d[c]]?.macros.calorias ?? 0), 0) / dias.length,
     ),
   ]),
 );
 
-const { titulo = null, compacto = false } = Astro.props;
-
-const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
+const totalItems = sectores.reduce((n, s) => n + s.items.length, 0);
 ---
 
 <div class="lista-compras" data-lista data-cal-comida={JSON.stringify(CAL_COMIDA)}>
@@ -75,7 +86,7 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
   {titulo && <h2 class="mt-6 text-2xl font-bold text-hoja-700">{titulo}</h2>}
 
   <div class="mt-6 grid gap-4 sm:grid-cols-2">
-    {LISTA_COMPRAS.map((s) => (
+    {sectores.map((s) => (
       <section class="rounded-xl border border-hoja-100 bg-white p-5 break-inside-avoid">
         <h3 class="font-semibold text-hoja-700 mb-3 flex items-baseline justify-between gap-2">
           {s.sector}
@@ -90,7 +101,7 @@ const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
                     todo lo que ya estaba marcado. */}
                 <input
                   type="checkbox" class="compra mt-0.5 w-5 h-5 rounded accent-hoja-600 shrink-0"
-                  data-item={claveItem(s.sector, item)}
+                  data-item={`s${semana}::${claveItem(s.sector, item)}`}
                 />
                 <span
                   class="text-hoja-900/80 group-has-checked:line-through group-has-checked:text-hoja-900/35 transition-colors"

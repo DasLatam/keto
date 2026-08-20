@@ -3,36 +3,45 @@ import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
 import ListaCompras from "../components/ListaCompras.astro";
 import SelectorAyuno from "../components/SelectorAyuno.astro";
-import { LISTA_COMPRAS, PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
+import SelectorSemana from "../components/SelectorSemana.astro";
+import { SEMANAS, RECETAS } from "../data/recetas.js";
 import { textoItem } from "../lib/porciones.js";
+import { listaDe } from "../lib/compras.js";
 
 const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
 const CLAVES = ["desayuno", "almuerzo", "merienda", "cena"];
 
-const totalItems = LISTA_COMPRAS.reduce((n, s) => n + s.items.length, 0);
-
-// Las 28 comidas del plan, con sus porciones y calorías. El total de porciones no
-// es 28: hay recetas que rinden 4 u 8 —una tarta, un cheesecake— y esas dejan
-// sobras que cubren otra comida.
-const recetasSemana = PLAN_SEMANAL.flatMap((d) =>
-  CLAVES.map((c) => porSlug[d[c]]).filter(Boolean)
-);
-const totalPorciones = recetasSemana.reduce((n, r) => n + r.porciones, 0);
-const caloriasSemana = recetasSemana.reduce((n, r) => n + r.macros.calorias, 0);
-const caloriasDia = Math.round(caloriasSemana / 7);
+// Una compra por semana. Las listas se derivan de las recetas —ver
+// `lib/compras.js`— así que cambiar el plan cambia la lista y no hay forma de
+// que queden diciendo cosas distintas.
+const semanas = SEMANAS.map((sem) => {
+  const recetas = sem.dias.flatMap((d) =>
+    CLAVES.map((c) => ({ receta: porSlug[d[c]], comida: c })).filter((x) => x.receta));
+  const { sectores } = listaDe(recetas);
+  const platos = recetas.map((x) => x.receta);
+  return {
+    ...sem,
+    sectores,
+    // El total de porciones no es 28: hay recetas que rinden 4 u 8 —una tarta,
+    // un cheesecake— y esas dejan sobras que cubren otra comida.
+    totalItems: sectores.reduce((n, x) => n + x.items.length, 0),
+    totalPorciones: platos.reduce((n, r) => n + r.porciones, 0),
+    caloriasDia: Math.round(platos.reduce((n, r) => n + r.macros.calorias, 0) / 7),
+  };
+});
 
 const jsonld = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   name: "Lista de compras keto semanal",
-  numberOfItems: totalItems,
-  itemListElement: LISTA_COMPRAS.flatMap((s, si) =>
+  numberOfItems: semanas[0].totalItems,
+  itemListElement: semanas[0].sectores.flatMap((s, si) =>
     s.items.map((item, ii) => ({
       "@type": "ListItem",
       position: si * 100 + ii + 1,
-      // La lista estructurada declara las cantidades para una persona, que es la
-      // base: el escalado por grupo familiar ocurre en el navegador y no tiene
-      // sentido en los datos estructurados.
+      // La lista estructurada declara las cantidades de la primera semana para
+      // una persona, que es la base: el escalado por grupo familiar y el cambio
+      // de semana ocurren en el navegador y no tienen sentido acá.
       name: textoItem(item, 1),
     }))
   ),
@@ -44,24 +53,34 @@ const jsonld = {
   descripcion="La lista completa del supermercado para una semana entera de dieta keto, agrupada por sector y con las cantidades calculadas para la cantidad de personas que sean en tu casa."
   jsonld={jsonld}
 >
-  <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Lista del súper, una semana</h1>
+  <h1 class="text-3xl md:text-4xl font-bold text-hoja-700">Las cuatro compras del mes</h1>
   <p class="mt-3 text-hoja-900/70 max-w-2xl leading-relaxed">
-    Todo lo que hace falta para las <strong>28 comidas</strong> del plan semanal: siete
-    desayunos, siete almuerzos, siete meriendas y siete cenas, sin repetir ninguna
-    receta. Está agrupada como se recorre el súper para no ir y volver entre góndolas.
+    Una lista por cada semana del <a href="/plan-semanal" class="text-naranja-600 hover:underline">plan
+    del mes</a>: todo lo que hace falta para las <strong>28 comidas</strong> de esa semana
+    —siete desayunos, siete almuerzos, siete meriendas y siete cenas, sin repetir ninguna
+    receta—, agrupado como se recorre el súper para no ir y volver entre góndolas.
   </p>
+  <p class="mt-3 text-hoja-900/70 max-w-2xl leading-relaxed">
+    Cada lista sale de los ingredientes de las recetas de su semana, sumados y convertidos
+    a cantidades de góndola. No está escrita a mano: si una receta cambia, la lista cambia.
+  </p>
+
+  <div class="mt-6">
+    <SelectorSemana etiqueta="Qué compra estás haciendo" />
+  </div>
   <p class="mt-3 text-hoja-900/70 max-w-2xl leading-relaxed">
     Las cantidades están escritas <strong>para una persona</strong>. Decile cuántos son en
     tu casa y se recalculan solas, con los redondeos que tienen sentido en la góndola: no
     vas a ver «2400 g de pechuga» sino «2,4 kg», ni fracciones de atado de acelga.
   </p>
 
-  <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+  {semanas.map((sem, si) => (
+  <div class:list={["mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3", si > 0 && "hidden"]} data-semana={si + 1}>
     {[
       ["Comidas", 28],
-      ["Porciones que rinde", totalPorciones],
-      ["Calorías por día", caloriasDia],
-      ["Ítems en la lista", totalItems],
+      ["Porciones que rinde", sem.totalPorciones],
+      ["Calorías por día", sem.caloriasDia],
+      ["Ítems en la lista", sem.totalItems],
     ].map(([k, v]) => (
       <div class="rounded-xl bg-white border border-hoja-100 p-4 text-center">
         <div class="text-2xl font-bold text-hoja-700">{v}</div>
@@ -69,6 +88,7 @@ const jsonld = {
       </div>
     ))}
   </div>
+  ))}
   <p class="mt-2 text-sm text-hoja-900/50 max-w-2xl leading-relaxed">
     Las porciones son más que las comidas porque varias recetas rinden de más —una tarta
     rinde 4, un cheesecake 8—: esas sobras son las que cubren la comida del día siguiente.
@@ -81,7 +101,11 @@ const jsonld = {
       <SelectorAyuno nota="Las cantidades bajan en proporción a las comidas que dejás de hacer, y lo que sólo servía para esas comidas sale de la lista. La despensa —aceite, condimentos, edulcorante— no se toca: rinde varias semanas igual." />
     </div>
 
-    <ListaCompras />
+    {semanas.map((sem, si) => (
+      <div class:list={[si > 0 && "hidden"]} data-semana={si + 1}>
+        <ListaCompras semana={si + 1} />
+      </div>
+    ))}
   </div>
 
   <AdSlot formato="horizontal" />
@@ -94,8 +118,9 @@ const jsonld = {
       <span data-aviso-veces class="hidden"></span>
     </p>
 
-    <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {PLAN_SEMANAL.map((d) => {
+    {semanas.map((sem, si) => (
+    <div class:list={["mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3", si > 0 && "hidden"]} data-semana={si + 1}>
+      {sem.dias.map((d) => {
         const delDia = CLAVES.map((c) => porSlug[d[c]]).filter(Boolean);
         const kcal = delDia.reduce((n, r) => n + r.macros.calorias, 0);
         const carbos = delDia.reduce((n, r) => n + r.macros.carbos, 0);
@@ -124,6 +149,7 @@ const jsonld = {
         );
       })}
     </div>
+    ))}
   </section>
 
   <aside class="mt-8 rounded-xl bg-crema-100 border border-hoja-100 p-5 max-w-3xl no-print">

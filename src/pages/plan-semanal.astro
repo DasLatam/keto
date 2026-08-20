@@ -3,7 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import AdSlot from "../components/AdSlot.astro";
 import ListaCompras from "../components/ListaCompras.astro";
 import SelectorAyuno from "../components/SelectorAyuno.astro";
-import { PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
+import SelectorSemana from "../components/SelectorSemana.astro";
+import { SEMANAS, RECETAS } from "../data/recetas.js";
 
 const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
 const COMIDAS_DIA = [
@@ -16,25 +17,39 @@ const COMIDAS_DIA = [
 // Totales de cada día: es el dato que hacía falta para que el plan se pueda usar
 // junto con la calculadora de macros. Sin el total diario, saber que un desayuno
 // tiene 430 calorías no le dice a nadie si el día cierra.
-const dias = PLAN_SEMANAL.map((d) => {
-  const comidas = COMIDAS_DIA.map(([clave]) => porSlug[d[clave]]);
-  const presentes = comidas.filter(Boolean);
-  return {
-    ...d,
-    comidas,
-    calorias: presentes.reduce((n, r) => n + r.macros.calorias, 0),
-    carbos: presentes.reduce((n, r) => n + r.macros.carbos, 0),
-    grasas: presentes.reduce((n, r) => n + r.macros.grasas, 0),
-    proteinas: presentes.reduce((n, r) => n + r.macros.proteinas, 0),
-  };
-});
+function conTotales(dias) {
+  return dias.map((d) => {
+    const comidas = COMIDAS_DIA.map(([clave]) => porSlug[d[clave]]);
+    const presentes = comidas.filter(Boolean);
+    return {
+      ...d,
+      comidas,
+      calorias: presentes.reduce((n, r) => n + r.macros.calorias, 0),
+      carbos: presentes.reduce((n, r) => n + r.macros.carbos, 0),
+      grasas: presentes.reduce((n, r) => n + r.macros.grasas, 0),
+      proteinas: presentes.reduce((n, r) => n + r.macros.proteinas, 0),
+    };
+  });
+}
 
-const promedio = {
+const promedioDe = (dias) => ({
   calorias: Math.round(dias.reduce((n, d) => n + d.calorias, 0) / dias.length),
   carbos: Math.round(dias.reduce((n, d) => n + d.carbos, 0) / dias.length),
   grasas: Math.round(dias.reduce((n, d) => n + d.grasas, 0) / dias.length),
   proteinas: Math.round(dias.reduce((n, d) => n + d.proteinas, 0) / dias.length),
-};
+});
+
+// Las cuatro semanas salen renderizadas del build y el selector muestra una.
+// Son 112 filas de HTML estático: pesan menos que el JavaScript que haría falta
+// para armarlas en el navegador, y funcionan con el buscador y con Ctrl+F.
+const semanas = SEMANAS.map((s) => {
+  const dias = conTotales(s.dias);
+  return { ...s, dias, promedio: promedioDe(dias) };
+});
+
+const dias = semanas[0].dias;
+const promedio = semanas[0].promedio;
+const todos = semanas.flatMap((s) => s.dias);
 
 const jsonld = {
   "@context": "https://schema.org",
@@ -45,7 +60,7 @@ const jsonld = {
       name: "¿Cuántas calorías tiene un día del plan keto?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: `El promedio del plan es de ${promedio.calorias} calorías por día, con ${promedio.carbos} gramos de carbohidratos netos, ${promedio.grasas} de grasas y ${promedio.proteinas} de proteínas, contando una porción de cada una de las cuatro comidas. Cada día tiene su propio total, que va de ${Math.min(...dias.map((d) => d.calorias))} a ${Math.max(...dias.map((d) => d.calorias))} calorías.`,
+        text: `El plan tiene cuatro semanas y las cuatro promedian alrededor de ${promedio.calorias} calorías por día, con ${promedio.carbos} gramos de carbohidratos netos, ${promedio.grasas} de grasas y ${promedio.proteinas} de proteínas, contando una porción de cada una de las cuatro comidas. Cada día tiene su propio total, que en el mes va de ${Math.min(...todos.map((d) => d.calorias))} a ${Math.max(...todos.map((d) => d.calorias))} calorías.`,
       },
     },
   ],
@@ -57,12 +72,22 @@ const jsonld = {
   descripcion={`Siete días de dieta keto armados, con las calorías y los carbohidratos de cada comida y el total de cada día (promedio: ${promedio.calorias} calorías), más la lista de compras calculada para los que sean en tu casa.`}
   jsonld={jsonld}
 >
-  <h1 class="text-3xl font-bold text-hoja-700">Plan de la semana</h1>
+  <h1 class="text-3xl font-bold text-hoja-700">Plan del mes</h1>
   <p class="mt-2 text-hoja-900/70 max-w-2xl leading-relaxed">
-    Siete días resueltos con <strong>28 recetas distintas</strong>: no se repite ninguna
-    comida en toda la semana. Cada una enlaza a su receta completa, con los pasos y el
-    error típico que hay que evitar, y muestra sus calorías y sus carbos netos por porción.
+    <strong>Cuatro semanas armadas</strong> con las 49 recetas del sitio: 112 comidas, sin
+    repetir ninguna dentro de la misma semana. Cada una enlaza a su receta completa, con
+    los pasos y el error típico que hay que evitar, y muestra sus calorías y sus carbos
+    netos por porción.
   </p>
+  <p class="mt-2 text-sm text-hoja-900/55 max-w-2xl leading-relaxed">
+    Las recetas no se repartieron al azar: las de una misma semana comparten verdura y
+    carne, para que la compra sea más corta y sobre menos en la heladera, y lo que lleva
+    más tiempo de cocina cae sábado y domingo.
+  </p>
+
+  <div class="mt-6">
+    <SelectorSemana />
+  </div>
 
   <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
     {[
@@ -95,7 +120,8 @@ const jsonld = {
   <p id="aviso-porciones" class="mt-3 text-sm text-naranja-600 leading-relaxed hidden"></p>
   <p id="aviso-proteina" class="mt-2 text-sm font-medium text-naranja-700 bg-naranja-400/10 border-l-4 border-naranja-500 rounded-r-lg px-4 py-3 leading-relaxed hidden"></p>
 
-  <div class="mt-8 overflow-x-auto">
+  {semanas.map((sem, si) => (
+  <div class:list={["mt-8 overflow-x-auto", si > 0 && "hidden"]} data-semana={si + 1}>
     <table class="w-full min-w-[720px] border-separate border-spacing-1">
       <thead>
         <tr>
@@ -109,7 +135,7 @@ const jsonld = {
         </tr>
       </thead>
       <tbody>
-        {dias.map((d) => (
+        {sem.dias.map((d) => (
           <tr>
             <th scope="row" class="text-left align-top bg-hoja-600 text-crema-50 rounded-lg px-3 py-3 text-sm font-semibold whitespace-nowrap">
               {d.dia}
@@ -152,6 +178,7 @@ const jsonld = {
       </tbody>
     </table>
   </div>
+  ))}
 
   <AdSlot formato="horizontal" />
 
@@ -163,19 +190,22 @@ const jsonld = {
       </div>
     </div>
     <p class="mt-1 text-sm text-hoja-900/60 max-w-2xl leading-relaxed">
-      Agrupada como se recorre el súper y calculada para los que sean en tu casa. Lo que
-      tildes queda guardado en este teléfono, así que podés ir marcando mientras comprás.
+      La de la semana que elegiste arriba, agrupada como se recorre el súper y calculada
+      para los que sean en tu casa. Lo que tildes queda guardado en este teléfono, así que
+      podés ir marcando mientras comprás.
     </p>
 
-    <div class="mt-5">
-      <ListaCompras compacto={true} />
-    </div>
+    {semanas.map((sem, si) => (
+      <div class:list={["mt-5", si > 0 && "hidden"]} data-semana={si + 1}>
+        <ListaCompras compacto={true} semana={si + 1} />
+      </div>
+    ))}
   </section>
 
   <section class="mt-10 rounded-xl border-2 border-naranja-400/50 bg-naranja-400/5 p-6">
     <h2 class="text-xl font-bold text-hoja-700">Las comidas, en tu calendario</h2>
     <p class="mt-2 text-hoja-900/70 leading-relaxed max-w-2xl">
-      Se pueden agendar las 28 comidas del plan, cada una en su día y con los ingredientes
+      Se pueden agendar las comidas del plan, cada una en su día y con los ingredientes
       y las calorías en la descripción del evento, más el recordatorio de la compra
       semanal. Se descarga un archivo que se importa en Google Calendar, en el Calendario
       del iPhone o en Outlook.
@@ -201,15 +231,34 @@ const jsonld = {
    * El multiplicador se calcula **por día** y no con el promedio de la semana:
    * cada día tiene su propio total y así cada uno cierra donde cerraba.
    */
-  const tabla = document.querySelector("table");
+  // La tabla visible, que cambia con el selector de semana. Las cuatro están en
+  // el DOM: la que manda es la que no está escondida.
+  const tablaActiva = () =>
+    document.querySelector("[data-semana]:not(.hidden) table");
 
-  /** La proteína del plan completo, para poder comparar contra ella. */
-  const BASE_PROTEINA = Number(
-    document.querySelector('[data-promedio="proteinas"]')?.textContent.replace(/\D/g, "") || 0);
+  /** La proteína del plan completo de esta semana, para comparar contra ella.
+   *
+   *  Se lee de los `data-` de la tabla y no del texto del promedio en pantalla,
+   *  que es justamente el número que esta función va a pisar: leerlo de ahí
+   *  hacía que después de cambiar de esquema la comparación fuera contra el
+   *  valor ya corregido, y el aviso desapareciera solo. */
+  function baseProteina(tabla) {
+    const filas = [...tabla.querySelectorAll("tbody tr")];
+    if (!filas.length) return 0;
+    const total = filas.reduce(
+      (a, tr) => a + [...tr.querySelectorAll("td[data-col]")]
+        .reduce((b, td) => b + Number(td.dataset.proteinas), 0), 0);
+    return Math.round(total / filas.length);
+  }
+
+  let esquema = null;
 
   function aplicar(id) {
+    if (id != null) esquema = id;
+    const tabla = tablaActiva();
     if (!tabla) return;
-    const saltea = porId(id).saltea;
+    const saltea = porId(esquema).saltea;
+    const BASE_PROTEINA = baseProteina(tabla);
 
     tabla.querySelectorAll("thead [data-col]").forEach((th) => {
       const fuera = saltea.includes(th.dataset.col);
@@ -290,4 +339,7 @@ const jsonld = {
   }
 
   document.addEventListener("keto:ayuno", (e) => aplicar(e.detail.id));
+  // Al cambiar de semana hay que rehacer los totales: la tabla es otra, y los
+  // promedios de arriba son los de la semana que se está mirando.
+  document.addEventListener("keto:semana", () => aplicar(null));
 </script>

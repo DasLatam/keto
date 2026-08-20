@@ -17,7 +17,8 @@
  * Sale con código 1 si hay errores, para poder engancharlo a un build o a un
  * hook antes de publicar.
  */
-import { RECETAS, PLAN_SEMANAL, LISTA_COMPRAS, COMIDAS, ETIQUETAS } from "../src/data/recetas.js";
+import { RECETAS, SEMANAS, COMIDAS, ETIQUETAS } from "../src/data/recetas.js";
+import { listaDe } from "../src/lib/compras.js";
 import { PRODUCTOS, CATEGORIAS } from "../src/data/productos.js";
 import { INGREDIENTES } from "../src/data/ingredientes.js";
 import { RUTINAS } from "../src/data/ejercicios.js";
@@ -260,66 +261,83 @@ for (const r of RECETAS) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// 7. El plan semanal
+// 7. El plan del mes
 // ══════════════════════════════════════════════════════════════════════════
 const porSlug = Object.fromEntries(RECETAS.map((r) => [r.slug, r]));
-const usadas = [];
-for (const d of PLAN_SEMANAL) {
-  for (const c of COMIDAS_PLAN) {
-    const s = d[c];
-    if (!s) { err(`plan/${d.dia}`, `no tiene ${c}`); continue; }
-    if (!porSlug[s]) { err(`plan/${d.dia}`, `${c} apunta a «${s}», que no existe`); continue; }
-    if (porSlug[s].comida !== c) {
-      avi(`plan/${d.dia}`, `«${s}» está catalogada como ${porSlug[s].comida} y se usa de ${c}`);
+const usadasEnElMes = new Set();
+
+for (const sem of SEMANAS) {
+  const usadas = [];
+  for (const d of sem.dias) {
+    for (const c of COMIDAS_PLAN) {
+      const s = d[c];
+      if (!s) { err(`${sem.nombre}/${d.dia}`, `no tiene ${c}`); continue; }
+      if (!porSlug[s]) { err(`${sem.nombre}/${d.dia}`, `${c} apunta a «${s}», que no existe`); continue; }
+      // La merienda admite además las colaciones: son lo mismo con otro nombre,
+      // y sin ellas la merienda es lo más repetido del mes.
+      const compatible = porSlug[s].comida === c ||
+        (c === "merienda" && porSlug[s].comida === "colacion");
+      if (!compatible) {
+        avi(`${sem.nombre}/${d.dia}`, `«${s}» está catalogada como ${porSlug[s].comida} y se usa de ${c}`);
+      }
+      usadas.push(s);
+      usadasEnElMes.add(s);
     }
-    usadas.push(s);
+  }
+
+  if (new Set(usadas).size !== usadas.length) {
+    const repes = usadas.filter((s, i) => usadas.indexOf(s) !== i);
+    err(sem.nombre, `recetas repetidas dentro de la semana: ${[...new Set(repes)].join(", ")}`);
+  }
+  if (usadas.length !== 28) err(sem.nombre, `tiene ${usadas.length} comidas y deberían ser 28`);
+
+  // El día tiene que cerrar dentro de un presupuesto keto.
+  for (const d of sem.dias) {
+    const carbos = COMIDAS_PLAN.reduce((a, c) => a + (porSlug[d[c]]?.macros.carbos ?? 0), 0);
+    if (carbos > 50) err(`${sem.nombre}/${d.dia}`, `${carbos} g de carbos netos en el día: fuera de keto`);
+    else if (carbos > 35) avi(`${sem.nombre}/${d.dia}`, `${carbos} g de carbos netos en el día, alto`);
   }
 }
-if (new Set(usadas).size !== usadas.length) {
-  const repes = usadas.filter((s, i) => usadas.indexOf(s) !== i);
-  err("plan", `recetas repetidas: ${[...new Set(repes)].join(", ")}`);
-}
-if (usadas.length !== 28) err("plan", `tiene ${usadas.length} comidas y deberían ser 28`);
 
-// El día tiene que cerrar dentro de un presupuesto keto.
-for (const d of PLAN_SEMANAL) {
-  const carbos = COMIDAS_PLAN.reduce((a, c) => a + (porSlug[d[c]]?.macros.carbos ?? 0), 0);
-  if (carbos > 50) err(`plan/${d.dia}`, `${carbos} g de carbos netos en el día: fuera de keto`);
-  else if (carbos > 35) avi(`plan/${d.dia}`, `${carbos} g de carbos netos en el día, alto`);
+// El mes existe para que entren todas: una receta que no aparece nunca es una
+// receta que nadie va a cocinar.
+for (const r of RECETAS) {
+  if (!usadasEnElMes.has(r.slug)) avi("plan del mes", `«${r.slug}» no se usa en ninguna semana`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
 // 8. La lista del súper cubre lo que el plan necesita
 // ══════════════════════════════════════════════════════════════════════════
-const enLista = new Set();
-for (const s of LISTA_COMPRAS) {
-  for (const it of s.items) {
-    for (const t of plano(it.nombre ?? it.unidad).split(/[\s,/]+/)) {
-      if (t.length >= 4) enLista.add(t.replace(/s$/, ""));
-    }
-  }
-}
-const sinCubrir = new Map();
-for (const d of PLAN_SEMANAL) {
-  for (const c of COMIDAS_PLAN) {
-    const r = porSlug[d[c]];
-    if (!r) continue;
-    for (const ing of r.ingredientes) {
-      const palabras = plano(ing)
-        .replace(/^[\d\s/½¼¾,.]*/, "")
-        .split(/[\s,/()]+/)
-        .map((t) => t.replace(/s$/, ""))
-        .filter((t) => t.length >= 4 && !["cucharada", "cucharadita", "gusto", "opcional",
-          "picado", "picada", "rallado", "rallada", "cubo", "feta", "diente", "punado",
-          "pizca", "taza", "hoja", "trozo", "unidad", "medio", "media", "extra"].includes(t));
-      if (palabras.length && !palabras.some((t) => enLista.has(t))) {
-        sinCubrir.set(ing, (sinCubrir.get(ing) ?? []).concat(r.slug));
+//
+// Antes esto comparaba palabras entre los ingredientes y una lista escrita a
+// mano, y sólo podía dar avisos difusos. Ahora la lista **se deriva** de las
+// recetas (`lib/compras.js`), así que la pregunta cambió: ya no es «¿está el
+// ingrediente en la lista?» sino «¿supo el traductor qué se compra para este
+// ingrediente?». Lo que no supo es un error, no un aviso: significa que la lista
+// está incompleta y no hay forma de darse cuenta hasta estar en la góndola.
+for (const sem of SEMANAS) {
+  const recetas = sem.dias.flatMap((d) =>
+    COMIDAS_PLAN.map((c) => ({ receta: porSlug[d[c]], comida: c })).filter((x) => x.receta));
+  const { sectores, sinReconocer } = listaDe(recetas);
+
+  for (const x of sinReconocer) err("lista-compras", `sin regla en despensa.js — ${x}`);
+  if (!sectores.length) err(sem.nombre, "la lista del súper sale vacía");
+
+  for (const s of sectores) {
+    for (const it of s.items) {
+      if (it.cant != null && !(it.cant > 0)) {
+        err("lista-compras", `${sem.nombre}: «${it.nombre ?? it.unidad}» quedó en ${it.cant}`);
       }
     }
   }
 }
-for (const [ing, recetas] of sinCubrir) {
-  avi("lista-compras", `«${ing}» (${recetas[0]}) no aparece en la lista del súper`);
+
+// Y lo mismo para **todas** las recetas, no sólo las que están en el plan: una
+// receta suelta con un ingrediente sin regla rompería la lista el día que entre
+// al plan, y eso se descubriría meses después.
+{
+  const { sinReconocer } = listaDe(RECETAS.map((r) => ({ receta: r, comida: r.comida })));
+  for (const x of sinReconocer) err("despensa", `sin regla — ${x}`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════

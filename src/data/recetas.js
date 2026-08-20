@@ -827,134 +827,95 @@ export const RECETAS = [
   },
 ];
 
-// Plan de siete días **sin repetir ninguna receta**: 28 comidas, 28 recetas distintas.
-export const PLAN_SEMANAL = [
-  { dia: "Lunes",     desayuno: "huevos-revueltos-con-palta",            almuerzo: "milanesas-de-pollo-con-almendras",           merienda: "pan-keto-de-taza",             cena: "tortilla-de-acelga-y-queso" },
-  { dia: "Martes",    desayuno: "omelette-de-jamon-crudo-y-provolone",   almuerzo: "ensalada-de-atun-y-huevo",                   merienda: "mousse-de-chocolate-keto",     cena: "fideos-de-zucchini-con-crema-y-panceta" },
-  { dia: "Miércoles", desayuno: "huevos-fritos-en-grasa-de-panceta",     almuerzo: "pollo-al-verdeo-sin-harina",                 merienda: "almendras-tostadas-al-pimenton", cena: "merluza-al-horno-con-manteca-y-limon" },
-  { dia: "Jueves",    desayuno: "revuelto-de-espinaca-y-queso-de-cabra", almuerzo: "revuelto-de-zapallitos-con-carne-picada",    merienda: "bocaditos-de-queso-y-nuez",    cena: "crema-de-brocoli" },
-  { dia: "Viernes",   desayuno: "panqueques-de-almendras",               almuerzo: "vacio-al-horno-con-chimichurri",             merienda: "flan-de-coco-sin-azucar",      cena: "pizza-con-masa-de-coliflor" },
-  { dia: "Sábado",    desayuno: "tortilla-espanola-de-nabo",             almuerzo: "matambrito-de-cerdo-con-rucula",             merienda: "torta-de-chocolate-en-taza",   cena: "berenjenas-a-la-parmesana" },
-  { dia: "Domingo",   desayuno: "yogur-con-nueces-y-frutos-rojos",       almuerzo: "tarta-de-jamon-y-queso-con-masa-de-almendras", merienda: "licuado-de-frutilla-y-coco", cena: "zapallitos-rellenos-con-carne" },
-];
-
-// Lista de compras de la semana, agrupada como se recorre el súper.
+// El plan del mes: cuatro semanas, 112 comidas, las 49 recetas del sitio.
 //
-// Las cantidades son **para una persona** y están partidas en `cant` / `unidad` /
-// `nombre` en lugar de escritas como texto ("1 kg de vacío") para que la página
-// pueda multiplicarlas por la cantidad de personas de la casa. El armado del
-// texto y el redondeo viven en `src/lib/porciones.js`: acá van sólo los datos.
+// **Por qué cuatro y no una.** Una semana sin repetir es una demostración de que
+// se puede; un mes es lo que se cocina de verdad. Con 49 recetas y 28 comidas
+// semanales, la única forma de llenar un mes es repetir, y hacerlo con criterio
+// es mejor que dejar que cada uno improvise a partir del jueves.
 //
-// `escala: false` marca lo que **no se multiplica**. Una botella de aceite o el
-// frasco de pimentón rinden varias semanas: multiplicarlos por cuatro haría que
-// la lista pidiera cuatro botellas de vinagre, que es exactamente el error que
-// hace que la gente deje de usar la lista.
+// **Cómo se repartieron.** Cada receta aparece entre una y cuatro veces en el
+// mes, según cuántas haya de su tipo: los desayunos son ocho para veintiocho
+// huecos, así que repiten cuatro veces; las cenas son catorce y repiten dos. Las
+// seis **colaciones entran como merienda**, que es lo que son, y suben la
+// merienda de nueve opciones a quince: sin eso era lo más repetido del mes.
 //
-// `usos` dice en cuántas recetas del plan aparece el ítem y en qué comida. Es lo
-// que permite restar el desayuno de la lista cuando alguien hace ayuno
-// intermitente: con `usos: { desayuno: 6, almuerzo: 4, merienda: 3, cena: 3 }`,
-// saltear el desayuno deja seis dieciseisavos de los huevos afuera, no todos.
-// Sin esto habría que elegir entre no tocar la lista —y comprar comida que no se
-// va a cocinar— o sacar el ítem entero, que es peor todavía.
+// El reparto no es alfabético ni al azar. Se armó con `scripts/armar_mes.mjs`
+// optimizando dos cosas:
 //
-// El mapeo se derivó de los ingredientes de las 28 recetas del plan y quedó
-// escrito acá en lugar de calcularse en cada visita: así se puede leer, discutir
-// y corregir a mano. Si se cambia el plan semanal, hay que rehacerlo.
-export const LISTA_COMPRAS = [
+//   · Que las recetas de una misma semana **compartan verdura y carne**, para
+//     que la compra sea más corta y sobre menos en la heladera. Eso bajó los
+//     artículos frescos distintos del mes de 120 a 111.
+//   · Que dentro de la semana **lo que lleva más tiempo caiga sábado y domingo**,
+//     y los lunes sean lo más rápido que hay.
+//
+// Ninguna receta se repite dentro de la misma semana, y las 49 se usan.
+//
+// **La semana 1 es la que ya existía y no se tocó**: está narrada en el audio de
+// la caminata 3, y cambiarla habría dejado el audio mintiendo.
+export const SEMANAS = [
   {
-    sector: "Carnicería y pescadería",
-    items: [
-      { cant: 1, unidad: "kg", nombre: "vacío", usos: { almuerzo: 1 } },
-      { cant: 600, unidad: "g", nombre: "pechuga de pollo", usos: { almuerzo: 2 } },
-      { cant: 6, unidad: "muslo", nombre: "pollo", usos: { almuerzo: 1 } },
-      { cant: 700, unidad: "g", nombre: "matambrito de cerdo", usos: { almuerzo: 1 } },
-      { cant: 900, unidad: "g", nombre: "carne picada", usos: { almuerzo: 1, merienda: 1, cena: 1 } },
-      { cant: 2, unidad: "filete", nombre: "merluza", usos: { cena: 1 } },
-      { cant: 150, unidad: "g", nombre: "panceta", usos: { desayuno: 1, cena: 1 } },
-      { cant: 200, unidad: "g", nombre: "jamón cocido", usos: { desayuno: 1, almuerzo: 1 } },
-      { cant: 1, unidad: "paquete", nombre: "jamón crudo", usos: { desayuno: 1, almuerzo: 1 } },
+    nombre: "Semana 1",
+    titulo: "La de arranque",
+    nota:
+      "Es la semana que narra el audio de la caminata 3 y la que menos vueltas pide: todo se consigue en cualquier súper y ninguna receta necesita algo que haya que salir a buscar. Si es tu primera semana de keto, empezá por acá.",
+    dias: [
+      { dia: "Lunes",      desayuno: "huevos-revueltos-con-palta",             almuerzo: "milanesas-de-pollo-con-almendras",              merienda: "pan-keto-de-taza",                cena: "tortilla-de-acelga-y-queso" },
+      { dia: "Martes",     desayuno: "omelette-de-jamon-crudo-y-provolone",    almuerzo: "ensalada-de-atun-y-huevo",                      merienda: "mousse-de-chocolate-keto",        cena: "fideos-de-zucchini-con-crema-y-panceta" },
+      { dia: "Miércoles",  desayuno: "huevos-fritos-en-grasa-de-panceta",      almuerzo: "pollo-al-verdeo-sin-harina",                    merienda: "almendras-tostadas-al-pimenton",  cena: "merluza-al-horno-con-manteca-y-limon" },
+      { dia: "Jueves",     desayuno: "revuelto-de-espinaca-y-queso-de-cabra",  almuerzo: "revuelto-de-zapallitos-con-carne-picada",       merienda: "bocaditos-de-queso-y-nuez",       cena: "crema-de-brocoli" },
+      { dia: "Viernes",    desayuno: "panqueques-de-almendras",                almuerzo: "vacio-al-horno-con-chimichurri",                merienda: "flan-de-coco-sin-azucar",         cena: "pizza-con-masa-de-coliflor" },
+      { dia: "Sábado",     desayuno: "tortilla-espanola-de-nabo",              almuerzo: "matambrito-de-cerdo-con-rucula",                merienda: "torta-de-chocolate-en-taza",      cena: "berenjenas-a-la-parmesana" },
+      { dia: "Domingo",    desayuno: "yogur-con-nueces-y-frutos-rojos",        almuerzo: "tarta-de-jamon-y-queso-con-masa-de-almendras",  merienda: "licuado-de-frutilla-y-coco",      cena: "zapallitos-rellenos-con-carne" },
     ],
   },
   {
-    sector: "Verdulería",
-    items: [
-      { cant: 4, unidad: "palta", usos: { desayuno: 1, almuerzo: 1 } },
-      { cant: 1, unidad: "atado", nombre: "acelga", usos: { cena: 1 } },
-      { cant: 1, unidad: "atado", nombre: "espinaca", usos: { desayuno: 1 } },
-      { cant: 4, unidad: "zucchini", usos: { cena: 1 } },
-      { cant: 3, unidad: "berenjena", usos: { cena: 1 } },
-      { cant: 12, unidad: "zapallito redondo", usos: { almuerzo: 1, cena: 1 } },
-      { cant: 1, unidad: "brócoli", nombre: null, usos: { cena: 1 } },
-      { cant: 1, unidad: "coliflor", nombre: null, usos: { cena: 1 } },
-      { cant: 3, unidad: "nabo", usos: { desayuno: 1 } },
-      { cant: 1, unidad: "atado", nombre: "cebolla de verdeo", usos: { desayuno: 1, almuerzo: 2, cena: 1 } },
-      { cant: 1, unidad: "puerro", usos: { cena: 1 } },
-      { cant: 1, unidad: "paquete", nombre: "rúcula", usos: { almuerzo: 2 } },
-      { cant: 2, unidad: "cebolla", usos: { desayuno: 1, almuerzo: 2, cena: 1 } },
-      { cant: 1, unidad: "morrón rojo", usos: { almuerzo: 1 } },
-      { cant: 2, unidad: "cabeza", nombre: "ajo", usos: { desayuno: 1, almuerzo: 3, cena: 1 } },
-      { cant: 1, unidad: "atado", nombre: "perejil", usos: { almuerzo: 2, merienda: 1, cena: 1 } },
-      { cant: 1, unidad: "paquete", nombre: "albahaca fresca", usos: { cena: 1 } },
-      { cant: 2, unidad: "limón", usos: { almuerzo: 2, cena: 1 } },
-      { cant: 1, unidad: "caja", nombre: "frutillas", usos: { desayuno: 1, merienda: 1 } },
+    nombre: "Semana 2",
+    titulo: "La del pescado y las sopas",
+    nota:
+      "Entra el salmón el lunes y jueves y viernes van seguidos de sopa, que es lo que más rinde cuando queda poco tiempo. También es la semana con el almuerzo más largo del mes: el vacío del domingo.",
+    dias: [
+      { dia: "Lunes",      desayuno: "yogur-con-nueces-y-frutos-rojos",          almuerzo: "ensalada-de-atun-y-huevo",          merienda: "palta-con-limon-y-sal",         cena: "salmon-rosado-con-manteca-de-hierbas" },
+      { dia: "Martes",     desayuno: "tortilla-de-jamon-y-queso-al-microondas",  almuerzo: "ensalada-de-repollo-y-zanahoria",   merienda: "pan-keto-de-taza",              cena: "revuelto-gramajo-keto" },
+      { dia: "Miércoles",  desayuno: "huevos-revueltos-con-palta",               almuerzo: "milanesas-de-pollo-con-almendras",  merienda: "chips-de-queso-al-horno",       cena: "brochetas-de-pollo-y-morron" },
+      { dia: "Jueves",     desayuno: "omelette-de-jamon-crudo-y-provolone",      almuerzo: "lomo-al-champignon",                merienda: "provoleta-a-la-parrilla",       cena: "sopa-crema-de-champignones" },
+      { dia: "Viernes",    desayuno: "huevos-fritos-en-grasa-de-panceta",        almuerzo: "pollo-al-curry-con-coco",           merienda: "huevos-duros-con-sal-y-oliva",  cena: "sopa-de-zapallo-y-jengibre" },
+      { dia: "Sábado",     desayuno: "panqueques-de-almendras",                  almuerzo: "matambrito-de-cerdo-con-rucula",    merienda: "cheesecake-keto-sin-horno",     cena: "coliflor-gratinado-con-queso" },
+      { dia: "Domingo",    desayuno: "tortilla-espanola-de-nabo",                almuerzo: "vacio-al-horno-con-chimichurri",    merienda: "budin-de-limon-keto",           cena: "pizza-con-masa-de-coliflor" },
     ],
   },
   {
-    sector: "Lácteos y fiambrería",
-    items: [
-      { cant: 3, unidad: "docena", nombre: "huevos", usos: { desayuno: 6, almuerzo: 4, merienda: 3, cena: 3 } },
-      { cant: 250, unidad: "g", nombre: "manteca", usos: { desayuno: 4, almuerzo: 3, merienda: 2, cena: 2 } },
-      { cant: 300, unidad: "g", nombre: "queso cremoso", usos: { desayuno: 1, almuerzo: 3, merienda: 1, cena: 6 } },
-      { cant: 200, unidad: "g", nombre: "queso crema", usos: { desayuno: 2, almuerzo: 4, merienda: 2, cena: 6 } },
-      { cant: 250, unidad: "g", nombre: "muzzarella", usos: { cena: 2 } },
-      { cant: 150, unidad: "g", nombre: "provolone", usos: { desayuno: 1 } },
-      { cant: 100, unidad: "g", nombre: "queso de cabra", usos: { desayuno: 1, almuerzo: 3, merienda: 1, cena: 6 } },
-      { cant: 150, unidad: "g", nombre: "queso sardo", usos: { desayuno: 1, almuerzo: 3, merienda: 1, cena: 6 } },
-      { cant: 100, unidad: "g", nombre: "queso parmesano", usos: { desayuno: 1, almuerzo: 3, merienda: 1, cena: 6 } },
-      { cant: 1, unidad: "paquete", nombre: "queso rallado", escala: false, usos: { desayuno: 1, almuerzo: 3, merienda: 1, cena: 6 } },
-      { cant: 600, unidad: "cc", nombre: "crema de leche", usos: { desayuno: 1, almuerzo: 2, merienda: 4, cena: 2 } },
-      { cant: 1, unidad: "pote", nombre: "yogur natural entero", usos: { desayuno: 1, almuerzo: 1 } },
+    nombre: "Semana 3",
+    titulo: "La de los almuerzos fríos",
+    nota:
+      "Lunes, martes y miércoles se almuerza sin prender el horno: caprese, atún y repollo. Es la semana para cuando hace calor o el mediodía es de veinte minutos.",
+    dias: [
+      { dia: "Lunes",      desayuno: "tortilla-de-jamon-y-queso-al-microondas",  almuerzo: "ensalada-caprese-con-palta",            merienda: "palta-con-limon-y-sal",           cena: "fideos-de-zucchini-con-crema-y-panceta" },
+      { dia: "Martes",     desayuno: "huevos-revueltos-con-palta",               almuerzo: "ensalada-de-atun-y-huevo",              merienda: "aceitunas-y-queso-en-cubos",      cena: "salmon-rosado-con-manteca-de-hierbas" },
+      { dia: "Miércoles",  desayuno: "omelette-de-jamon-crudo-y-provolone",      almuerzo: "ensalada-de-repollo-y-zanahoria",       merienda: "torta-de-chocolate-en-taza",      cena: "huevos-a-la-cazuela-con-espinaca" },
+      { dia: "Jueves",     desayuno: "huevos-fritos-en-grasa-de-panceta",        almuerzo: "milanesas-de-pollo-con-almendras",      merienda: "bocaditos-de-queso-y-nuez",       cena: "merluza-al-horno-con-manteca-y-limon" },
+      { dia: "Viernes",    desayuno: "revuelto-de-espinaca-y-queso-de-cabra",    almuerzo: "pollo-al-verdeo-sin-harina",            merienda: "chips-de-queso-al-horno",         cena: "tortilla-de-acelga-y-queso" },
+      { dia: "Sábado",     desayuno: "panqueques-de-almendras",                  almuerzo: "pechuga-rellena-con-espinaca-y-queso",  merienda: "almendras-tostadas-al-pimenton",  cena: "revuelto-gramajo-keto" },
+      { dia: "Domingo",    desayuno: "tortilla-espanola-de-nabo",                almuerzo: "vacio-al-horno-con-chimichurri",        merienda: "chicharron-de-cerdo-casero",      cena: "berenjenas-a-la-parmesana" },
     ],
   },
   {
-    sector: "Almacén",
-    items: [
-      { cant: 1, unidad: "lata", nombre: "atún al natural", usos: { desayuno: 1, almuerzo: 1 } },
-      { cant: 1, unidad: "botella", nombre: "aceite de oliva", escala: false, usos: { desayuno: 1, almuerzo: 4, merienda: 2, cena: 3 } },
-      { cant: 1, unidad: "frasco", nombre: "aceitunas verdes", escala: false, usos: { cena: 1 } },
-      { cant: 1, unidad: "lata", nombre: "salsa de tomate sin azúcar", usos: { desayuno: 1, cena: 2 } },
-      { cant: 1, unidad: "botella", nombre: "vinagre", escala: false, usos: { almuerzo: 1 } },
-      { cant: 1, unidad: "botella", nombre: "vino blanco seco", escala: false, usos: { almuerzo: 1 } },
-      { cant: null, nombre: "Orégano, pimentón, comino, ají molido, nuez moscada", escala: false, usos: { desayuno: 1, almuerzo: 4, merienda: 2, cena: 3 } },
-      { cant: 1, unidad: "paquete", nombre: "sal gruesa", escala: false, usos: { desayuno: 4, almuerzo: 7, merienda: 3, cena: 7 } },
-    ],
-  },
-  {
-    sector: "Dietética",
-    items: [
-      { cant: 1, unidad: "kg", nombre: "harina de almendras", usos: { desayuno: 1, almuerzo: 2, merienda: 3 } },
-      { cant: 200, unidad: "g", nombre: "almendras", usos: { desayuno: 1, almuerzo: 2, merienda: 3 } },
-      { cant: 100, unidad: "g", nombre: "nueces", usos: { desayuno: 1, merienda: 1 } },
-      { cant: 800, unidad: "cc", nombre: "leche de coco", usos: { desayuno: 1, almuerzo: 1, merienda: 3, cena: 2 } },
-      { cant: 1, unidad: "frasco", nombre: "aceite de coco", escala: false, usos: { desayuno: 1, almuerzo: 4, merienda: 3, cena: 3 } },
-      { cant: 1, unidad: "paquete", nombre: "cacao amargo", escala: false, usos: { merienda: 2 } },
-      { cant: 1, unidad: "paquete", nombre: "semillas de chía", escala: false, usos: { desayuno: 1 } },
-      { cant: 1, unidad: "paquete", nombre: "polvo de hornear", escala: false, usos: { desayuno: 1, merienda: 2 } },
-      { cant: 1, unidad: "paquete", nombre: "edulcorante (stevia o eritritol)", escala: false, usos: { desayuno: 2, merienda: 4 } },
-      { cant: 1, unidad: "frasco", nombre: "esencia de vainilla", escala: false, usos: { desayuno: 1, merienda: 2 } },
-    ],
-  },
-  // Van aparte porque no se compran todas las semanas: se mira la alacena y se
-  // repone lo que falta. Si estuvieran mezcladas con lo demás, la lista daría la
-  // impresión de que hay que comprar sal y pimienta cada siete días. Ninguno
-  // escala: son los mismos frascos para uno o para seis.
-  {
-    sector: "Alacena — revisá si te queda",
-    items: [
-      { cant: null, nombre: "Pimienta negra", escala: false, usos: { desayuno: 3, almuerzo: 2, merienda: 1, cena: 3 } },
-      { cant: null, nombre: "Caldo de verdura", escala: false, usos: { cena: 1 } },
-      { cant: null, nombre: "Manteca extra para cocinar", escala: false, usos: { desayuno: 4, almuerzo: 3, merienda: 2, cena: 2 } },
-      { cant: null, nombre: "Hielo", escala: false, usos: { merienda: 1 } },
+    nombre: "Semana 4",
+    titulo: "La del horno y la olla",
+    nota:
+      "Gratinados, rellenos, cazuelas y las dos sopas otra vez. Es la que más porciones de sobra deja, así que es la semana para cocinar de más y llenar el freezer.",
+    dias: [
+      { dia: "Lunes",      desayuno: "yogur-con-nueces-y-frutos-rojos",          almuerzo: "ensalada-caprese-con-palta",                    merienda: "aceitunas-y-queso-en-cubos",    cena: "huevos-a-la-cazuela-con-espinaca" },
+      { dia: "Martes",     desayuno: "tortilla-de-jamon-y-queso-al-microondas",  almuerzo: "revuelto-de-zapallitos-con-carne-picada",       merienda: "licuado-de-frutilla-y-coco",    cena: "crema-de-brocoli" },
+      { dia: "Miércoles",  desayuno: "huevos-revueltos-con-palta",               almuerzo: "lomo-al-champignon",                            merienda: "mousse-de-chocolate-keto",      cena: "brochetas-de-pollo-y-morron" },
+      { dia: "Jueves",     desayuno: "omelette-de-jamon-crudo-y-provolone",      almuerzo: "pollo-al-verdeo-sin-harina",                    merienda: "provoleta-a-la-parrilla",       cena: "sopa-crema-de-champignones" },
+      { dia: "Viernes",    desayuno: "huevos-fritos-en-grasa-de-panceta",        almuerzo: "pollo-al-curry-con-coco",                       merienda: "huevos-duros-con-sal-y-oliva",  cena: "sopa-de-zapallo-y-jengibre" },
+      { dia: "Sábado",     desayuno: "revuelto-de-espinaca-y-queso-de-cabra",    almuerzo: "pechuga-rellena-con-espinaca-y-queso",          merienda: "flan-de-coco-sin-azucar",       cena: "coliflor-gratinado-con-queso" },
+      { dia: "Domingo",    desayuno: "tortilla-espanola-de-nabo",                almuerzo: "tarta-de-jamon-y-queso-con-masa-de-almendras",  merienda: "chicharron-de-cerdo-casero",    cena: "zapallitos-rellenos-con-carne" },
     ],
   },
 ];
+
+/** La semana 1, que es la que ve quien no elige ninguna. Varias páginas y el
+ *  exportador de audios la usan directamente. */
+export const PLAN_SEMANAL = SEMANAS[0].dias;

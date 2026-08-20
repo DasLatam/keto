@@ -4,7 +4,7 @@ import SelectorAyuno from "../components/SelectorAyuno.astro";
 import { HORAS_COMIDA } from "../data/ayuno.js";
 import AdSlot from "../components/AdSlot.astro";
 import { RUTINAS } from "../data/ejercicios.js";
-import { PLAN_SEMANAL, RECETAS } from "../data/recetas.js";
+import { SEMANAS, RECETAS } from "../data/recetas.js";
 
 // Los datos van al cliente por un `<script type="application/json">` y no por
 // `define:vars`: usar `define:vars` marca el script como inline y le prohíbe los
@@ -27,7 +27,7 @@ const DATOS = {
       ejercicios: b.ejercicios.map((e) => ({ nombre: e.nombre })),
     })),
   })),
-  plan: PLAN_SEMANAL,
+  semanas: SEMANAS.map((s) => ({ nombre: s.nombre, dias: s.dias })),
   recetas: Object.fromEntries(
     RECETAS.map((r) => [
       r.slug,
@@ -91,7 +91,7 @@ const FAQ = [
   },
   {
     p: "¿Conviene agendar también las comidas?",
-    r: "Depende de cómo uses el calendario. Son 28 eventos y a quien tiene la agenda llena de reuniones le puede resultar ruido. Lo que sí sirve mucho es el recordatorio de la compra semanal: la mayoría de los planes se caen el miércoles porque el domingo nadie fue al súper.",
+    r: "Depende de cómo uses el calendario. Son 112 eventos —las cuatro semanas del plan, rotando cada cuatro— y a quien tiene la agenda llena de reuniones le puede resultar ruido. Lo que sí sirve mucho es el recordatorio de la compra semanal: la mayoría de los planes se caen el miércoles porque el domingo nadie fue al súper.",
   },
 ];
 
@@ -212,9 +212,9 @@ const jsonld = {
               <span aria-hidden="true">🍽</span> Las comidas del plan semanal
             </span>
             <span class="block text-sm text-hoja-900/60 mt-0.5">
-              Las 28 comidas del <a href="/plan-semanal" class="text-naranja-600 hover:underline">plan</a>,
+              Las 112 comidas del <a href="/plan-semanal" class="text-naranja-600 hover:underline">plan del mes</a>,
               cada una en su día, con los ingredientes y las calorías en la descripción del evento.
-              Son 28 eventos: si usás el calendario para trabajar, puede ser mucho ruido.
+              Son 112 eventos que rotan cada cuatro semanas: si usás el calendario para trabajar, puede ser mucho ruido.
             </span>
           </span>
         </label>
@@ -406,7 +406,7 @@ const jsonld = {
       saltea: ayuno.saltea,
       ayuno,
       RUTINAS: DATOS.rutinas,
-      plan: DATOS.plan,
+      semanas: DATOS.semanas,
       recetas: DATOS.recetas,
       sitio: location.origin,
     };
