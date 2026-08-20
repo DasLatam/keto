@@ -6,7 +6,7 @@
 #   scripts/subir_audios.sh              # los que cambiaron
 #   scripts/subir_audios.sh --todos      # todos, aunque no hayan cambiado
 #
-# Los MP3 **no van al repo**: son unos 90 MB entre los cinco y git guarda cada
+# Los MP3 **no van al repo**: son unos 134 MB entre los siete y git guarda cada
 # versión para siempre. Regenerar los audios tres veces dejaría 270 MB dentro de
 # un sitio que compila a 5 MB de HTML. Van al mismo hosting que el contador y el
 # panel, que es donde ya vive lo que el sitio necesita y no puede servir estático.
@@ -29,7 +29,7 @@ if ! compgen -G "$ORIGEN/*.mp3" > /dev/null; then
 fi
 
 # `--only-newer` compara fecha y tamaño contra lo que ya está en el servidor:
-# resubir 90 MB por cambiar un audio de 7 son veinte minutos de FTP al pedo.
+# resubir 134 MB por cambiar un audio de 8 son veinte minutos de FTP al pedo.
 SOLO_NUEVOS="--only-newer"
 [[ "${1:-}" == "--todos" ]] && SOLO_NUEVOS=""
 

@@ -46,6 +46,7 @@ export const RUTINAS = [
           {
             nombre: "Respiración con brazos arriba",
             dosis: "5 respiraciones",
+            posicion: "Parate con los pies al ancho de las caderas y los brazos al costado del cuerpo.",
             zona: "Caja torácica, hombros",
             como: "De pie, pies al ancho de las caderas. Subí los brazos por los costados mientras inhalás por la nariz, contando cuatro. Bajalos exhalando por la boca, contando seis.",
             tip: "Exhalar más largo que inhalar es lo que baja el pulso. Si inhalás y exhalás igual, es respirar fuerte y nada más.",
@@ -53,6 +54,7 @@ export const RUTINAS = [
           {
             nombre: "Rotación de cuello",
             dosis: "4 vueltas a cada lado",
+            posicion: "Seguí de pie, con los brazos colgando y los hombros sueltos.",
             zona: "Cuello, trapecio",
             como: "Dejá caer la pera al pecho y llevá la oreja hacia un hombro, despacio, dibujando un semicírculo. Sin pasar la cabeza para atrás.",
             tip: "El círculo completo, con la cabeza yendo hacia atrás, comprime las cervicales. Sólo la mitad de adelante: de hombro a hombro pasando por el pecho.",
@@ -60,6 +62,7 @@ export const RUTINAS = [
           {
             nombre: "Círculos de hombros",
             dosis: "10 atrás, 10 adelante",
+            posicion: "Quedate de pie, con los brazos colgando a los costados.",
             zona: "Hombros, parte alta de la espalda",
             como: "Brazos colgando. Llevá los hombros arriba, atrás y abajo, como dibujando un círculo grande con las puntas de los hombros.",
             tip: "El movimiento es del hombro, no del brazo. Si te ves moviendo las manos, estás haciendo otra cosa.",
@@ -67,6 +70,7 @@ export const RUTINAS = [
           {
             nombre: "Inclinación lateral de tronco",
             dosis: "20 segundos por lado",
+            posicion: "De pie, con los pies al ancho de las caderas y las rodillas apenas blandas.",
             zona: "Costados, oblicuos",
             como: "Un brazo arriba, inclinate hacia el lado opuesto hasta sentir el costado. La otra mano apoyada en la cadera. Sostené sin rebotar.",
             tip: "La cadera se queda quieta. Si se va para el costado con el tronco, el estiramiento desaparece y sólo estás parado torcido.",
@@ -80,6 +84,7 @@ export const RUTINAS = [
           {
             nombre: "Gato y camello",
             dosis: "8 repeticiones lentas",
+            posicion: "Arrodillate en la alfombra y apoyá las manos en el piso, en cuatro apoyos.",
             zona: "Toda la columna",
             como: "En cuatro apoyos, manos debajo de los hombros. Redondeá la espalda hacia arriba metiendo la pera al pecho, y después hundila llevando la mirada al frente. Una respiración por movimiento.",
             tip: "El error es hacerlo rápido, como bombeando. Cada posición necesita una respiración completa para que la columna se mueva vértebra por vértebra.",
@@ -87,6 +92,7 @@ export const RUTINAS = [
           {
             nombre: "Postura del niño",
             dosis: "40 segundos",
+            posicion: "Quedate de rodillas y sentate sobre los talones.",
             zona: "Espalda baja, caderas, hombros",
             como: "De rodillas, sentate sobre los talones y estirá los brazos hacia adelante apoyando la frente en la alfombra. Dejá que la espalda se abra sola con cada exhalación.",
             tip: "Si las rodillas o los tobillos molestan, poné una toalla doblada abajo. Aguantar la molestia no estira más, sólo hace que abandones la rutina en tres días.",
@@ -94,6 +100,7 @@ export const RUTINAS = [
           {
             nombre: "Isquiotibiales sentado",
             dosis: "30 segundos por pierna",
+            posicion: "Sentate en la alfombra con las piernas estiradas hacia adelante.",
             zona: "Parte de atrás del muslo",
             como: "Sentado, una pierna estirada y la otra flexionada con la planta contra el muslo. Llevá el pecho hacia la rodilla estirada, con la espalda lo más recta que puedas.",
             tip: "No hay que llegar al pie. La instrucción real es «espalda recta»: redondear la espalda para tocarse la punta del pie estira la lumbar en vez del isquiotibial, que es lo contrario de lo que se busca.",
@@ -101,6 +108,7 @@ export const RUTINAS = [
           {
             nombre: "Rotación de columna acostado",
             dosis: "30 segundos por lado",
+            posicion: "Acostate boca arriba, con los brazos abiertos en cruz.",
             zona: "Espalda baja, glúteo",
             como: "Boca arriba, brazos en cruz. Subí una rodilla y cruzala hacia el lado opuesto, dejando que caiga por su peso. Los dos hombros pegados al piso.",
             tip: "Si el hombro se levanta para que la rodilla llegue al piso, perdiste la rotación. La rodilla llega hasta donde llega con el hombro apoyado.",
@@ -108,6 +116,7 @@ export const RUTINAS = [
           {
             nombre: "Rodillas al pecho",
             dosis: "30 segundos",
+            posicion: "Quedate boca arriba, sin levantarte.",
             zona: "Espalda baja",
             como: "Boca arriba, abrazá las dos rodillas y acercalas al pecho. Balanceate apenas de lado a lado, como masajeando la lumbar contra el piso.",
             tip: "Es el cierre de la rutina y conviene no saltearlo: descomprime la zona que quedó trabajando en todos los estiramientos anteriores.",
@@ -121,6 +130,7 @@ export const RUTINAS = [
           {
             nombre: "Cuádriceps con apoyo",
             dosis: "25 segundos por pierna",
+            posicion: "Parate al lado de la silla, con una mano en el respaldo.",
             zona: "Frente del muslo",
             como: "Una mano en el respaldo de la silla. Llevá el talón al glúteo tomándote el tobillo, con la rodilla apuntando al piso y la cadera adelantada.",
             tip: "La rodilla tiene que quedar debajo de la cadera, no atrás. Si se va para atrás, el estiramiento se lo come la lumbar.",
@@ -128,6 +138,7 @@ export const RUTINAS = [
           {
             nombre: "Pantorrilla contra la pared",
             dosis: "25 segundos por pierna",
+            posicion: "Parate frente a la pared, con las dos manos apoyadas a la altura del pecho.",
             zona: "Gemelo, tendón de Aquiles",
             como: "Manos en la pared, una pierna atrás bien estirada con el talón clavado en el piso. Empujá la pared hasta sentir la parte de atrás de la pierna.",
             tip: "El talón de atrás no se levanta ni un milímetro. Es el único punto que importa en este ejercicio.",
@@ -135,6 +146,7 @@ export const RUTINAS = [
           {
             nombre: "Pecho en el marco de la puerta",
             dosis: "25 segundos",
+            posicion: "Parate en el marco de una puerta, con un pie adelante.",
             zona: "Pecho, hombro delantero",
             como: "Antebrazos apoyados en el marco de la puerta a la altura de los hombros, un pie adelante. Dejate caer despacio hacia adelante.",
             tip: "Es el antídoto de la postura de escritorio: los pectorales acortados son los que tiran los hombros hacia adelante todo el día.",
@@ -289,6 +301,7 @@ export const RUTINAS = [
           {
             nombre: "Sentadilla a la silla",
             dosis: "3 series de 12",
+            posicion: "Parate de espaldas a la silla, con los pies al ancho de los hombros.",
             zona: "Cuádriceps, glúteo",
             como: "De espaldas a la silla, pies al ancho de los hombros. Bajá como si fueras a sentarte, tocá el asiento con la cola y subí sin apoyarte del todo. Rodillas apuntando hacia afuera, no hacia adentro.",
             tip: "La silla no es para descansar, es para marcar la profundidad. Si te sentás y te levantás con el impulso del respaldo, el ejercicio dejó de existir.",
@@ -296,6 +309,7 @@ export const RUTINAS = [
           {
             nombre: "Zancada con la silla atrás",
             dosis: "3 series de 10 por pierna",
+            posicion: "Parate de espaldas a la silla, a un paso largo de distancia.",
             zona: "Cuádriceps, glúteo, equilibrio",
             como: "Parado de frente, apoyá el empeine de un pie sobre el asiento detrás de vos. Bajá con la pierna de adelante hasta que el muslo quede casi paralelo al piso.",
             tip: "El pie de adelante va bien lejos de la silla. Si queda cerca, la rodilla se pasa de la punta del pie y todo el peso va a la rótula.",
@@ -303,6 +317,7 @@ export const RUTINAS = [
           {
             nombre: "Puente de glúteos",
             dosis: "3 series de 15",
+            posicion: "Acostate boca arriba en la alfombra, con las rodillas flexionadas y los pies apoyados cerca de la cola.",
             zona: "Glúteo, isquiotibiales",
             como: "Boca arriba en la alfombra, rodillas flexionadas y pies apoyados cerca de la cola. Subí la cadera apretando el glúteo hasta formar una línea recta de rodillas a hombros. Sostené un segundo arriba.",
             tip: "El empujón sale del glúteo, no de la lumbar. Si terminás sintiendo la espalda baja, subiste demasiado: la línea recta es el techo, no un arco.",
@@ -310,6 +325,7 @@ export const RUTINAS = [
           {
             nombre: "Silla isométrica contra la pared",
             dosis: "3 series de 30 a 45 segundos",
+            posicion: "Parate de espaldas a la pared, con la espalda bien pegada.",
             zona: "Cuádriceps",
             como: "Espalda pegada a la pared, deslizate hasta que los muslos queden paralelos al piso, rodillas en ángulo recto. Sostené.",
             tip: "Las manos no se apoyan en los muslos. Es la trampa más común y le saca al ejercicio la mitad del trabajo.",
@@ -323,6 +339,7 @@ export const RUTINAS = [
           {
             nombre: "Flexiones (elegí tu altura)",
             dosis: "3 series de 8 a 15",
+            posicion: "Ubicate en la altura que elijas: las manos en la pared, en el asiento de la silla o en el piso.",
             zona: "Pectoral, hombro, tríceps",
             como: "Nivel 1: manos en la pared, cuerpo inclinado. Nivel 2: manos en el asiento de la silla. Nivel 3: manos en el piso. Nivel 4: manos en el piso y pies sobre la silla. Bajá hasta que el pecho quede a un puño del apoyo.",
             tip: "Elegí el nivel donde llegás a 8 repeticiones con buena forma, no el que te gustaría estar haciendo. Diez flexiones completas valen más que veinte a medio recorrido.",
@@ -330,6 +347,7 @@ export const RUTINAS = [
           {
             nombre: "Apertura con banda",
             dosis: "3 series de 12",
+            posicion: "Parate con la banda pasada por detrás de la espalda, a la altura de las axilas.",
             zona: "Pectoral",
             como: "Pasá la banda por detrás de la espalda, a la altura de las axilas, sujetando las puntas con las manos. Brazos casi estirados al frente, abrí en cruz y cerrá juntando las manos adelante.",
             tip: "El movimiento se hace con el codo apenas flexionado y fijo. Si flexionás y estirás el codo, pasaste a hacer tríceps.",
@@ -337,6 +355,7 @@ export const RUTINAS = [
           {
             nombre: "Flexión diamante",
             dosis: "2 series de 6 a 10",
+            posicion: "Volvé a la posición de flexión, con las manos juntas debajo del pecho.",
             zona: "Pectoral interno, tríceps",
             como: "Igual que la flexión, pero con las manos juntas debajo del pecho formando un triángulo con los índices y los pulgares. Se puede hacer con las manos en la silla si en el piso es mucho.",
             tip: "Los codos se van hacia atrás pegados al cuerpo, no hacia los costados. Abiertos, el hombro se lleva toda la carga.",
@@ -350,6 +369,7 @@ export const RUTINAS = [
           {
             nombre: "Remo con banda",
             dosis: "3 series de 12",
+            posicion: "Sentate en el piso con las piernas estiradas y la banda pasada por las plantas de los pies.",
             zona: "Dorsal, romboides",
             como: "Sentado en el piso con las piernas estiradas, pasá la banda por las plantas de los pies y tomá las puntas. Espalda recta, tirá llevando los codos hacia atrás y pegados al cuerpo, apretando los omóplatos.",
             tip: "El tirón arranca en los omóplatos, no en las manos. Si sólo doblás los codos, estás haciendo bíceps con la espalda quieta.",
@@ -357,6 +377,7 @@ export const RUTINAS = [
           {
             nombre: "Remo invertido bajo la mesa",
             dosis: "3 series de 8",
+            posicion: "Acostate boca arriba debajo de la mesa y tomá el borde con las dos manos.",
             zona: "Dorsal, bíceps",
             como: "Acostate boca arriba debajo de una mesa firme y tomá el borde con las dos manos. Cuerpo recto, talones en el piso, y traccioná hasta acercar el pecho al borde.",
             tip: "Antes de colgarte, comprobá que la mesa no se venga encima: probá con la mano apoyando peso de a poco. Las mesas livianas de caballete no sirven para esto.",
@@ -364,6 +385,7 @@ export const RUTINAS = [
           {
             nombre: "Superman",
             dosis: "3 series de 12",
+            posicion: "Acostate boca abajo en la alfombra, con los brazos estirados adelante.",
             zona: "Lumbares, glúteo",
             como: "Boca abajo en la alfombra, brazos estirados adelante. Levantá al mismo tiempo brazos, pecho y piernas unos centímetros, sostené dos segundos y bajá.",
             tip: "Unos centímetros alcanzan. Arquear la espalda todo lo posible no fortalece más, comprime las vértebras lumbares.",
@@ -371,6 +393,7 @@ export const RUTINAS = [
           {
             nombre: "Pull-apart con banda",
             dosis: "2 series de 15",
+            posicion: "Parate con la banda tomada con las dos manos y los brazos estirados al frente.",
             zona: "Espalda alta, postura",
             como: "Brazos estirados al frente a la altura de los hombros, banda tomada con las dos manos. Abrí los brazos en cruz estirando la banda hasta que toque el pecho.",
             tip: "Es el ejercicio que corrige los hombros caídos hacia adelante. Si hacés uno solo de este bloque, que sea este.",
@@ -384,6 +407,7 @@ export const RUTINAS = [
           {
             nombre: "Fondos de tríceps en la silla",
             dosis: "3 series de 10",
+            posicion: "Sentate al borde de la silla, con las manos a los costados de la cadera tomando el asiento.",
             zona: "Tríceps",
             como: "Sentado al borde de la silla, manos a los costados de la cadera tomando el asiento. Deslizá la cola hacia adelante y bajá flexionando los codos hacia atrás, hasta unos 90 grados. Subí empujando.",
             tip: "La silla contra la pared, o se va para atrás en la primera repetición. Y los codos hacia atrás, no abiertos: abiertos, esto es de los ejercicios que más hombros lastima.",
@@ -391,6 +415,7 @@ export const RUTINAS = [
           {
             nombre: "Curl de bíceps con banda",
             dosis: "3 series de 12",
+            posicion: "Parate sobre el medio de la banda, con una punta en cada mano.",
             zona: "Bíceps",
             como: "Parado sobre el medio de la banda, una punta en cada mano. Codos pegados al cuerpo y fijos, subí las manos hacia los hombros y bajá despacio, contando tres.",
             tip: "La bajada lenta es donde está el trabajo. Dejar que la banda te devuelva la mano de golpe desperdicia la mitad de la repetición.",
@@ -398,6 +423,7 @@ export const RUTINAS = [
           {
             nombre: "Extensión de tríceps sobre la cabeza",
             dosis: "3 series de 12",
+            posicion: "Parate pisando una punta de la banda, con la otra punta detrás de la cabeza.",
             zona: "Tríceps",
             como: "Pisá una punta de la banda, pasá la otra por detrás de la cabeza tomándola con las dos manos. Estirá los brazos hacia arriba manteniendo los codos apuntando al frente.",
             tip: "Los codos quedan cerca de las orejas y no se abren. Si se abren hacia los costados, el tríceps deja de trabajar.",
@@ -411,6 +437,7 @@ export const RUTINAS = [
           {
             nombre: "Plancha",
             dosis: "3 series de 20 a 45 segundos",
+            posicion: "Apoyate en la alfombra sobre los antebrazos y las puntas de los pies.",
             zona: "Abdomen, zona media",
             como: "Antebrazos y puntas de los pies en la alfombra, cuerpo en línea recta de la cabeza a los talones. Apretá el abdomen y el glúteo como si fueras a recibir un golpe.",
             tip: "La cola no se levanta ni la cadera se hunde. Treinta segundos con la línea recta valen más que dos minutos con la cola en el aire.",
@@ -418,6 +445,7 @@ export const RUTINAS = [
           {
             nombre: "Bicho muerto",
             dosis: "2 series de 10 por lado",
+            posicion: "Acostate boca arriba, con los brazos apuntando al techo y las rodillas a noventa grados.",
             zona: "Abdomen profundo",
             como: "Boca arriba, brazos apuntando al techo y rodillas a 90 grados. Estirá un brazo hacia atrás y la pierna opuesta hacia adelante, sin que la lumbar se despegue del piso. Volvé y cambiá.",
             tip: "Si sentís que la espalda baja se arquea, no estires tanto la pierna. El rango correcto es el que mantiene la lumbar pegada al piso.",

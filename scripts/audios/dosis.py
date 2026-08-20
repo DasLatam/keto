@@ -18,7 +18,7 @@ valores están arriba, en un solo lugar, para poder ajustarlos escuchando.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # ── Cuánto dura cada cosa ───────────────────────────────────────────────────
 SEG_REPETICION   = 3.0    # una repetición normal (bajar y subir controlado)
@@ -40,11 +40,107 @@ def _delrango(a: float, b: float) -> float:
     return (a + b) / 2
 
 
+# ── Acompañar: contar en voz alta mientras se trabaja ───────────────────────
+#
+# Un tramo de silencio puro dura lo que tiene que durar, pero deja a quien está
+# sosteniendo una postura sin ninguna referencia: no sabe si van cinco segundos o
+# veinticinco, y termina mirando el teléfono, que es justo lo que el audio venía a
+# evitar. Ariel lo probó el 2026-08-19 con la elongación y ése fue el pedido:
+# «si tenemos que mantener 15 segundos, contar hasta 15».
+#
+# Así que los tramos traen su propia cuenta, en forma de cortes: frases que
+# `voz.armar()` **encaja adentro** del silencio sin estirarlo. El tramo sigue
+# durando exactamente lo que dice que dura; lo único que cambia es que no está
+# mudo.
+#
+# Dos estilos, y el límite entre ellos no es estético sino de física del habla:
+#
+#   · Hasta 20 segundos se cuenta de uno en uno, un número por segundo. Funciona
+#     porque «veinte» dura 0,85 s y entra cómodo en su segundo. De ahí para
+#     arriba los números se vuelven largos —«veintisiete» pasa el segundo— y se
+#     pisarían entre ellos.
+#   · Más de 20 segundos: la mitad, el aviso de los diez, y la cuenta regresiva
+#     de los últimos cinco. Es además como cuenta un entrenador de verdad:
+#     nadie recita cuarenta números seguidos.
+CONTAR_HASTA = 20
+
+NUMERO = {
+    1: "Uno", 2: "Dos", 3: "Tres", 4: "Cuatro", 5: "Cinco", 6: "Seis",
+    7: "Siete", 8: "Ocho", 9: "Nueve", 10: "Diez", 11: "Once", 12: "Doce",
+    13: "Trece", 14: "Catorce", 15: "Quince", 16: "Dieciséis", 17: "Diecisiete",
+    18: "Dieciocho", 19: "Diecinueve", 20: "Veinte",
+}
+
+Cortes = list[tuple[float, str]]
+
+
+def _regresiva(seg: float, desde: int = 5) -> Cortes:
+    """La cuenta regresiva de los últimos segundos de un tramo."""
+    return [(seg - k, f"{NUMERO[k]}.") for k in range(desde, 0, -1) if seg - k > 0]
+
+
+def _contar_sostenido(seg: float) -> Cortes:
+    """Acompañar un tramo en el que no hay repeticiones: se sostiene y ya."""
+    if seg <= 0:
+        return []
+    if seg <= CONTAR_HASTA:
+        # El número `k` se dice **al cumplirse** el segundo `k`, así que el
+        # último cae un segundo antes del final y el tramo cierra en silencio,
+        # que es lo que hace que la voz siguiente no pise la cuenta.
+        #
+        # Los 0,2 s de adelanto son para que el número entre entero en su
+        # segundo. «Diecinueve» dura 1,05 s: dicho exactamente en el 19,0 de un
+        # tramo de 20 no termina antes del final, y `voz.armar()` —que nunca
+        # estira un tramo— lo descarta. El resultado sería una cuenta que se
+        # corta justo en el último número.
+        return [(k - 0.2, f"{NUMERO[k]}.") for k in range(1, int(seg))]
+    cortes: Cortes = []
+    if seg >= 26:
+        cortes.append((seg / 2, "Vas por la mitad."))
+    if seg >= 25:
+        cortes.append((seg - 10, "Quedan diez."))
+    return cortes + _regresiva(seg)
+
+
+def _contar_piezas(n: int, cada: float, primera: str | None = None) -> Cortes:
+    """Contar repeticiones, vueltas o movimientos: un número por pieza hecha.
+
+    Se cuenta **al terminar** cada repetición, no al empezarla, que es como
+    cuenta cualquiera que esté mirando. El corrimiento hacia atrás deja lugar
+    para que el número termine de decirse antes de que arranque la siguiente.
+    """
+    if n > CONTAR_HASTA or cada <= 0:
+        return []
+    margen = min(0.9, cada * 0.3)
+    return [(i * cada - margen, f"{NUMERO[i]}.") for i in range(1, n + 1)
+            if i * cada - margen > 0]
+
+
+def _contar_respiracion(inicio: float, inhalar: int = 4, exhalar: int = 6) -> Cortes:
+    """Una respiración guiada: inhalar contando cuatro, exhalar contando seis.
+
+    Es el ejercicio que abre la elongación, y el `como` de la página ya dice
+    «contando cuatro» y «contando seis». Que el texto lo pida y el audio se
+    quede mudo era la peor combinación posible: la instrucción existía y no
+    había forma de seguirla sin contar mentalmente.
+    """
+    cortes: Cortes = [(inicio, "Inhalá.")]
+    cortes += [(inicio + k - 1, f"{NUMERO[k]}.") for k in range(2, inhalar + 1)]
+    cortes.append((inicio + inhalar, "Y exhalá."))
+    cortes += [(inicio + inhalar + k - 1, f"{NUMERO[k]}.") for k in range(2, exhalar + 1)]
+    return cortes
+
+
 @dataclass
 class Tramo:
-    """Un tramo de trabajo: lo que la voz dice al entrar, y cuánto se calla."""
+    """Un tramo de trabajo: lo que la voz dice al entrar, y cuánto se calla.
+
+    `cortes` son las frases que se dicen **adentro** del silencio, en el segundo
+    indicado desde su inicio. No estiran el tramo: ver `voz.armar()`.
+    """
     aviso: str | None
     segundos: float
+    cortes: Cortes = field(default_factory=list)
 
 
 # ── Reconocedores ───────────────────────────────────────────────────────────
@@ -59,8 +155,8 @@ _LADOS = {
 }
 
 
-def _cuenta_de_serie(cuerpo: str) -> tuple[float, str | None]:
-    """El contenido de una serie: cuántos segundos dura y si tiene dos lados."""
+def _cuenta_de_serie(cuerpo: str) -> tuple[float, str | None, Cortes]:
+    """El contenido de una serie: cuánto dura, si tiene dos lados y cómo se cuenta."""
     cuerpo = cuerpo.strip()
 
     porlado = None
@@ -74,14 +170,17 @@ def _cuenta_de_serie(cuerpo: str) -> tuple[float, str | None]:
     if m:
         a = float(m.group(1))
         seg = _delrango(a, float(m.group(2))) if m.group(2) else a
-        return seg, porlado
+        return seg, porlado, _contar_sostenido(seg)
 
     # «12» / «8 a 15»
     m = re.fullmatch(r"(\d+)(?:\s*a\s*(\d+))?", cuerpo)
     if m:
         a = float(m.group(1))
         reps = _delrango(a, float(m.group(2))) if m.group(2) else a
-        return reps * SEG_REPETICION, porlado
+        # El rango da medias repeticiones («8 a 15» son 11,5): se cuenta hasta
+        # la entera de abajo, porque contar «doce» cuando la doceava está a
+        # mitad de camino apura a quien la está haciendo.
+        return reps * SEG_REPETICION, porlado, _contar_piezas(int(reps), SEG_REPETICION)
 
     raise ValueError(f"no sé cuánto dura una serie de «{cuerpo}»")
 
@@ -92,17 +191,19 @@ def _series(d: str) -> list[Tramo] | None:
     if not m:
         return None
     n = int(m.group(1))
-    seg, porlado = _cuenta_de_serie(m.group(2))
+    seg, porlado, cortes = _cuenta_de_serie(m.group(2))
 
     tramos: list[Tramo] = []
     for i in range(n):
         # La primera serie no lleva aviso: lo dijo la instrucción del ejercicio.
         entrada = None if i == 0 else f"Serie {i + 1}."
-        tramos.append(Tramo(entrada, seg))
+        tramos.append(Tramo(entrada, seg, list(cortes)))
         if porlado:
-            tramos.append(Tramo(porlado, seg))
+            tramos.append(Tramo(porlado, seg, list(cortes)))
         if i < n - 1:
-            tramos.append(Tramo("Descansá.", DESCANSO_SERIE))
+            # El descanso también se acompaña, con la regresiva de los últimos
+            # cinco: sin eso, la serie siguiente arranca de sorpresa.
+            tramos.append(Tramo("Descansá.", DESCANSO_SERIE, _regresiva(DESCANSO_SERIE)))
     return tramos
 
 
@@ -113,9 +214,10 @@ def _segundos(d: str) -> list[Tramo] | None:
         return None
     a = float(m.group(1))
     seg = _delrango(a, float(m.group(2))) if m.group(2) else a
-    tramos = [Tramo(None, seg)]
+    cortes = _contar_sostenido(seg)
+    tramos = [Tramo(None, seg, list(cortes))]
     if m.group(3):
-        tramos.append(Tramo(_LADOS[m.group(3)], seg))
+        tramos.append(Tramo(_LADOS[m.group(3)], seg, list(cortes)))
     return tramos
 
 
@@ -131,13 +233,20 @@ def _repeticiones(d: str) -> list[Tramo] | None:
     if not m:
         return None
     seg = SEG_REP_LENTA if m.group(2) else SEG_REPETICION
-    return [Tramo(None, int(m.group(1)) * seg)]
+    n = int(m.group(1))
+    return [Tramo(None, n * seg, _contar_piezas(n, seg))]
 
 
 def _respiraciones(d: str) -> list[Tramo] | None:
     """«5 respiraciones»."""
     m = re.fullmatch(r"(\d+)\s*respiraciones?", d, re.I)
-    return [Tramo(None, int(m.group(1)) * SEG_RESPIRACION)] if m else None
+    if not m:
+        return None
+    n = int(m.group(1))
+    cortes: Cortes = []
+    for i in range(n):
+        cortes += _contar_respiracion(i * SEG_RESPIRACION)
+    return [Tramo(None, n * SEG_RESPIRACION, cortes)]
 
 
 def _vueltas(d: str) -> list[Tramo] | None:
@@ -145,8 +254,11 @@ def _vueltas(d: str) -> list[Tramo] | None:
     m = re.fullmatch(r"(\d+)\s*vueltas?\s+a\s+cada\s+lado", d, re.I)
     if not m:
         return None
-    seg = int(m.group(1)) * SEG_VUELTA
-    return [Tramo(None, seg), Tramo("Ahora para el otro lado.", seg)]
+    n = int(m.group(1))
+    seg = n * SEG_VUELTA
+    cortes = _contar_piezas(n, SEG_VUELTA)
+    return [Tramo(None, seg, list(cortes)),
+            Tramo("Ahora para el otro lado.", seg, list(cortes))]
 
 
 def _dos_sentidos(d: str) -> list[Tramo] | None:
@@ -154,9 +266,11 @@ def _dos_sentidos(d: str) -> list[Tramo] | None:
     m = re.fullmatch(r"(\d+)\s*(\w+),\s*(\d+)\s*(\w+)", d, re.I)
     if not m:
         return None
+    a, b = int(m.group(1)), int(m.group(3))
     return [
-        Tramo(None, int(m.group(1)) * SEG_REPETICION),
-        Tramo(f"Ahora {m.group(4)}.", int(m.group(3)) * SEG_REPETICION),
+        Tramo(None, a * SEG_REPETICION, _contar_piezas(a, SEG_REPETICION)),
+        Tramo(f"Ahora {m.group(4)}.", b * SEG_REPETICION,
+              _contar_piezas(b, SEG_REPETICION)),
     ]
 
 

@@ -88,8 +88,11 @@ def _tramo_a_pieza(t: Tramo) -> list[Pieza]:
     piezas: list[Pieza] = []
     if t.aviso:
         piezas.append(Habla(t.aviso))
-    cortes: list[tuple[float, str]] = []
-    if t.segundos >= MINIMO_AVISO:
+    # La cuenta la arma `dosis.py`, que es el único que sabe si el tramo son
+    # doce repeticiones, cuarenta segundos de plancha o cinco respiraciones. Acá
+    # sólo queda el respaldo para un tramo largo que no traiga cuenta propia.
+    cortes = list(t.cortes)
+    if not cortes and t.segundos >= MINIMO_AVISO:
         cortes.append((t.segundos - AVISO_FINAL, "Diez segundos."))
     piezas.append(Silencio(t.segundos, cortes))
     return piezas
@@ -114,6 +117,11 @@ def guion(rutina: dict, tope_series: int = TOPE_SERIES) -> list[Pieza]:
         "Este audio va en tiempo real: cuando yo me calle, hacé el ejercicio, "
         "y cuando vuelva a hablar es que se terminó. No hace falta que mires el reloj."
     ))
+    piezas.append(Habla(
+        "Te voy contando mientras trabajás, así que seguí mi cuenta y no la tuya. "
+        "Antes de cada ejercicio te digo dónde ponerte, y te doy unos segundos "
+        "para acomodarte."
+    ))
 
     recortado = any(
         len(_tope(interpretar(e["dosis"]), tope_series)) < len(interpretar(e["dosis"]))
@@ -135,12 +143,34 @@ def guion(rutina: dict, tope_series: int = TOPE_SERIES) -> list[Pieza]:
     # ── Ejercicios ──────────────────────────────────────────────────────────
     prepararse = PREPARARSE.get(rutina.get("tipo", ""), PREPARARSE_POR_DEFECTO)
     bloque_actual = None
+    ultima_posicion = None
     for i, (bloque, ej) in enumerate(ejercicios):
         if bloque is not bloque_actual:
             bloque_actual = bloque
             piezas.append(Habla(f"Bloque: {bloque['nombre']}. {_sin_marcas(bloque['nota'])}"))
 
         piezas.append(Habla(f"{ej['nombre']}. {ej['dosis']}."))
+
+        # ── Dónde ponerse, y recién después el tiempo de ponerse ───────────
+        #
+        # Antes esto era al revés: la voz decía «acomodate para el que sigue»,
+        # se callaba, y recién entonces nombraba el ejercicio. Quien lo hacía
+        # con los ojos cerrados se quedaba parado sin saber si el que venía era
+        # en el piso o de pie, y el silencio de acomodarse se le iba en esperar.
+        # Ahora primero se dice de pie, boca arriba o de rodillas, y el silencio
+        # llega cuando ya se sabe hacia dónde moverse.
+        posicion = _sin_marcas(ej.get("posicion", ""))
+        if posicion and posicion != ultima_posicion:
+            piezas.append(Habla(posicion))
+            piezas.append(Silencio(prepararse))
+            ultima_posicion = posicion
+        elif posicion:
+            # Misma postura que el anterior: repetirla entera suena a que la voz
+            # no se acuerda de lo que acaba de decir, y acomodarse no lleva
+            # tiempo si ya se está en el lugar.
+            piezas.append(Habla("Quedate en la misma posición."))
+            piezas.append(Silencio(prepararse / 2))
+
         piezas.append(Habla(_sin_marcas(ej["como"])))
         # El tip va antes del trabajo y no después: es el error que hay que
         # evitar mientras se hace, no un comentario sobre lo que ya pasó.
@@ -154,8 +184,7 @@ def guion(rutina: dict, tope_series: int = TOPE_SERIES) -> list[Pieza]:
             piezas.extend(_tramo_a_pieza(t))
 
         if i < len(ejercicios) - 1:
-            piezas.append(Habla("Muy bien. Acomodate para el que sigue."))
-            piezas.append(Silencio(prepararse))
+            piezas.append(Habla("Muy bien."))
 
     # ── Cierre ──────────────────────────────────────────────────────────────
     piezas.append(Habla(
