@@ -1,0 +1,357 @@
+---
+/**
+ * Controles médicos.
+ *
+ * La página que hace que el resto del sitio sea responsable. Todo lo demás
+ * explica cómo comer; ésta explica cómo saber si te está haciendo bien, y con
+ * quién. Está armada para dos usos concretos:
+ *
+ *   1. Leerla antes de empezar y salir con una orden de laboratorio pedida.
+ *   2. Imprimir la planilla y llevarla a la consulta. Por eso la tabla de
+ *      seguimiento tiene las tres columnas vacías —inicio, 3 meses, 6 meses— y
+ *      por eso hay reglas de impresión al final del archivo.
+ *
+ * El JSON-LD usa `MedicalWebPage` con `citation`, igual que los artículos de
+ * Evidencia: en temas de salud es lo que separa una página citable de una que
+ * los modelos y el buscador tratan como opinión.
+ */
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import {
+  MOMENTOS,
+  ESTUDIOS,
+  MEDIDAS,
+  OBJETIVOS,
+  ESPECIALISTAS,
+  MEDICACION,
+  ALARMAS,
+  NO_EMPEZAR_SOLO,
+  FAQ,
+  FUENTES,
+} from "../data/controles.js";
+
+const TITULO = "Controles médicos";
+const BAJADA =
+  "Qué estudios pedir antes de empezar keto, qué repetir a los 3 y a los 6 meses, qué anotar en casa y con qué especialistas consultar.";
+
+const jsonld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "MedicalWebPage",
+      headline: "Controles médicos antes y durante una dieta cetogénica",
+      description: BAJADA,
+      inLanguage: "es-AR",
+      about: { "@type": "Diet", name: "Dieta cetogénica" },
+      audience: { "@type": "Patient" },
+      citation: FUENTES.map((f) => ({
+        "@type": "CreativeWork",
+        name: f.cita,
+        url: f.url,
+      })),
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: new URL("/", Astro.site).href },
+        { "@type": "ListItem", position: 2, name: TITULO },
+      ],
+    },
+  ],
+};
+---
+
+<Layout titulo={TITULO} descripcion={BAJADA} jsonld={jsonld}>
+  <nav class="text-sm text-hoja-900/50 mb-4" aria-label="Miga de pan">
+    <a href="/" class="hover:underline">Inicio</a>
+  </nav>
+
+  <article class="prosa">
+    <h1 class="text-3xl md:text-4xl font-bold text-hoja-700 leading-tight">
+      Controles médicos
+    </h1>
+    <p class="mt-4 text-lg text-hoja-900/80 leading-relaxed border-l-4 border-hoja-500 pl-4">
+      Una dieta cetogénica no es comer un poco menos: cambia cómo el cuerpo maneja el
+      azúcar, el agua y el sodio. Eso se nota en el laboratorio, y en quien toma
+      medicación se nota en la dosis. Por eso esto empieza en el consultorio y no en la
+      verdulería.
+    </p>
+
+    {/* La advertencia va arriba de todo y no al pie: al pie la lee quien ya
+        terminó de decidir. */}
+    <aside class="mt-6 rounded-xl border-2 border-naranja-500 bg-naranja-400/10 p-5">
+      <h2 class="font-bold text-naranja-600 text-lg">Antes del primer día</h2>
+      <p class="mt-2 text-hoja-900/80 leading-relaxed">
+        Consultá con tu médico y hacete un laboratorio. No es un trámite de cortesía: es
+        lo que te va a permitir saber, dentro de tres meses, si esto te hizo bien. Sin la
+        foto de partida no hay comparación posible, y un valor suelto no dice casi nada.
+      </p>
+      <p class="mt-3 text-hoja-900/80 leading-relaxed">
+        <strong>Si tomás alguna medicación, la consulta previa no es opcional.</strong>{" "}
+        Hay cuatro grupos —insulina y pastillas para la diabetes, inhibidores de SGLT2,
+        antihipertensivos y diuréticos, anticoagulantes— donde bajar los carbohidratos
+        cambia lo que esa medicación hace en tu cuerpo.
+      </p>
+    </aside>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">
+      Cuándo directamente no se arranca por cuenta propia
+    </h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      No quiere decir que no puedas: quiere decir que en estos casos la dieta se hace
+      acompañada por un profesional que te conozca, y la decisión de empezar es suya y
+      tuya, no de una página web.
+    </p>
+    <ul class="mt-4 grid sm:grid-cols-2 gap-2">
+      {NO_EMPEZAR_SOLO.map((x) => (
+        <li class="flex items-start gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5">
+          <span class="text-red-500 shrink-0" aria-hidden="true">⚠</span>
+          <span class="text-sm text-hoja-900/85">{x}</span>
+        </li>
+      ))}
+    </ul>
+
+    <AdSlot formato="horizontal" />
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Los cuatro momentos</h2>
+    <div class="mt-4 space-y-4">
+      {MOMENTOS.map((m) => (
+        <section class="rounded-xl border border-hoja-100 bg-white p-5">
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-hoja-100 text-hoja-700 whitespace-nowrap font-medium">
+              {m.cuando}
+            </span>
+            <h3 class="font-bold text-hoja-700 text-lg">{m.titulo}</h3>
+          </div>
+          <p class="mt-3 text-hoja-900/75 leading-relaxed">{m.texto}</p>
+          <ul class="mt-3 space-y-1.5">
+            {m.hacer.map((h) => (
+              <li class="flex items-start gap-2 text-sm text-hoja-900/80">
+                <span class="text-hoja-500 shrink-0" aria-hidden="true">✓</span>
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Qué pedir en el laboratorio</h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      Esta lista es para llevar a la consulta, no para pedirla por tu cuenta: quien decide
+      qué estudios corresponden es el médico, que tiene tus antecedentes delante. Los
+      valores de referencia están para que la orden se pueda leer, y no para
+      autodiagnosticarse — un número fuera de rango puede no significar nada, y uno dentro
+      de rango puede significar mucho según con qué venga acompañado.
+    </p>
+    <div class="mt-4 space-y-5">
+      {ESTUDIOS.map((g) => (
+        <section class="rounded-xl border border-hoja-100 bg-white p-5">
+          <h3 class="font-bold text-hoja-700 text-lg">{g.grupo}</h3>
+          <p class="mt-2 text-sm text-hoja-900/70 leading-relaxed">{g.porque}</p>
+          <dl class="mt-4 space-y-3">
+            {g.items.map((i) => (
+              <div class="border-t border-hoja-100 pt-3">
+                <dt class="font-semibold text-hoja-900/85 text-sm">{i.que}</dt>
+                <dd class="mt-1 text-sm text-hoja-900/75 leading-relaxed">
+                  <span class="text-hoja-600 font-medium">{i.referencia}</span>
+                  <span class="block mt-1 text-hoja-900/55">{i.nota}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ))}
+    </div>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">
+      Si tomás medicación, esto se habla antes
+    </h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      Ninguno de estos casos es motivo para no hacer la dieta. Todos son motivo para no
+      hacerla sin avisar: lo que cambia no es la medicación, es lo que esa dosis produce
+      cuando bajan los carbohidratos.
+    </p>
+    <div class="mt-4 space-y-3">
+      {MEDICACION.map((m) => (
+        <section class="rounded-xl border border-naranja-400/60 bg-white p-5">
+          <div class="flex items-baseline justify-between gap-3 flex-wrap">
+            <h3 class="font-semibold text-hoja-700">{m.grupo}</h3>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-naranja-400/20 text-naranja-600 whitespace-nowrap font-medium">
+              {m.riesgo}
+            </span>
+          </div>
+          <p class="mt-2 text-sm text-hoja-900/75 leading-relaxed">{m.texto}</p>
+        </section>
+      ))}
+    </div>
+
+    <AdSlot formato="horizontal" />
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">La planilla de casa</h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      Entre control y control pasan tres meses, y tres meses a ciegas es mucho. Estas son
+      las medidas que se toman solas, con una cinta métrica y una balanza. La tabla está
+      pensada para imprimirla y completarla a mano: las tres columnas de la derecha son el
+      inicio, los tres meses y los seis meses.
+    </p>
+
+    <div class="mt-4 overflow-x-auto rounded-xl border border-hoja-100 bg-white">
+      <table class="w-full text-sm min-w-[34rem]">
+        <thead>
+          <tr class="bg-hoja-50 text-left">
+            <th class="px-4 py-3 font-semibold text-hoja-700">Qué</th>
+            <th class="px-3 py-3 font-semibold text-hoja-700 whitespace-nowrap">Cada cuánto</th>
+            <th class="px-3 py-3 font-semibold text-hoja-700 text-center w-20">Inicio</th>
+            <th class="px-3 py-3 font-semibold text-hoja-700 text-center w-20">3 meses</th>
+            <th class="px-3 py-3 font-semibold text-hoja-700 text-center w-20">6 meses</th>
+          </tr>
+        </thead>
+        <tbody>
+          {MEDIDAS.map((m) => (
+            <tr class="border-t border-hoja-100 align-top">
+              <td class="px-4 py-3">
+                <span class="font-medium text-hoja-900/85">{m.que}</span>
+                {m.unidad && <span class="text-hoja-900/45"> ({m.unidad})</span>}
+              </td>
+              <td class="px-3 py-3 text-hoja-900/60 whitespace-nowrap">{m.cada}</td>
+              <td class="px-3 py-3 border-l border-hoja-100">&nbsp;</td>
+              <td class="px-3 py-3 border-l border-hoja-100">&nbsp;</td>
+              <td class="px-3 py-3 border-l border-hoja-100">&nbsp;</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="mt-8 text-xl font-bold text-hoja-700">Cómo tomar cada medida</h3>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      Una medida mal tomada no es «menos precisa»: es ruido, y el ruido tapa justo la
+      señal que estás buscando en una serie de seis meses.
+    </p>
+    <div class="mt-4 grid sm:grid-cols-2 gap-3">
+      {MEDIDAS.map((m) => (
+        <section class="rounded-xl border border-hoja-100 bg-white p-4">
+          <h4 class="font-semibold text-hoja-700 text-sm">{m.que}</h4>
+          {m.referencia && (
+            <p class="mt-1.5 text-sm text-hoja-600 leading-relaxed">{m.referencia}</p>
+          )}
+          <p class="mt-1.5 text-sm text-hoja-900/70 leading-relaxed">{m.como}</p>
+        </section>
+      ))}
+    </div>
+
+    <p class="mt-4 text-sm text-hoja-900/60 leading-relaxed">
+      El IMC y el porcentaje de grasa a partir de la cintura y el cuello los calcula{" "}
+      <a href="/calculadora" class="text-naranja-600 hover:underline">la calculadora del sitio</a>,
+      que además te dice cuánto deberías pesar y tus macros diarios.
+    </p>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Cuatro objetivos, no uno</h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      Un solo objetivo, y encima el de la balanza, es lo que hace que alguien abandone en
+      la cuarta semana: el peso se estanca por motivos que no tienen nada que ver con
+      cómo comiste. Cuatro objetivos que se mueven a distinta velocidad sostienen el
+      proceso cuando uno de ellos se planta.
+    </p>
+    <div class="mt-4 grid sm:grid-cols-2 gap-4">
+      {OBJETIVOS.map((o) => (
+        <section class="rounded-xl border border-hoja-100 bg-white p-5">
+          <h3 class="font-semibold text-hoja-700 leading-snug">{o.titulo}</h3>
+          <p class="mt-2 text-sm text-hoja-900/75 leading-relaxed">{o.texto}</p>
+        </section>
+      ))}
+    </div>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Con quién consultar</h2>
+    <div class="mt-4 space-y-3">
+      {ESPECIALISTAS.map((e) => (
+        <section class="rounded-xl border border-hoja-100 bg-white p-5">
+          <div class="flex items-baseline justify-between gap-3 flex-wrap">
+            <h3 class="font-semibold text-hoja-700">{e.quien}</h3>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-hoja-100 text-hoja-700 font-medium">
+              {e.cuando}
+            </span>
+          </div>
+          <p class="mt-2 text-sm text-hoja-900/75 leading-relaxed">{e.porque}</p>
+        </section>
+      ))}
+    </div>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Cuándo no esperar al control</h2>
+    <p class="mt-2 text-hoja-900/70 leading-relaxed">
+      Con cualquiera de estas, se consulta ese mismo día. Y si es intenso o no cede, es
+      una guardia y no un turno.
+    </p>
+    <ul class="mt-4 space-y-2">
+      {ALARMAS.map((a) => (
+        <li class="flex items-start gap-2 rounded-lg border-l-4 border-red-400 bg-white px-4 py-2.5 text-sm text-hoja-900/85">
+          <span class="text-red-500 shrink-0" aria-hidden="true">●</span>
+          <span>{a}</span>
+        </li>
+      ))}
+    </ul>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Preguntas frecuentes</h2>
+    <div class="mt-4 space-y-4">
+      {FAQ.map((f) => (
+        <details class="rounded-xl border border-hoja-100 bg-white p-5 group">
+          <summary class="font-semibold text-hoja-700 cursor-pointer list-none flex justify-between gap-3">
+            {f.p}
+            <span class="text-naranja-500 group-open:rotate-45 transition-transform" aria-hidden="true">+</span>
+          </summary>
+          <p class="mt-3 text-hoja-900/75 leading-relaxed">{f.r}</p>
+        </details>
+      ))}
+    </div>
+
+    <h2 class="mt-10 text-2xl font-bold text-hoja-700">Fuentes</h2>
+    <ul class="mt-4 space-y-3">
+      {FUENTES.map((f) => (
+        <li class="text-sm leading-relaxed">
+          <a href={f.url} target="_blank" rel="noopener noreferrer"
+             class="text-naranja-600 hover:underline">{f.cita}</a>
+          <span class="block text-hoja-900/55">{f.nota}</span>
+        </li>
+      ))}
+    </ul>
+
+    <p class="mt-8 text-sm text-hoja-900/60 leading-relaxed">
+      Esta página es material informativo y no reemplaza una consulta médica. Si querés
+      leer qué dice la investigación sobre keto,{" "}
+      <a href="/evidencia" class="text-naranja-600 hover:underline">está en Evidencia</a>,
+      con las fuentes citadas. Y si todavía no empezaste,{" "}
+      <a href="/como-empezar" class="text-naranja-600 hover:underline">acá están los primeros siete días</a>.
+    </p>
+  </article>
+
+  <AdSlot formato="rectangulo" />
+</Layout>
+
+<style>
+  /* La planilla se imprime: es la mitad del sentido de la página. En papel
+     sobran la navegación, los avisos y los desplegables cerrados, y las filas
+     necesitan alto suficiente para escribir a mano. */
+  @media print {
+    :global(header),
+    :global(footer),
+    :global(nav),
+    :global([data-ad-slot]) {
+      display: none !important;
+    }
+    table td {
+      height: 2.2rem;
+    }
+    details {
+      break-inside: avoid;
+    }
+  }
+</style>

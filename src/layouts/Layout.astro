@@ -39,6 +39,7 @@ const GRUPOS = [
     texto: "Entender",
     items: [
       { href: "/como-empezar", texto: "Cómo empezar", pista: "los 7 primeros días" },
+      { href: "/controles-medicos", texto: "Controles médicos", pista: "qué estudios y cada cuánto" },
       { href: "/evidencia", texto: "Evidencia", pista: "con las fuentes citadas" },
       { href: "/negociemos", texto: "Negociemos", pista: "el alcohol, la fruta, la Coca Zero" },
       { href: "/ayuno-intermitente", texto: "Ayuno intermitente", pista: "16:8 y 20:4" },
@@ -110,7 +111,10 @@ const NAV_PIE = [
 
           <nav class="hidden md:flex gap-1 items-center" aria-label="Principal">
             {GRUPOS.map((g) => (
-              <div class="relative" data-menu>
+              /* `h-14` y no sólo `relative`: el contenedor tiene que medir toda
+                 la altura de la barra para que el panel cuelgue del borde de
+                 abajo y no de la mitad del botón. Ver el comentario del script. */
+              <div class="relative h-14 flex items-center" data-menu>
                 <button
                   type="button"
                   class="px-2.5 py-2 rounded-md text-sm hover:bg-hoja-600 transition-colors whitespace-nowrap flex items-center gap-1"
@@ -125,7 +129,7 @@ const NAV_PIE = [
                 </button>
                 <div
                   data-panel
-                  class="hidden absolute left-0 top-full mt-1 min-w-[15rem] rounded-xl bg-crema-50 text-hoja-900 shadow-xl ring-1 ring-hoja-900/10 py-1.5 z-50"
+                  class="hidden absolute left-0 top-full min-w-[15rem] rounded-b-xl bg-crema-50 text-hoja-900 shadow-xl ring-1 ring-hoja-900/10 py-1.5 z-50"
                 >
                   {g.items.map((i) => (
                     <a href={i.href} class="block px-4 py-2 hover:bg-hoja-100 transition-colors">
@@ -233,6 +237,14 @@ const NAV_PIE = [
       // llegar con el teclado ni de usarlos en una pantalla táctil, que es
       // exactamente la mitad de las visitas. El hover se suma encima para el que
       // usa mouse.
+      // Y el hover cierra **con un respiro de 150 ms**. Sin eso, cualquier
+      // milímetro que el puntero pise fuera del contenedor —el borde entre dos
+      // menús, el pixel entre el botón y el panel— dispara `mouseleave` y el
+      // submenú desaparece antes de que el mouse llegue. Con el respiro, volver
+      // a entrar cancela el cierre y el recorrido lento funciona igual que el
+      // rápido, que era exactamente el bug.
+      const GRACIA = 150;
+
       const desplegables = [...document.querySelectorAll("[data-menu]")];
 
       function cerrarTodos(salvo) {
@@ -256,12 +268,25 @@ const NAV_PIE = [
           if (v) cerrarTodos(d);
         };
 
+        let cierre = null;
+        const cancelar = () => {
+          if (cierre) clearTimeout(cierre);
+          cierre = null;
+        };
+
         boton.addEventListener("click", (e) => {
           e.stopPropagation();
+          cancelar();
           mostrar(panel.classList.contains("hidden"));
         });
-        d.addEventListener("mouseenter", () => mostrar(true));
-        d.addEventListener("mouseleave", () => mostrar(false));
+        d.addEventListener("mouseenter", () => {
+          cancelar();
+          mostrar(true);
+        });
+        d.addEventListener("mouseleave", () => {
+          cancelar();
+          cierre = setTimeout(() => mostrar(false), GRACIA);
+        });
         // Al salir del último enlace con Tab, el panel se cierra solo.
         d.addEventListener("focusout", (e) => {
           if (!d.contains(e.relatedTarget)) mostrar(false);

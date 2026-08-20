@@ -95,6 +95,23 @@ export function GET() {
       b: "como empezar keto arrancar primera semana guia principiantes gripe keto",
     },
     {
+      t: "Controles médicos: qué estudios pedir y cada cuánto",
+      u: "/controles-medicos",
+      s: "Guía",
+      d: "El laboratorio de base, los controles a los 3 y 6 meses y con qué especialista.",
+      // El cuerpo indexado trae los nombres de los estudios y de las
+      // especialidades: quien busca "hemoglobina glicosilada" o "diabetólogo"
+      // no está buscando una receta, y hasta ahora no encontraba nada.
+      b: ["controles medicos estudios laboratorio analisis antes de empezar",
+          "glucemia hemoglobina glicosilada hba1c colesterol ldl hdl trigliceridos",
+          "presion arterial creatinina filtrado glomerular hepatograma acido urico",
+          "ionograma sodio potasio magnesio tsh vitamina d b12 insulina basal homa",
+          "peso cintura cuello cadera imc objetivos planilla seguimiento",
+          "clinico nutricionista diabetologo endocrinologo cardiologo nefrologo",
+          "insulina sulfonilureas sglt2 antihipertensivos diureticos anticoagulantes",
+          "hipoglucemia cetoacidosis contraindicaciones embarazo riñon higado"].join(" "),
+    },
+    {
       t: "Calculadora de macros y peso ideal",
       u: "/calculadora",
       s: "Herramienta",
