@@ -1,21 +1,21 @@
 {
   "elongacion-manana": {
     "archivo": "elongacion-manana.mp3",
-    "segundos": 968.1,
-    "minutos": 16.1,
-    "bytes": 7745770,
+    "segundos": 1013.0,
+    "minutos": 16.9,
+    "bytes": 8104588,
     "titulo": "Elongación de la mañana",
     "clase": "rutina",
-    "generado": "2026-08-18"
+    "generado": "2026-08-19"
   },
   "fuerza-en-casa": {
     "archivo": "fuerza-en-casa.mp3",
-    "segundos": 2484.9,
-    "minutos": 41.4,
-    "bytes": 19880159,
+    "segundos": 2557.1,
+    "minutos": 42.6,
+    "bytes": 20457361,
     "titulo": "Fuerza en casa",
     "clase": "rutina",
-    "generado": "2026-08-18"
+    "generado": "2026-08-19"
   },
   "caminata-1-por-que-funciona": {
     "archivo": "caminata-1-por-que-funciona.mp3",
@@ -43,5 +43,23 @@
     "titulo": "Caminata 3 — El súper y la semana",
     "clase": "caminata",
     "generado": "2026-08-18"
+  },
+  "caminata-4-la-cocina": {
+    "archivo": "caminata-4-la-cocina.mp3",
+    "segundos": 2869.0,
+    "minutos": 47.8,
+    "bytes": 22952587,
+    "titulo": "Caminata 4 — La cocina",
+    "clase": "caminata",
+    "generado": "2026-08-19"
+  },
+  "caminata-5-la-despensa": {
+    "archivo": "caminata-5-la-despensa.mp3",
+    "segundos": 2703.5,
+    "minutos": 45.1,
+    "bytes": 21628285,
+    "titulo": "Caminata 5 — La despensa",
+    "clase": "caminata",
+    "generado": "2026-08-19"
   }
 }

@@ -10,8 +10,8 @@
 Opciones:
     --plan              muestra duraciones estimadas y presupuesto de palabras
     --rutinas           sólo elongación y fuerza (no usan modelo de lenguaje)
-    --caminatas         sólo las tres caminatas
-    --todo              las cinco
+    --caminatas         sólo las cinco caminatas
+    --todo              las siete
     --solo SLUG         una sola
     --minutos N         duración objetivo de cada caminata (por defecto 45)
     --series N          tope de series en el audio de fuerza (por defecto 2)
@@ -107,7 +107,7 @@ def main() -> int:
                       f"({estimar(piezas) / 60:.0f} min)", flush=True)
             else:
                 if motor is None:
-                    motor = caminatas.llm.Motor(a.motor)
+                    motor = caminatas.MotorConReintento(a.motor)
                     print(f"Motor: {motor} (cadena: {', '.join(motor.cadena)})\n")
                 print(f"  {p['titulo']}")
                 t0 = time.time()

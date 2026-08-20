@@ -17,7 +17,9 @@ const BAJADAS = {
   "caminata-3-el-super-y-la-semana":
     "Góndola por góndola, la semana armada y seis cenas.",
   "caminata-4-la-cocina":
-    "Ingrediente por ingrediente, cómo congelar, los trucos de cocina y el ayuno intermitente. Con seis meriendas.",
+    "Cómo congelar, los trucos de cocina y el ayuno intermitente. Con seis meriendas.",
+  "caminata-5-la-despensa":
+    "Los treinta y siete ingredientes, uno por uno: por qué entra, cuál elegir, cómo guardarlo.",
 };
 
 /** Qué audios van en la página de cada rutina. */
@@ -29,11 +31,12 @@ const REPARTO = {
     "caminata-2-lo-que-te-van-a-decir",
     "caminata-3-el-super-y-la-semana",
     "caminata-4-la-cocina",
+    "caminata-5-la-despensa",
   ],
 };
 
 // Un audio que está en el reparto pero todavía no se generó simplemente no
-// aparece: así se puede publicar el sitio con dos de las tres caminatas hechas.
+// aparece: así se puede publicar el sitio con cuatro de las cinco caminatas hechas.
 export const AUDIOS_POR_RUTINA = Object.fromEntries(
   Object.entries(REPARTO).map(([rutina, slugs]) => [
     rutina,

@@ -1,4 +1,4 @@
-"""Guiones de los tres audios de caminata.
+"""Guiones de los cinco audios de caminata.
 
 La idea es de Ariel: cuarenta y cinco minutos caminando escuchando el sitio, para
 que los conceptos y las recetas queden fijados sin sentarse a leer nada.
@@ -33,6 +33,7 @@ import numeros                                              # noqa: E402
 from rutinas import Habla, Pieza, Silencio, _sin_marcas     # noqa: E402
 
 PPM = 172                # ritmo de Daniela en modo relajado, medido en videosyt
+REINTENTAR_CADA = 3      # bloques antes de volver a probar el motor preferido
 INTENTOS = 3             # cuántas veces se le da otra oportunidad a un bloque
 
 # Techo de estiramiento. Pedirle a un modelo que saque 900 palabras de un párrafo
@@ -40,6 +41,59 @@ INTENTOS = 3             # cuántas veces se le da otra oportunidad a un bloque
 # los datos inventados. Si un programa necesita más que esto para llegar a la
 # duración pedida, el script avisa en vez de simular que llegó.
 EXPANSION_MAXIMA = 2.6
+
+class MotorConReintento:
+    """Un `Motor` de videosyt que vuelve a intentar con el motor preferido.
+
+    La cadena de videosyt descarta un motor **para toda la corrida** en cuanto
+    falla una vez, y para un video de diez secciones eso está bien: una cuota
+    agotada no se recupera a mitad de camino, y reintentar cuesta un timeout por
+    llamada.
+
+    Acá no. Un guion de caminata son veinte bloques y veinte minutos, y el
+    2026-08-18 gemini falló **una vez** por un timeout de 90 segundos —diez
+    minutos después contestaba perfecto— y esa única caída mandó los catorce
+    bloques siguientes a ollama. El resultado fue un audio que a la mitad pasaba
+    de prosa hablada a listas numeradas leídas en voz alta.
+
+    Así que cada tres bloques se rearma el motor y se le da otra oportunidad al
+    preferido. Si la cuota está agotada de verdad, cuesta un timeout cada tres
+    bloques y sigue cayendo al respaldo; si fue un hipo, se recupera.
+    """
+
+    def __init__(self, nombre: str):
+        self.nombre = nombre
+        self._motor = llm.Motor(nombre)
+        self._desde_caida = 0
+        self.avisos: list[str] = []
+        self.usados: list[str] = []
+
+    @property
+    def cadena(self):
+        return self._motor.cadena
+
+    def pedir(self, prompt: str, sistema: str, timeout: int = 600) -> str:
+        if self._motor._caidos:
+            self._desde_caida += 1
+            if self._desde_caida >= REINTENTAR_CADA:
+                self.avisos.append(
+                    f"vuelvo a probar con {self.nombre} después de "
+                    f"{self._desde_caida} bloques con el respaldo")
+                self._motor = llm.Motor(self.nombre)
+                self._desde_caida = 0
+
+        texto = self._motor.pedir(prompt, sistema=sistema, timeout=timeout)
+        for m in self._motor.usados:
+            if m not in self.usados:
+                self.usados.append(m)
+        for a in self._motor.avisos:
+            if a not in self.avisos:
+                self.avisos.append(a)
+        return texto
+
+    def __str__(self) -> str:
+        return str(self._motor)
+
 
 SISTEMA = (
     "Sos el narrador de un audio que una persona escucha mientras camina, sola, "
@@ -175,7 +229,7 @@ def _plan(plan: list[dict], recetas: dict) -> tuple[str, str]:
     return "El plan de la semana", "\n\n".join(partes)
 
 
-# ── Los tres programas ──────────────────────────────────────────────────────
+# ── Los cinco programas ─────────────────────────────────────────────────────
 
 def programas(datos: dict) -> list[dict]:
     """Qué material lleva cada caminata.
@@ -184,6 +238,14 @@ def programas(datos: dict) -> list[dict]:
     uno explica por qué la dieta funciona, otro contesta las objeciones que te
     van a hacer, y el tercero es operativo, del súper y la semana. Las recetas se
     reparten por comida, así la caminata de la mañana trae desayunos.
+
+    **La cuarta se partió en dos el 2026-08-19.** Llevaba las fichas de los
+    treinta y siete ingredientes *más* el freezer, los trucos y el ayuno: 9.300
+    palabras de fuente contra las 8.200 que entran en cuarenta y cinco minutos.
+    Como comprimir no funciona —el reparto toca su piso de 120 palabras y los
+    modelos entregan el doble de lo pedido; ver el README—, el audio salía de 66
+    minutos. Ahora la cuarta es la de cocinar y la quinta es el diccionario de
+    ingredientes, que además es la que se escucha suelta y no en orden.
     """
     porslug = {r["slug"]: r for r in datos["recetas"]}
     neg = {n["slug"]: n for n in datos["negociaciones"]}
@@ -241,14 +303,22 @@ def programas(datos: dict) -> list[dict]:
             "n": 4,
             "slug": "caminata-4-la-cocina",
             "titulo": "Caminata 4 — La cocina",
-            "bajada": "Ingrediente por ingrediente, cómo congelar, los trucos y el ayuno. Con seis meriendas.",
+            "bajada": "Cómo congelar, los trucos que cambian el resultado y el ayuno. Con seis meriendas.",
             "fuentes": (
-                [_gondola_fichas(cats[c], ps, datos.get("ingredientes", {}))
-                 for c, ps in prods.items() if c in cats]
-                + [_freezer(datos["freezer"])]
+                [_freezer(datos["freezer"])]
                 + [_trucos(g) for g in datos["trucos"]]
                 + [_ayuno(datos["ayunos"])]
                 + [_receta(r) for r in por_comida.get("merienda", [])[:6]]
+            ),
+        },
+        {
+            "n": 5,
+            "slug": "caminata-5-la-despensa",
+            "titulo": "Caminata 5 — La despensa",
+            "bajada": "Ingrediente por ingrediente: por qué entra, cuál elegir, cómo guardarlo.",
+            "fuentes": (
+                [_gondola_fichas(cats[c], ps, datos.get("ingredientes", {}))
+                 for c, ps in prods.items() if c in cats]
             ),
         },
     ]
@@ -283,6 +353,19 @@ def expandir(titulo: str, fuente: str, objetivo: int, motor: llm.Motor) -> str:
         texto = motor.pedir(prompt, sistema=SISTEMA, timeout=600)
         texto = _limpiar(texto)
 
+        # Salida en forma de lista: son los modelos chicos volviendo a su forma
+        # favorita apenas se les pide compresión. Leído en voz alta queda
+        # "Menos edulcorante del que se espera. 4. Preparación rápida: Pan keto:
+        # 2 minutos en microondas", que fue literalmente lo que salió el
+        # 2026-08-18 y lo que hizo tirar el audio entero.
+        if _parece_lista(texto):
+            print(f"      intento {intento}: contestó en forma de lista; lo pido de nuevo",
+                  flush=True)
+            reproche = ("ATENCIÓN: tu respuesta anterior tenía enumeraciones, dos puntos "
+                        "y renglones sueltos. Esto lo escucha alguien caminando: no puede "
+                        "haber listas ni títulos. Todo en oraciones seguidas.\n")
+            continue
+
         colados = numeros.inventados(fuente, texto)
         if not colados:
             return texto
@@ -299,6 +382,21 @@ def expandir(titulo: str, fuente: str, objetivo: int, motor: llm.Motor) -> str:
     # corto y textual es mejor que uno largo con un dato falso.
     print(f"      ⚠ «{titulo}»: se usa el texto del sitio sin reescribir", flush=True)
     return fuente
+
+
+def _parece_lista(t: str) -> bool:
+    """Si el texto tiene forma de lista en vez de prosa hablada.
+
+    Se mira lo que sobrevive a `_limpiar`, que ya saca las viñetas de markdown:
+    lo que queda son enumeraciones con número y renglones cortos terminados en
+    dos puntos, que es como escribe un modelo chico cuando se le pide resumir.
+    """
+    lineas = [l.strip() for l in t.split("\n") if l.strip()]
+    if not lineas:
+        return True
+    numeradas = sum(1 for l in lineas if re.match(r"^\d+[.)]\s", l))
+    cortas = sum(1 for l in lineas if len(l.split()) <= 6 and l.endswith(":"))
+    return numeradas >= 2 or cortas >= 2 or re.search(r"(^|\s)\d+[.)]\s+[A-ZÁÉÍÓÚ]", t) is not None
 
 
 def _limpiar(t: str) -> str:
